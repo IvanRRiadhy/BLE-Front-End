@@ -1,0 +1,1703 @@
+{
+  "mode": "Mode A (ML OFF)",
+  "configuration": {
+    "ml_enabled": false,
+    "provider": "disabled",
+    "device": "cpu"
+  },
+  "summary": {
+    "strategyId": "baseline",
+    "strategyName": "Strategy A: Baseline (Pure Classical CV)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 110455.64,
+      "totalMs": 110654.22
+    }
+  },
+  "per_image": [
+    {
+      "imageId": "ChatGPT Image Sep 16, 2026, 01_19_00 PM",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 2172,
+      "imageHeight": 724,
+      "gtRoomCount": 3,
+      "predRoomCount": 3,
+      "truePositiveCount": 0,
+      "falsePositiveCount": 3,
+      "falseNegativeCount": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "meanIoU": 0.0,
+      "medianIoU": 0.0,
+      "minIoU": 0.0,
+      "iouBins": {
+        "gte_0_25": 0,
+        "gte_0_50": 0,
+        "gte_0_75": 0,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 0.0,
+      "medianAreaErrorPct": 0.0,
+      "meanCentroidErrorPx": 0.0,
+      "meanBoundaryErrorPx": 0.0,
+      "gtCoveragePct": 43.58,
+      "predictionCoveragePct": 9.75,
+      "falsePositiveAreaPct": 5.49,
+      "mergedRooms": [],
+      "splitRooms": [],
+      "invalidPredictions": [],
+      "matches": [],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_002",
+        "gt_003"
+      ],
+      "unmatchedPredIds": [
+        "hyp_cavity_1",
+        "hyp_recovered_repeated_room_1",
+        "hyp_recovered_repeated_room_2"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 2172,
+      "imageHeight": 724,
+      "gtRoomCount": 5,
+      "predRoomCount": 5,
+      "truePositiveCount": 0,
+      "falsePositiveCount": 5,
+      "falseNegativeCount": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "meanIoU": 0.0,
+      "medianIoU": 0.0,
+      "minIoU": 0.0,
+      "iouBins": {
+        "gte_0_25": 0,
+        "gte_0_50": 0,
+        "gte_0_75": 0,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 0.0,
+      "medianAreaErrorPct": 0.0,
+      "meanCentroidErrorPx": 0.0,
+      "meanBoundaryErrorPx": 0.0,
+      "gtCoveragePct": 56.99,
+      "predictionCoveragePct": 5.95,
+      "falsePositiveAreaPct": 28.75,
+      "mergedRooms": [],
+      "splitRooms": [],
+      "invalidPredictions": [],
+      "matches": [],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_004",
+        "gt_005"
+      ],
+      "unmatchedPredIds": [
+        "hyp_cavity_1",
+        "hyp_recovered_repeated_room_1",
+        "hyp_recovered_repeated_room_2",
+        "hyp_recovered_wall_enclosure_3",
+        "hyp_recovered_wall_enclosure_4"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 2172,
+      "imageHeight": 724,
+      "gtRoomCount": 5,
+      "predRoomCount": 10,
+      "truePositiveCount": 0,
+      "falsePositiveCount": 10,
+      "falseNegativeCount": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "meanIoU": 0.0,
+      "medianIoU": 0.0,
+      "minIoU": 0.0,
+      "iouBins": {
+        "gte_0_25": 0,
+        "gte_0_50": 0,
+        "gte_0_75": 0,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 0.0,
+      "medianAreaErrorPct": 0.0,
+      "meanCentroidErrorPx": 0.0,
+      "meanBoundaryErrorPx": 0.0,
+      "gtCoveragePct": 48.24,
+      "predictionCoveragePct": 32.71,
+      "falsePositiveAreaPct": 37.13,
+      "mergedRooms": [
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_10",
+          "groundTruthIds": [
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_003": 0.767,
+            "gt_004": 0.449,
+            "gt_005": 0.451
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_4",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.452,
+            "gt_005": 0.452
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_5",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.452,
+            "gt_005": 0.452
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_7",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.452,
+            "gt_005": 0.452
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_8",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.452,
+            "gt_005": 0.452
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_9",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.452,
+            "gt_005": 0.452
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_11",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.452,
+            "gt_005": 0.452
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_3",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.44,
+            "gt_005": 0.448
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_2",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.462,
+            "gt_005": 0.455
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_face_face_12",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_001": 1.0,
+            "gt_003": 1.0,
+            "gt_004": 0.452,
+            "gt_005": 0.452
+          }
+        }
+      ],
+      "splitRooms": [
+        {
+          "groundTruthId": "gt_004",
+          "predictionIds": [
+            "merged_hyp_cavity_1_hyp_face_face_10",
+            "merged_hyp_cavity_1_hyp_face_face_11",
+            "merged_hyp_cavity_1_hyp_face_face_2",
+            "merged_hyp_cavity_1_hyp_face_face_3",
+            "merged_hyp_cavity_1_hyp_face_face_4",
+            "merged_hyp_cavity_1_hyp_face_face_5",
+            "merged_hyp_cavity_1_hyp_face_face_7",
+            "merged_hyp_cavity_1_hyp_face_face_8",
+            "merged_hyp_cavity_1_hyp_face_face_9"
+          ],
+          "overlaps": {
+            "merged_hyp_cavity_1_hyp_face_face_10": 0.449,
+            "merged_hyp_cavity_1_hyp_face_face_4": 0.452,
+            "merged_hyp_cavity_1_hyp_face_face_5": 0.452,
+            "merged_hyp_cavity_1_hyp_face_face_7": 0.452,
+            "merged_hyp_cavity_1_hyp_face_face_8": 0.452,
+            "merged_hyp_cavity_1_hyp_face_face_9": 0.452,
+            "merged_hyp_cavity_1_hyp_face_face_11": 0.452,
+            "merged_hyp_cavity_1_hyp_face_face_3": 0.44,
+            "merged_hyp_cavity_1_hyp_face_face_2": 0.462
+          }
+        }
+      ],
+      "invalidPredictions": [],
+      "matches": [],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_004",
+        "gt_005"
+      ],
+      "unmatchedPredIds": [
+        "merged_hyp_cavity_1_hyp_face_face_10",
+        "merged_hyp_cavity_1_hyp_face_face_4",
+        "merged_hyp_cavity_1_hyp_face_face_5",
+        "merged_hyp_cavity_1_hyp_face_face_7",
+        "merged_hyp_cavity_1_hyp_face_face_8",
+        "merged_hyp_cavity_1_hyp_face_face_9",
+        "merged_hyp_cavity_1_hyp_face_face_11",
+        "merged_hyp_cavity_1_hyp_face_face_3",
+        "merged_hyp_cavity_1_hyp_face_face_2",
+        "merged_hyp_cavity_1_hyp_face_face_12"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "Floorplan-House",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 2490,
+      "imageHeight": 2420,
+      "gtRoomCount": 16,
+      "predRoomCount": 31,
+      "truePositiveCount": 10,
+      "falsePositiveCount": 21,
+      "falseNegativeCount": 6,
+      "precision": 0.3226,
+      "recall": 0.625,
+      "f1": 0.4255,
+      "meanIoU": 0.6151,
+      "medianIoU": 0.5442,
+      "minIoU": 0.3529,
+      "iouBins": {
+        "gte_0_25": 10,
+        "gte_0_50": 8,
+        "gte_0_75": 3,
+        "gte_0_90": 1
+      },
+      "meanAreaErrorPct": 36.94,
+      "medianAreaErrorPct": 47.28,
+      "meanCentroidErrorPx": 101.11,
+      "meanBoundaryErrorPx": 325.48,
+      "gtCoveragePct": 67.76,
+      "predictionCoveragePct": 64.21,
+      "falsePositiveAreaPct": 4.57,
+      "mergedRooms": [
+        {
+          "predictionId": "hyp_cavity_15",
+          "groundTruthIds": [
+            "gt_011",
+            "gt_012"
+          ],
+          "overlaps": {
+            "gt_011": 0.956,
+            "gt_012": 0.268
+          }
+        },
+        {
+          "predictionId": "hyp_face_face_1",
+          "groundTruthIds": [
+            "gt_005",
+            "gt_014"
+          ],
+          "overlaps": {
+            "gt_005": 0.922,
+            "gt_014": 0.595
+          }
+        },
+        {
+          "predictionId": "hyp_cavity_1_sub2",
+          "groundTruthIds": [
+            "gt_017",
+            "gt_020"
+          ],
+          "overlaps": {
+            "gt_017": 0.998,
+            "gt_020": 0.379
+          }
+        }
+      ],
+      "splitRooms": [
+        {
+          "groundTruthId": "gt_006",
+          "predictionIds": [
+            "hyp_cavity_13",
+            "hyp_cavity_8"
+          ],
+          "overlaps": {
+            "hyp_cavity_13": 0.335,
+            "hyp_cavity_8": 0.522
+          }
+        },
+        {
+          "groundTruthId": "gt_007",
+          "predictionIds": [
+            "hyp_cavity_10",
+            "hyp_cavity_6"
+          ],
+          "overlaps": {
+            "hyp_cavity_6": 0.234,
+            "hyp_cavity_10": 0.527
+          }
+        },
+        {
+          "groundTruthId": "gt_008",
+          "predictionIds": [
+            "hyp_cavity_14",
+            "hyp_cavity_9"
+          ],
+          "overlaps": {
+            "hyp_cavity_9": 0.348,
+            "hyp_cavity_14": 0.353
+          }
+        },
+        {
+          "groundTruthId": "gt_016",
+          "predictionIds": [
+            "hyp_face_face_16",
+            "hyp_face_face_19",
+            "hyp_face_face_19_sub1"
+          ],
+          "overlaps": {
+            "hyp_face_face_16": 0.173,
+            "hyp_face_face_19": 0.663,
+            "hyp_face_face_19_sub1": 0.47
+          }
+        },
+        {
+          "groundTruthId": "gt_018",
+          "predictionIds": [
+            "hyp_cavity_12",
+            "hyp_cavity_5"
+          ],
+          "overlaps": {
+            "hyp_cavity_12": 0.401,
+            "hyp_cavity_5": 0.333
+          }
+        },
+        {
+          "groundTruthId": "gt_019",
+          "predictionIds": [
+            "hyp_cavity_16",
+            "hyp_cavity_16_sub2"
+          ],
+          "overlaps": {
+            "hyp_cavity_16_sub2": 0.5,
+            "hyp_cavity_16": 0.991
+          }
+        },
+        {
+          "groundTruthId": "gt_020",
+          "predictionIds": [
+            "hyp_cavity_1",
+            "hyp_cavity_1_sub2",
+            "hyp_cavity_3"
+          ],
+          "overlaps": {
+            "hyp_cavity_3": 0.164,
+            "hyp_cavity_1_sub2": 0.379,
+            "hyp_cavity_1": 0.511
+          }
+        }
+      ],
+      "invalidPredictions": [],
+      "matches": [
+        {
+          "gtId": "gt_005",
+          "predId": "hyp_face_face_1",
+          "iou": 0.8419,
+          "intersectionArea": 245101.3,
+          "unionArea": 291129.4,
+          "areaErrorPct": 1.73,
+          "centroidErrorPx": 11.78,
+          "normalizedCentroidError": 0.0034,
+          "boundaryErrorPx": 221.0
+        },
+        {
+          "gtId": "gt_006",
+          "predId": "hyp_cavity_8",
+          "iou": 0.5213,
+          "intersectionArea": 57623.3,
+          "unionArea": 110533.7,
+          "areaErrorPct": 47.68,
+          "centroidErrorPx": 95.41,
+          "normalizedCentroidError": 0.0275,
+          "boundaryErrorPx": 217.09
+        },
+        {
+          "gtId": "gt_007",
+          "predId": "hyp_cavity_10",
+          "iou": 0.5245,
+          "intersectionArea": 81011.7,
+          "unionArea": 154455.2,
+          "areaErrorPct": 46.89,
+          "centroidErrorPx": 118.46,
+          "normalizedCentroidError": 0.0341,
+          "boundaryErrorPx": 310.5
+        },
+        {
+          "gtId": "gt_008",
+          "predId": "hyp_cavity_14",
+          "iou": 0.3529,
+          "intersectionArea": 31417.2,
+          "unionArea": 89029.3,
+          "areaErrorPct": 64.58,
+          "centroidErrorPx": 95.73,
+          "normalizedCentroidError": 0.0276,
+          "boundaryErrorPx": 193.15
+        },
+        {
+          "gtId": "gt_011",
+          "predId": "hyp_cavity_15",
+          "iou": 0.5639,
+          "intersectionArea": 179704.6,
+          "unionArea": 318697.5,
+          "areaErrorPct": 65.22,
+          "centroidErrorPx": 140.1,
+          "normalizedCentroidError": 0.0403,
+          "boundaryErrorPx": 334.48
+        },
+        {
+          "gtId": "gt_015",
+          "predId": "hyp_cavity_7",
+          "iou": 0.8596,
+          "intersectionArea": 236011.5,
+          "unionArea": 274569.2,
+          "areaErrorPct": 9.35,
+          "centroidErrorPx": 22.03,
+          "normalizedCentroidError": 0.0063,
+          "boundaryErrorPx": 183.0
+        },
+        {
+          "gtId": "gt_016",
+          "predId": "hyp_face_face_19",
+          "iou": 0.6108,
+          "intersectionArea": 290882.7,
+          "unionArea": 476229.9,
+          "areaErrorPct": 25.26,
+          "centroidErrorPx": 67.54,
+          "normalizedCentroidError": 0.0195,
+          "boundaryErrorPx": 355.5
+        },
+        {
+          "gtId": "gt_018",
+          "predId": "hyp_cavity_12",
+          "iou": 0.397,
+          "intersectionArea": 39156.5,
+          "unionArea": 98641.2,
+          "areaErrorPct": 58.95,
+          "centroidErrorPx": 134.4,
+          "normalizedCentroidError": 0.0387,
+          "boundaryErrorPx": 325.5
+        },
+        {
+          "gtId": "gt_019",
+          "predId": "hyp_cavity_16",
+          "iou": 0.9703,
+          "intersectionArea": 868440.3,
+          "unionArea": 895040.0,
+          "areaErrorPct": 1.25,
+          "centroidErrorPx": 5.02,
+          "normalizedCentroidError": 0.0014,
+          "boundaryErrorPx": 30.5
+        },
+        {
+          "gtId": "gt_020",
+          "predId": "hyp_cavity_1",
+          "iou": 0.5085,
+          "intersectionArea": 752969.8,
+          "unionArea": 1480685.8,
+          "areaErrorPct": 48.47,
+          "centroidErrorPx": 320.62,
+          "normalizedCentroidError": 0.0923,
+          "boundaryErrorPx": 1084.09
+        }
+      ],
+      "unmatchedGtIds": [
+        "gt_002",
+        "gt_009",
+        "gt_012",
+        "gt_013",
+        "gt_014",
+        "gt_017"
+      ],
+      "unmatchedPredIds": [
+        "hyp_cavity_6",
+        "hyp_cavity_9",
+        "hyp_face_face_16",
+        "hyp_cavity_5",
+        "hyp_cavity_2",
+        "hyp_cavity_13",
+        "hyp_cavity_11",
+        "hyp_cavity_4",
+        "hyp_face_face_19_sub1",
+        "hyp_cavity_3",
+        "hyp_cavity_16_sub2",
+        "hyp_cavity_1_sub2",
+        "hyp_recovered_wall_enclosure_2",
+        "hyp_recovered_wall_enclosure_3",
+        "hyp_recovered_wall_enclosure_4",
+        "hyp_recovered_wall_enclosure_5",
+        "hyp_recovered_wall_enclosure_6",
+        "hyp_recovered_wall_enclosure_7",
+        "hyp_recovered_wall_enclosure_8",
+        "hyp_recovered_wall_enclosure_9",
+        "hyp_recovered_wall_enclosure_10"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "Lantai 1",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 1280,
+      "imageHeight": 280,
+      "gtRoomCount": 5,
+      "predRoomCount": 5,
+      "truePositiveCount": 3,
+      "falsePositiveCount": 2,
+      "falseNegativeCount": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "meanIoU": 0.4418,
+      "medianIoU": 0.4408,
+      "minIoU": 0.4038,
+      "iouBins": {
+        "gte_0_25": 3,
+        "gte_0_50": 0,
+        "gte_0_75": 0,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 55.07,
+      "medianAreaErrorPct": 54.59,
+      "meanCentroidErrorPx": 163.9,
+      "meanBoundaryErrorPx": 365.37,
+      "gtCoveragePct": 94.79,
+      "predictionCoveragePct": 52.43,
+      "falsePositiveAreaPct": 1.41,
+      "mergedRooms": [],
+      "splitRooms": [
+        {
+          "groundTruthId": "gt_002",
+          "predictionIds": [
+            "hyp_cavity_4",
+            "hyp_cavity_5"
+          ],
+          "overlaps": {
+            "hyp_cavity_4": 0.454,
+            "hyp_cavity_5": 0.445
+          }
+        },
+        {
+          "groundTruthId": "gt_003",
+          "predictionIds": [
+            "hyp_cavity_2",
+            "hyp_cavity_6"
+          ],
+          "overlaps": {
+            "hyp_cavity_2": 0.481,
+            "hyp_cavity_6": 0.309
+          }
+        }
+      ],
+      "invalidPredictions": [],
+      "matches": [
+        {
+          "gtId": "gt_002",
+          "predId": "hyp_cavity_5",
+          "iou": 0.4408,
+          "intersectionArea": 19155.4,
+          "unionArea": 43452.6,
+          "areaErrorPct": 54.59,
+          "centroidErrorPx": 35.94,
+          "normalizedCentroidError": 0.0274,
+          "boundaryErrorPx": 75.08
+        },
+        {
+          "gtId": "gt_003",
+          "predId": "hyp_cavity_2",
+          "iou": 0.4808,
+          "intersectionArea": 44088.0,
+          "unionArea": 91698.0,
+          "areaErrorPct": 51.92,
+          "centroidErrorPx": 29.66,
+          "normalizedCentroidError": 0.0226,
+          "boundaryErrorPx": 87.0
+        },
+        {
+          "gtId": "gt_005",
+          "predId": "hyp_cavity_3",
+          "iou": 0.4038,
+          "intersectionArea": 73787.5,
+          "unionArea": 182723.5,
+          "areaErrorPct": 58.71,
+          "centroidErrorPx": 426.1,
+          "normalizedCentroidError": 0.3252,
+          "boundaryErrorPx": 934.03
+        }
+      ],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_004"
+      ],
+      "unmatchedPredIds": [
+        "hyp_cavity_4",
+        "hyp_cavity_6"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "Lantai 2",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 1280,
+      "imageHeight": 283,
+      "gtRoomCount": 5,
+      "predRoomCount": 2,
+      "truePositiveCount": 2,
+      "falsePositiveCount": 0,
+      "falseNegativeCount": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "meanIoU": 0.6778,
+      "medianIoU": 0.6778,
+      "minIoU": 0.4822,
+      "iouBins": {
+        "gte_0_25": 2,
+        "gte_0_50": 1,
+        "gte_0_75": 1,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 18.16,
+      "medianAreaErrorPct": 18.16,
+      "meanCentroidErrorPx": 76.58,
+      "meanBoundaryErrorPx": 148.33,
+      "gtCoveragePct": 96.71,
+      "predictionCoveragePct": 51.11,
+      "falsePositiveAreaPct": 0.91,
+      "mergedRooms": [
+        {
+          "predictionId": "hyp_recovered_repeated_room_1",
+          "groundTruthIds": [
+            "gt_002",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_002": 0.5,
+            "gt_005": 0.574
+          }
+        }
+      ],
+      "splitRooms": [],
+      "invalidPredictions": [],
+      "matches": [
+        {
+          "gtId": "gt_003",
+          "predId": "hyp_cavity_1",
+          "iou": 0.8735,
+          "intersectionArea": 92319.5,
+          "unionArea": 105690.5,
+          "areaErrorPct": 12.65,
+          "centroidErrorPx": 11.72,
+          "normalizedCentroidError": 0.0089,
+          "boundaryErrorPx": 27.66
+        },
+        {
+          "gtId": "gt_005",
+          "predId": "hyp_recovered_repeated_room_1",
+          "iou": 0.4822,
+          "intersectionArea": 69751.0,
+          "unionArea": 144665.5,
+          "areaErrorPct": 23.67,
+          "centroidErrorPx": 141.44,
+          "normalizedCentroidError": 0.1079,
+          "boundaryErrorPx": 269.0
+        }
+      ],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_002",
+        "gt_004"
+      ],
+      "unmatchedPredIds": [],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 1184,
+      "imageHeight": 864,
+      "gtRoomCount": 51,
+      "predRoomCount": 0,
+      "truePositiveCount": 0,
+      "falsePositiveCount": 0,
+      "falseNegativeCount": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "meanIoU": 0.0,
+      "medianIoU": 0.0,
+      "minIoU": 0.0,
+      "iouBins": {
+        "gte_0_25": 0,
+        "gte_0_50": 0,
+        "gte_0_75": 0,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 0.0,
+      "medianAreaErrorPct": 0.0,
+      "meanCentroidErrorPx": 0.0,
+      "meanBoundaryErrorPx": 0.0,
+      "gtCoveragePct": 65.67,
+      "predictionCoveragePct": 0.0,
+      "falsePositiveAreaPct": 0.0,
+      "mergedRooms": [],
+      "splitRooms": [],
+      "invalidPredictions": [],
+      "matches": [],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_004",
+        "gt_005",
+        "gt_006",
+        "gt_007",
+        "gt_008",
+        "gt_009",
+        "gt_010",
+        "gt_011",
+        "gt_012",
+        "gt_013",
+        "gt_014",
+        "gt_015",
+        "gt_016",
+        "gt_017",
+        "gt_018",
+        "gt_019",
+        "gt_020",
+        "gt_021",
+        "gt_022",
+        "gt_023",
+        "gt_024",
+        "gt_025",
+        "gt_026",
+        "gt_027",
+        "gt_028",
+        "gt_029",
+        "gt_030",
+        "gt_031",
+        "gt_032",
+        "gt_033",
+        "gt_034",
+        "gt_035",
+        "gt_036",
+        "gt_037",
+        "gt_038",
+        "gt_039",
+        "gt_040",
+        "gt_041",
+        "gt_042",
+        "gt_043",
+        "gt_044",
+        "gt_045",
+        "gt_046",
+        "gt_047",
+        "gt_048",
+        "gt_049",
+        "gt_050",
+        "gt_051"
+      ],
+      "unmatchedPredIds": [],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "library-floor-plan",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 909,
+      "imageHeight": 609,
+      "gtRoomCount": 5,
+      "predRoomCount": 3,
+      "truePositiveCount": 1,
+      "falsePositiveCount": 2,
+      "falseNegativeCount": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "meanIoU": 0.4424,
+      "medianIoU": 0.4424,
+      "minIoU": 0.4424,
+      "iouBins": {
+        "gte_0_25": 1,
+        "gte_0_50": 0,
+        "gte_0_75": 0,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 124.5,
+      "medianAreaErrorPct": 124.5,
+      "meanCentroidErrorPx": 239.69,
+      "meanBoundaryErrorPx": 486.0,
+      "gtCoveragePct": 89.4,
+      "predictionCoveragePct": 88.59,
+      "falsePositiveAreaPct": 4.46,
+      "mergedRooms": [
+        {
+          "predictionId": "hyp_face_face_2",
+          "groundTruthIds": [
+            "gt_002",
+            "gt_004",
+            "gt_005"
+          ],
+          "overlaps": {
+            "gt_002": 0.995,
+            "gt_004": 0.989,
+            "gt_005": 0.701
+          }
+        },
+        {
+          "predictionId": "hyp_face_face_1",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_003"
+          ],
+          "overlaps": {
+            "gt_001": 0.631,
+            "gt_003": 0.856
+          }
+        }
+      ],
+      "splitRooms": [
+        {
+          "groundTruthId": "gt_005",
+          "predictionIds": [
+            "hyp_face_face_1",
+            "hyp_face_face_2"
+          ],
+          "overlaps": {
+            "hyp_face_face_2": 0.701,
+            "hyp_face_face_1": 0.244
+          }
+        }
+      ],
+      "invalidPredictions": [],
+      "matches": [
+        {
+          "gtId": "gt_002",
+          "predId": "hyp_face_face_2",
+          "iou": 0.4424,
+          "intersectionArea": 167773.8,
+          "unionArea": 379195.7,
+          "areaErrorPct": 124.5,
+          "centroidErrorPx": 239.69,
+          "normalizedCentroidError": 0.2191,
+          "boundaryErrorPx": 486.0
+        }
+      ],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_003",
+        "gt_004",
+        "gt_005"
+      ],
+      "unmatchedPredIds": [
+        "hyp_cavity_1",
+        "hyp_face_face_1"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "sample-floorplan-house2",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 2560,
+      "imageHeight": 1608,
+      "gtRoomCount": 17,
+      "predRoomCount": 19,
+      "truePositiveCount": 10,
+      "falsePositiveCount": 9,
+      "falseNegativeCount": 7,
+      "precision": 0.5263,
+      "recall": 0.5882,
+      "f1": 0.5556,
+      "meanIoU": 0.6988,
+      "medianIoU": 0.7364,
+      "minIoU": 0.354,
+      "iouBins": {
+        "gte_0_25": 10,
+        "gte_0_50": 8,
+        "gte_0_75": 5,
+        "gte_0_90": 1
+      },
+      "meanAreaErrorPct": 24.6,
+      "medianAreaErrorPct": 22.97,
+      "meanCentroidErrorPx": 55.43,
+      "meanBoundaryErrorPx": 129.99,
+      "gtCoveragePct": 66.81,
+      "predictionCoveragePct": 39.14,
+      "falsePositiveAreaPct": 2.56,
+      "mergedRooms": [
+        {
+          "predictionId": "hyp_cavity_1_sub2",
+          "groundTruthIds": [
+            "gt_004",
+            "gt_010",
+            "gt_020"
+          ],
+          "overlaps": {
+            "gt_004": 0.622,
+            "gt_010": 0.279,
+            "gt_020": 0.436
+          }
+        },
+        {
+          "predictionId": "hyp_cavity_3",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_002"
+          ],
+          "overlaps": {
+            "gt_001": 0.285,
+            "gt_002": 0.983
+          }
+        },
+        {
+          "predictionId": "hyp_cavity_8",
+          "groundTruthIds": [
+            "gt_007",
+            "gt_016"
+          ],
+          "overlaps": {
+            "gt_007": 0.85,
+            "gt_016": 0.428
+          }
+        },
+        {
+          "predictionId": "hyp_cavity_1",
+          "groundTruthIds": [
+            "gt_016",
+            "gt_020"
+          ],
+          "overlaps": {
+            "gt_016": 0.403,
+            "gt_020": 0.784
+          }
+        }
+      ],
+      "splitRooms": [
+        {
+          "groundTruthId": "gt_020",
+          "predictionIds": [
+            "hyp_cavity_1",
+            "hyp_cavity_1_sub2"
+          ],
+          "overlaps": {
+            "hyp_cavity_1_sub2": 0.436,
+            "hyp_cavity_1": 0.784
+          }
+        }
+      ],
+      "invalidPredictions": [],
+      "matches": [
+        {
+          "gtId": "gt_001",
+          "predId": "hyp_cavity_2",
+          "iou": 0.6707,
+          "intersectionArea": 51507.0,
+          "unionArea": 76794.0,
+          "areaErrorPct": 29.04,
+          "centroidErrorPx": 66.51,
+          "normalizedCentroidError": 0.022,
+          "boundaryErrorPx": 133.0
+        },
+        {
+          "gtId": "gt_002",
+          "predId": "hyp_cavity_3",
+          "iou": 0.8499,
+          "intersectionArea": 175513.3,
+          "unionArea": 206519.2,
+          "areaErrorPct": 13.93,
+          "centroidErrorPx": 41.92,
+          "normalizedCentroidError": 0.0139,
+          "boundaryErrorPx": 142.06
+        },
+        {
+          "gtId": "gt_005",
+          "predId": "hyp_cavity_6",
+          "iou": 0.7187,
+          "intersectionArea": 29287.5,
+          "unionArea": 40752.5,
+          "areaErrorPct": 27.99,
+          "centroidErrorPx": 24.16,
+          "normalizedCentroidError": 0.008,
+          "boundaryErrorPx": 55.51
+        },
+        {
+          "gtId": "gt_010",
+          "predId": "hyp_cavity_9",
+          "iou": 0.56,
+          "intersectionArea": 40191.1,
+          "unionArea": 71771.4,
+          "areaErrorPct": 41.28,
+          "centroidErrorPx": 71.4,
+          "normalizedCentroidError": 0.0236,
+          "boundaryErrorPx": 142.86
+        },
+        {
+          "gtId": "gt_011",
+          "predId": "hyp_cavity_10",
+          "iou": 0.8554,
+          "intersectionArea": 69389.6,
+          "unionArea": 81117.4,
+          "areaErrorPct": 11.35,
+          "centroidErrorPx": 12.85,
+          "normalizedCentroidError": 0.0043,
+          "boundaryErrorPx": 83.29
+        },
+        {
+          "gtId": "gt_014",
+          "predId": "hyp_cavity_12",
+          "iou": 0.7932,
+          "intersectionArea": 51653.1,
+          "unionArea": 65119.9,
+          "areaErrorPct": 17.95,
+          "centroidErrorPx": 20.5,
+          "normalizedCentroidError": 0.0068,
+          "boundaryErrorPx": 73.85
+        },
+        {
+          "gtId": "gt_015",
+          "predId": "hyp_cavity_13",
+          "iou": 0.4802,
+          "intersectionArea": 23955.2,
+          "unionArea": 49881.8,
+          "areaErrorPct": 50.0,
+          "centroidErrorPx": 77.25,
+          "normalizedCentroidError": 0.0256,
+          "boundaryErrorPx": 156.0
+        },
+        {
+          "gtId": "gt_016",
+          "predId": "hyp_cavity_8",
+          "iou": 0.354,
+          "intersectionArea": 35267.5,
+          "unionArea": 99639.7,
+          "areaErrorPct": 36.4,
+          "centroidErrorPx": 107.11,
+          "normalizedCentroidError": 0.0354,
+          "boundaryErrorPx": 185.38
+        },
+        {
+          "gtId": "gt_018",
+          "predId": "hyp_cavity_4",
+          "iou": 0.9519,
+          "intersectionArea": 26072.5,
+          "unionArea": 27389.8,
+          "areaErrorPct": 0.39,
+          "centroidErrorPx": 3.93,
+          "normalizedCentroidError": 0.0013,
+          "boundaryErrorPx": 7.93
+        },
+        {
+          "gtId": "gt_020",
+          "predId": "hyp_cavity_1",
+          "iou": 0.7542,
+          "intersectionArea": 836483.5,
+          "unionArea": 1109059.7,
+          "areaErrorPct": 17.71,
+          "centroidErrorPx": 128.67,
+          "normalizedCentroidError": 0.0426,
+          "boundaryErrorPx": 320.0
+        }
+      ],
+      "unmatchedGtIds": [
+        "gt_004",
+        "gt_006",
+        "gt_007",
+        "gt_009",
+        "gt_017",
+        "gt_019",
+        "gt_021"
+      ],
+      "unmatchedPredIds": [
+        "hyp_face_face_16",
+        "hyp_cavity_7",
+        "hyp_cavity_11",
+        "hyp_face_face_15",
+        "hyp_cavity_1_sub2",
+        "hyp_recovered_repeated_room_2",
+        "hyp_recovered_wall_enclosure_3",
+        "hyp_recovered_wall_enclosure_6",
+        "hyp_recovered_wall_enclosure_8"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "sample-floorplan-house3",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 6500,
+      "imageHeight": 5224,
+      "gtRoomCount": 21,
+      "predRoomCount": 25,
+      "truePositiveCount": 3,
+      "falsePositiveCount": 22,
+      "falseNegativeCount": 18,
+      "precision": 0.12,
+      "recall": 0.1429,
+      "f1": 0.1304,
+      "meanIoU": 0.4807,
+      "medianIoU": 0.3504,
+      "minIoU": 0.2688,
+      "iouBins": {
+        "gte_0_25": 3,
+        "gte_0_50": 1,
+        "gte_0_75": 1,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 51.25,
+      "medianAreaErrorPct": 64.45,
+      "meanCentroidErrorPx": 250.97,
+      "meanBoundaryErrorPx": 672.58,
+      "gtCoveragePct": 48.51,
+      "predictionCoveragePct": 70.73,
+      "falsePositiveAreaPct": 42.23,
+      "mergedRooms": [
+        {
+          "predictionId": "merged_hyp_cavity_3_hyp_face_face_6",
+          "groundTruthIds": [
+            "gt_010",
+            "gt_011"
+          ],
+          "overlaps": {
+            "gt_010": 0.464,
+            "gt_011": 0.469
+          }
+        },
+        {
+          "predictionId": "hyp_cavity_2_sub1",
+          "groundTruthIds": [
+            "gt_011",
+            "gt_012",
+            "gt_015",
+            "gt_019",
+            "gt_020",
+            "gt_021"
+          ],
+          "overlaps": {
+            "gt_011": 0.515,
+            "gt_012": 0.988,
+            "gt_015": 0.998,
+            "gt_019": 1.0,
+            "gt_020": 1.0,
+            "gt_021": 0.417
+          }
+        },
+        {
+          "predictionId": "hyp_cavity_15_sub2",
+          "groundTruthIds": [
+            "gt_005",
+            "gt_007"
+          ],
+          "overlaps": {
+            "gt_005": 0.382,
+            "gt_007": 0.449
+          }
+        },
+        {
+          "predictionId": "merged_hyp_cavity_1_hyp_cavity_2",
+          "groundTruthIds": [
+            "gt_008",
+            "gt_009",
+            "gt_010",
+            "gt_011",
+            "gt_012",
+            "gt_013",
+            "gt_014",
+            "gt_015",
+            "gt_016",
+            "gt_017",
+            "gt_018",
+            "gt_019",
+            "gt_020",
+            "gt_021"
+          ],
+          "overlaps": {
+            "gt_008": 0.709,
+            "gt_009": 1.0,
+            "gt_010": 0.747,
+            "gt_011": 1.0,
+            "gt_012": 1.0,
+            "gt_013": 1.0,
+            "gt_014": 1.0,
+            "gt_015": 1.0,
+            "gt_016": 1.0,
+            "gt_017": 1.0,
+            "gt_018": 1.0,
+            "gt_019": 1.0,
+            "gt_020": 1.0,
+            "gt_021": 0.873
+          }
+        }
+      ],
+      "splitRooms": [
+        {
+          "groundTruthId": "gt_004",
+          "predictionIds": [
+            "hyp_cavity_9",
+            "hyp_recovered_repeated_room_5"
+          ],
+          "overlaps": {
+            "hyp_cavity_9": 0.271,
+            "hyp_recovered_repeated_room_5": 0.23
+          }
+        },
+        {
+          "groundTruthId": "gt_007",
+          "predictionIds": [
+            "hyp_cavity_15",
+            "hyp_cavity_15_sub1",
+            "hyp_cavity_15_sub2"
+          ],
+          "overlaps": {
+            "hyp_cavity_15_sub2": 0.449,
+            "hyp_cavity_15_sub1": 0.475,
+            "hyp_cavity_15": 0.825
+          }
+        },
+        {
+          "groundTruthId": "gt_010",
+          "predictionIds": [
+            "hyp_cavity_3",
+            "merged_hyp_cavity_3_hyp_face_face_6"
+          ],
+          "overlaps": {
+            "hyp_cavity_3": 0.352,
+            "merged_hyp_cavity_3_hyp_face_face_6": 0.464
+          }
+        }
+      ],
+      "invalidPredictions": [],
+      "matches": [
+        {
+          "gtId": "gt_004",
+          "predId": "hyp_cavity_9",
+          "iou": 0.2688,
+          "intersectionArea": 258842.9,
+          "unionArea": 962962.3,
+          "areaErrorPct": 72.14,
+          "centroidErrorPx": 337.07,
+          "normalizedCentroidError": 0.0404,
+          "boundaryErrorPx": 695.21
+        },
+        {
+          "gtId": "gt_007",
+          "predId": "hyp_cavity_15",
+          "iou": 0.823,
+          "intersectionArea": 2500884.0,
+          "unionArea": 3038837.0,
+          "areaErrorPct": 17.15,
+          "centroidErrorPx": 103.16,
+          "normalizedCentroidError": 0.0124,
+          "boundaryErrorPx": 706.0
+        },
+        {
+          "gtId": "gt_010",
+          "predId": "hyp_cavity_3",
+          "iou": 0.3504,
+          "intersectionArea": 308890.6,
+          "unionArea": 881618.7,
+          "areaErrorPct": 64.45,
+          "centroidErrorPx": 312.7,
+          "normalizedCentroidError": 0.0375,
+          "boundaryErrorPx": 616.52
+        }
+      ],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_005",
+        "gt_006",
+        "gt_008",
+        "gt_009",
+        "gt_011",
+        "gt_012",
+        "gt_013",
+        "gt_014",
+        "gt_015",
+        "gt_016",
+        "gt_017",
+        "gt_018",
+        "gt_019",
+        "gt_020",
+        "gt_021"
+      ],
+      "unmatchedPredIds": [
+        "hyp_cavity_7",
+        "hyp_cavity_11",
+        "hyp_cavity_16",
+        "merged_hyp_cavity_3_hyp_face_face_6",
+        "hyp_cavity_18",
+        "hyp_cavity_6",
+        "hyp_cavity_8",
+        "hyp_cavity_17",
+        "hyp_cavity_12",
+        "hyp_cavity_2_sub1",
+        "hyp_cavity_14",
+        "hyp_cavity_15_sub2",
+        "merged_hyp_cavity_1_hyp_cavity_2",
+        "hyp_cavity_15_sub1",
+        "hyp_cavity_4_sub2",
+        "hyp_face_face_13",
+        "hyp_cavity_4",
+        "hyp_recovered_repeated_room_1",
+        "hyp_recovered_repeated_room_2",
+        "hyp_recovered_repeated_room_3",
+        "hyp_recovered_repeated_room_5",
+        "hyp_recovered_repeated_room_6"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "sample-floorplan",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 623,
+      "imageHeight": 431,
+      "gtRoomCount": 8,
+      "predRoomCount": 8,
+      "truePositiveCount": 7,
+      "falsePositiveCount": 1,
+      "falseNegativeCount": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "meanIoU": 0.8804,
+      "medianIoU": 0.9318,
+      "minIoU": 0.5732,
+      "iouBins": {
+        "gte_0_25": 7,
+        "gte_0_50": 7,
+        "gte_0_75": 6,
+        "gte_0_90": 5
+      },
+      "meanAreaErrorPct": 9.02,
+      "medianAreaErrorPct": 3.83,
+      "meanCentroidErrorPx": 12.89,
+      "meanBoundaryErrorPx": 31.36,
+      "gtCoveragePct": 77.65,
+      "predictionCoveragePct": 76.68,
+      "falsePositiveAreaPct": 2.85,
+      "mergedRooms": [],
+      "splitRooms": [
+        {
+          "groundTruthId": "gt_003",
+          "predictionIds": [
+            "hyp_cavity_3",
+            "hyp_cavity_5"
+          ],
+          "overlaps": {
+            "hyp_cavity_5": 0.379,
+            "hyp_cavity_3": 0.578
+          }
+        }
+      ],
+      "invalidPredictions": [],
+      "matches": [
+        {
+          "gtId": "gt_001",
+          "predId": "hyp_cavity_4",
+          "iou": 0.9574,
+          "intersectionArea": 34404.7,
+          "unionArea": 35936.0,
+          "areaErrorPct": 0.95,
+          "centroidErrorPx": 0.83,
+          "normalizedCentroidError": 0.0011,
+          "boundaryErrorPx": 9.58
+        },
+        {
+          "gtId": "gt_003",
+          "predId": "hyp_cavity_3",
+          "iou": 0.5732,
+          "intersectionArea": 44948.1,
+          "unionArea": 78414.8,
+          "areaErrorPct": 41.42,
+          "centroidErrorPx": 77.84,
+          "normalizedCentroidError": 0.1028,
+          "boundaryErrorPx": 167.06
+        },
+        {
+          "gtId": "gt_004",
+          "predId": "hyp_cavity_9",
+          "iou": 0.9612,
+          "intersectionArea": 30715.6,
+          "unionArea": 31954.4,
+          "areaErrorPct": 3.83,
+          "centroidErrorPx": 0.43,
+          "normalizedCentroidError": 0.0006,
+          "boundaryErrorPx": 5.5
+        },
+        {
+          "gtId": "gt_005",
+          "predId": "hyp_cavity_8",
+          "iou": 0.9318,
+          "intersectionArea": 23302.5,
+          "unionArea": 25008.7,
+          "areaErrorPct": 0.44,
+          "centroidErrorPx": 3.89,
+          "normalizedCentroidError": 0.0051,
+          "boundaryErrorPx": 10.02
+        },
+        {
+          "gtId": "gt_006",
+          "predId": "hyp_cavity_6",
+          "iou": 0.9087,
+          "intersectionArea": 9238.3,
+          "unionArea": 10166.9,
+          "areaErrorPct": 9.65,
+          "centroidErrorPx": 2.42,
+          "normalizedCentroidError": 0.0032,
+          "boundaryErrorPx": 8.73
+        },
+        {
+          "gtId": "gt_007",
+          "predId": "hyp_cavity_10",
+          "iou": 0.8748,
+          "intersectionArea": 7324.9,
+          "unionArea": 8373.2,
+          "areaErrorPct": 2.68,
+          "centroidErrorPx": 3.99,
+          "normalizedCentroidError": 0.0053,
+          "boundaryErrorPx": 11.87
+        },
+        {
+          "gtId": "gt_008",
+          "predId": "hyp_cavity_7",
+          "iou": 0.9556,
+          "intersectionArea": 20635.2,
+          "unionArea": 21593.7,
+          "areaErrorPct": 4.14,
+          "centroidErrorPx": 0.85,
+          "normalizedCentroidError": 0.0011,
+          "boundaryErrorPx": 6.8
+        }
+      ],
+      "unmatchedGtIds": [
+        "gt_002"
+      ],
+      "unmatchedPredIds": [
+        "hyp_cavity_5"
+      ],
+      "passed": true,
+      "executionTimeMs": 0.0
+    },
+    {
+      "imageId": "simple-apartment-floor-plan",
+      "sourceDataset": "my_floorplan",
+      "imageWidth": 1100,
+      "imageHeight": 850,
+      "gtRoomCount": 7,
+      "predRoomCount": 3,
+      "truePositiveCount": 2,
+      "falsePositiveCount": 1,
+      "falseNegativeCount": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "meanIoU": 0.4768,
+      "medianIoU": 0.4768,
+      "minIoU": 0.4021,
+      "iouBins": {
+        "gte_0_25": 2,
+        "gte_0_50": 1,
+        "gte_0_75": 0,
+        "gte_0_90": 0
+      },
+      "meanAreaErrorPct": 114.47,
+      "medianAreaErrorPct": 114.47,
+      "meanCentroidErrorPx": 185.9,
+      "meanBoundaryErrorPx": 365.56,
+      "gtCoveragePct": 90.86,
+      "predictionCoveragePct": 93.8,
+      "falsePositiveAreaPct": 3.66,
+      "mergedRooms": [
+        {
+          "predictionId": "hyp_cavity_1",
+          "groundTruthIds": [
+            "gt_004",
+            "gt_005",
+            "gt_006",
+            "gt_007"
+          ],
+          "overlaps": {
+            "gt_004": 1.0,
+            "gt_005": 0.999,
+            "gt_006": 0.997,
+            "gt_007": 0.997
+          }
+        },
+        {
+          "predictionId": "hyp_cavity_2",
+          "groundTruthIds": [
+            "gt_001",
+            "gt_002",
+            "gt_003"
+          ],
+          "overlaps": {
+            "gt_001": 0.688,
+            "gt_002": 0.952,
+            "gt_003": 1.0
+          }
+        }
+      ],
+      "splitRooms": [],
+      "invalidPredictions": [],
+      "matches": [
+        {
+          "gtId": "gt_003",
+          "predId": "hyp_cavity_2",
+          "iou": 0.5514,
+          "intersectionArea": 60441.1,
+          "unionArea": 109605.4,
+          "areaErrorPct": 81.33,
+          "centroidErrorPx": 79.84,
+          "normalizedCentroidError": 0.0574,
+          "boundaryErrorPx": 188.47
+        },
+        {
+          "gtId": "gt_007",
+          "predId": "hyp_cavity_1",
+          "iou": 0.4021,
+          "intersectionArea": 307346.2,
+          "unionArea": 764301.6,
+          "areaErrorPct": 147.61,
+          "centroidErrorPx": 291.96,
+          "normalizedCentroidError": 0.21,
+          "boundaryErrorPx": 542.64
+        }
+      ],
+      "unmatchedGtIds": [
+        "gt_001",
+        "gt_002",
+        "gt_004",
+        "gt_005",
+        "gt_006"
+      ],
+      "unmatchedPredIds": [
+        "hyp_recovered_wall_enclosure_2"
+      ],
+      "passed": false,
+      "executionTimeMs": 0.0
+    }
+  ]
+}

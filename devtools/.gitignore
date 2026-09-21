@@ -1,0 +1,40 @@
+# Node dependencies and build outputs
+node_modules/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tsbuildinfo
+*.swp
+*.swo
+*~
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+.coverage.*
+output/
+results/
+
+# DevTools evaluation runs & failure dumps
+evaluation/results/
+evaluation/failures/
+
+# Large Model Weights, Checkpoints & Pickles
+*.pt
+*.pth
+*.onnx
+*.pkl
+*.pickle
+*.bin
+*.safetensors

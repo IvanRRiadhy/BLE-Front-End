@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "gt_equation_holds": true,
+  "pred_equation_holds": true,
+  "baseline_ml_off": {
+    "gt": 148,
+    "pred": 114,
+    "tp": 38,
+    "fp": 76,
+    "fn": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "expected_tp": 38,
+    "expected_fp": 76,
+    "expected_fn": 110,
+    "matches_phase291": true
+  },
+  "production_ml_on": {
+    "gt": 148,
+    "pred": 105,
+    "tp": 40,
+    "fp": 65,
+    "fn": 108,
+    "precision": 0.381,
+    "recall": 0.2703,
+    "microF1": 0.3162,
+    "expected_tp": 40,
+    "expected_fp": 65,
+    "expected_fn": 108,
+    "matches_phase291": true
+  },
+  "delta": {
+    "tp_delta": 2,
+    "fp_delta": -11,
+    "fn_delta": -2,
+    "f1_delta": 0.0261
+  }
+}

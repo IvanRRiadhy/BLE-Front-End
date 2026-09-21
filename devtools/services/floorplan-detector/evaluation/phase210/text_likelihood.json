@@ -1,0 +1,23 @@
+{
+  "strategy": "B_text_evidence",
+  "gt": 148,
+  "pred": 378,
+  "tp": 43,
+  "fp": 335,
+  "fn": 105,
+  "precision": 0.1138,
+  "recall": 0.2905,
+  "microF1": 0.1635,
+  "macroF1": 0.301,
+  "meanIoU": 0.5405,
+  "medianIoU": 0.475,
+  "total_runtime_ms": 433530.83,
+  "mean_latency_ms": 36127.57,
+  "fragmentation": {
+    "total_gt_rooms": 148,
+    "fragmented_rooms": 27,
+    "text_likely_cause": 6,
+    "text_possible_cause": 17,
+    "text_unrelated": 4
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "phase": "2.10.5",
+  "description": "Oversized Cavity Splitting Experiment",
+  "authoritative_gt_count": 148,
+  "total_cavities_evaluated": 88,
+  "oversized_cavities_split": 68,
+  "protected_valid_rooms": 20,
+  "total_split_configurations": 65,
+  "baseline_cavity_split_recall_25": 0.5088,
+  "hybrid_cavity_split_recall_25": 0.5614,
+  "cavity_split_recall_improvement_pct": 5.26,
+  "improved_rooms_count": 25,
+  "affected_gt_rooms_total": 57,
+  "false_split_rate": 0.9601,
+  "mean_coverage_ratio": 1.2587,
+  "mean_overlap_ratio": 0.3718,
+  "status": "PASS",
+  "ready_for_phase_2_10_6": true
+}

@@ -1,0 +1,9 @@
+{
+  "classical_latency_ms": 9204.65,
+  "ml_enabled_total_latency_ms": 100.19,
+  "model_lazy_load_ms": 725.46,
+  "inference_latency_ms": 65.14,
+  "association_latency_ms": 0.0,
+  "device_profiled": "cuda",
+  "single_request_overhead_ms": 65.33
+}

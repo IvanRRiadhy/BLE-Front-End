@@ -1,0 +1,104 @@
+{
+  "benchmarkName": "bionic_v2.6_baseline",
+  "dataset": "cubicasa5k",
+  "detectorVersion": "2.6.0",
+  "timestamp": "2026-09-17T02:34:09.369817+00:00",
+  "gitCommit": "63c7502",
+  "config": {
+    "benchmark_name": "bionic_v2.6_baseline",
+    "dataset": {
+      "name": "cubicasa5k",
+      "path": "datasets/cubicasa5k",
+      "fallback_dataset": "synthetic"
+    },
+    "subset_selection": {
+      "target_samples": 50,
+      "seed": 42,
+      "min_rooms": 1,
+      "max_rooms": 15,
+      "stratify_by_room_count": true,
+      "image_resolution_filter": {
+        "min_width": 600,
+        "min_height": 500
+      }
+    },
+    "detector": {
+      "name": "current_cv",
+      "version": "2.6.0",
+      "config": {
+        "wall_close_kernel_size": 35,
+        "min_room_area_px": 1200,
+        "auto_scale_kernel": true,
+        "enable_multi_evidence": true
+      }
+    },
+    "matching": {
+      "min_iou": 0.25,
+      "iou_thresholds": [
+        0.25,
+        0.5,
+        0.75,
+        0.9
+      ],
+      "max_centroid_distance_px": 250.0
+    },
+    "topology": {
+      "merged_min_overlap_ratio": 0.3,
+      "split_min_overlap_ratio": 0.3
+    },
+    "validation": {
+      "min_vertices": 3,
+      "max_vertices": 200,
+      "min_area_px": 100.0
+    },
+    "output": {
+      "results_dir": "evaluation/results/latest",
+      "failures_dir": "evaluation/failures",
+      "visualizations_dir": "evaluation/results/latest/visualizations",
+      "baseline_dir": "evaluation/baselines/v2.6"
+    }
+  },
+  "totals": {
+    "imagesEvaluated": 50,
+    "imagesPassed": 45,
+    "imagePassRatePct": 90.0,
+    "groundTruthRooms": 399,
+    "predictedRooms": 295,
+    "truePositiveRooms": 291,
+    "falsePositiveRooms": 4,
+    "missedRooms": 108
+  },
+  "metrics": {
+    "microPrecision": 0.9864,
+    "microRecall": 0.7293,
+    "microF1": 0.8386,
+    "macroPrecision": 0.9575,
+    "macroRecall": 0.7386,
+    "macroF1": 0.8178,
+    "meanIoU": 0.8868,
+    "medianIoU": 0.984,
+    "minIoU": 0.2802,
+    "iouBins": {
+      "gte_0_25": 291,
+      "gte_0_25_pct": 72.93,
+      "gte_0_50": 263,
+      "gte_0_50_pct": 65.91,
+      "gte_0_75": 238,
+      "gte_0_75_pct": 59.65,
+      "gte_0_90": 238,
+      "gte_0_90_pct": 59.65
+    },
+    "meanAreaErrorPct": 24.89,
+    "medianAreaErrorPct": 1.6,
+    "meanCentroidErrorPx": 31.39,
+    "meanBoundaryErrorPx": 64.65
+  },
+  "topology": {
+    "mergedRoomsCount": 57,
+    "splitRoomsCount": 0,
+    "invalidPredictionsCount": 0
+  },
+  "performance": {
+    "meanExecutionTimeMs": 111.92
+  }
+}

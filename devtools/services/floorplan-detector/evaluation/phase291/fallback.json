@@ -1,0 +1,30 @@
+{
+  "mode_c_cpu": {
+    "description": "ML ON, Device: CPU",
+    "resolved_device": "cpu",
+    "error": null,
+    "is_fallback": false,
+    "status": "PASS"
+  },
+  "mode_d_cuda_unavailable": {
+    "description": "CUDA unavailable & CPU fallback disabled",
+    "resolved_device": null,
+    "error": "cuda_unavailable_and_cpu_fallback_disabled",
+    "is_fallback": true,
+    "fallback_reason": "cuda_unavailable_and_cpu_fallback_disabled",
+    "status": "PASS"
+  },
+  "mode_e_weights_missing": {
+    "description": "RT-DETR checkpoint missing",
+    "is_available": false,
+    "is_fallback": true,
+    "fallback_reason": "weights_not_found_non_existent_rtdetr_weights.pt",
+    "status": "PASS"
+  },
+  "mode_f_inference_error": {
+    "description": "Runtime exception during inference",
+    "is_fallback": true,
+    "fallback_reason": "inference_exception: Simulated GPU out-of-memory exception",
+    "status": "PASS"
+  }
+}

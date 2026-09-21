@@ -1,0 +1,25 @@
+{
+  "single_request_ms": 88.33,
+  "10_sequential": {
+    "mean_ms": 82.53,
+    "median_ms": 82.64,
+    "min_ms": 71.99,
+    "max_ms": 90.77
+  },
+  "50_sequential": {
+    "mean_ms": 76.02,
+    "median_ms": 71.88,
+    "p50_ms": 71.88,
+    "p95_ms": 102.79,
+    "p99_ms": 110.84,
+    "min_ms": 63.01,
+    "max_ms": 110.9
+  },
+  "system_resources": {
+    "cpu_percent": 47.8,
+    "ram_rss_mb": 1592.18,
+    "gpu_vram_mb": 141.71,
+    "device": "cuda"
+  },
+  "status": "PASS"
+}

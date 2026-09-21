@@ -1,0 +1,71 @@
+{
+  "1_missing_model_file": {
+    "is_fallback": true,
+    "fallback_reason": "weights_not_found_non_existent_path.pt",
+    "status": "PASS"
+  },
+  "2_corrupted_model_file": {
+    "is_fallback": true,
+    "fallback_reason": "model_load_failed: Corrupted PyTorch checkpoint",
+    "status": "PASS"
+  },
+  "3_invalid_checkpoint": {
+    "is_fallback": true,
+    "fallback_reason": "model_load_failed: Invalid weights format",
+    "status": "PASS"
+  },
+  "4_rtdetr_init_exception": {
+    "is_fallback": true,
+    "status": "PASS"
+  },
+  "5_ml_inference_exception": {
+    "is_fallback": true,
+    "fallback_reason": "inference_exception: CUDA out of memory",
+    "status": "PASS"
+  },
+  "6_provider_factory_fallback": {
+    "provider_class": "DisabledStructuralEvidenceProvider",
+    "is_fallback": true,
+    "status": "PASS"
+  },
+  "7_cuda_unavailable_no_cpu_fallback": {
+    "is_fallback": true,
+    "fallback_reason": "cuda_requested_but_unavailable",
+    "status": "PASS"
+  },
+  "8_cuda_init_failure": {
+    "is_fallback": true,
+    "fallback_reason": "cuda_init_failed",
+    "status": "PASS"
+  },
+  "9_cpu_fallback": {
+    "resolved_device": "cpu",
+    "error": null,
+    "status": "PASS"
+  },
+  "10_empty_ml_result": {
+    "associations_count": 0,
+    "is_fallback": false,
+    "status": "PASS"
+  },
+  "11_malformed_ml_result": {
+    "status": "PASS"
+  },
+  "12_invalid_coords_from_provider": {
+    "status": "PASS"
+  },
+  "13_provider_timeout": {
+    "is_fallback": true,
+    "fallback_reason": "inference_timeout_31ms",
+    "status": "PASS"
+  },
+  "14_consecutive_failures": {
+    "attempts": 10,
+    "consecutive_passes": 10,
+    "status": "PASS"
+  },
+  "15_service_recovery": {
+    "is_fallback": false,
+    "status": "PASS"
+  }
+}

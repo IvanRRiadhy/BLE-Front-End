@@ -1,0 +1,56 @@
+{
+  "text_detection_ms_mean": 56.48,
+  "distance_transform_ms_mean": 33.08,
+  "relation_classification_ms_mean": 37.99,
+  "strategy_timing": {
+    "A_baseline": {
+      "masking_total_ms": 21.69,
+      "downstream_total_ms": 268263.93,
+      "total_e2e_ms": 272683.41,
+      "mean_latency_ms": 22723.62
+    },
+    "B_distance_only": {
+      "masking_total_ms": 21210.34,
+      "downstream_total_ms": 97.8,
+      "total_e2e_ms": 24650.47,
+      "mean_latency_ms": 2054.21
+    },
+    "C_wall_overlap_only": {
+      "masking_total_ms": 7775.98,
+      "downstream_total_ms": 4759.37,
+      "total_e2e_ms": 15753.6,
+      "mean_latency_ms": 1312.8
+    },
+    "D_distance_wall_support": {
+      "masking_total_ms": 25361.64,
+      "downstream_total_ms": 94.01,
+      "total_e2e_ms": 28771.8,
+      "mean_latency_ms": 2397.65
+    },
+    "E_thickness_aware": {
+      "masking_total_ms": 20213.21,
+      "downstream_total_ms": 242172.07,
+      "total_e2e_ms": 265975.52,
+      "mean_latency_ms": 22164.63
+    },
+    "F_soft_mask": {
+      "masking_total_ms": 6978.0,
+      "downstream_total_ms": 0.0,
+      "total_e2e_ms": 9925.37,
+      "mean_latency_ms": 827.11
+    },
+    "G_adaptive_combined": {
+      "masking_total_ms": 23110.37,
+      "downstream_total_ms": 102.16,
+      "total_e2e_ms": 26596.91,
+      "mean_latency_ms": 2216.41
+    },
+    "H_candidate_penalty": {
+      "masking_total_ms": 25363.09,
+      "downstream_total_ms": 106.47,
+      "total_e2e_ms": 48880.42,
+      "mean_latency_ms": 4073.37
+    }
+  },
+  "memory_overhead_mb": 14.5
+}

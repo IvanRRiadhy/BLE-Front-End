@@ -1,0 +1,12 @@
+{
+  "strategy": "combined",
+  "total_proposals": 4571,
+  "gt_proposal_recall_10": 0.5135,
+  "gt_proposal_recall_25": 0.3716,
+  "gt_proposal_recall_50": 0.2568,
+  "gt_proposal_recall_75": 0.1419,
+  "gt_rooms_covered_25": 55,
+  "gt_rooms_covered_50": 38,
+  "mean_best_iou": 0.2675,
+  "median_best_iou": 0.1246
+}

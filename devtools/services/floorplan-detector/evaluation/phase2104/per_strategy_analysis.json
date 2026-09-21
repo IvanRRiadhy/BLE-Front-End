@@ -1,0 +1,86 @@
+{
+  "baseline_candidates": {
+    "strategy": "baseline_candidates",
+    "total_proposals": 0,
+    "gt_proposal_recall_10": 0.3919,
+    "gt_proposal_recall_25": 0.2635,
+    "gt_proposal_recall_50": 0.1757,
+    "gt_proposal_recall_75": 0.1081,
+    "gt_rooms_covered_25": 39,
+    "gt_rooms_covered_50": 26,
+    "mean_best_iou": 0.1976,
+    "median_best_iou": 0.0057
+  },
+  "wall_network_face": {
+    "strategy": "wall_network_face",
+    "total_proposals": 4198,
+    "gt_proposal_recall_10": 0.3581,
+    "gt_proposal_recall_25": 0.277,
+    "gt_proposal_recall_50": 0.1824,
+    "gt_proposal_recall_75": 0.1014,
+    "gt_rooms_covered_25": 41,
+    "gt_rooms_covered_50": 27,
+    "mean_best_iou": 0.1927,
+    "median_best_iou": 0.0306
+  },
+  "doorway_connected": {
+    "strategy": "doorway_connected",
+    "total_proposals": 0,
+    "gt_proposal_recall_10": 0.0,
+    "gt_proposal_recall_25": 0.0,
+    "gt_proposal_recall_50": 0.0,
+    "gt_proposal_recall_75": 0.0,
+    "gt_rooms_covered_25": 0,
+    "gt_rooms_covered_50": 0,
+    "mean_best_iou": 0.0,
+    "median_best_iou": 0.0
+  },
+  "internal_partition": {
+    "strategy": "internal_partition",
+    "total_proposals": 199,
+    "gt_proposal_recall_10": 0.2432,
+    "gt_proposal_recall_25": 0.1824,
+    "gt_proposal_recall_50": 0.1014,
+    "gt_proposal_recall_75": 0.0676,
+    "gt_rooms_covered_25": 27,
+    "gt_rooms_covered_50": 15,
+    "mean_best_iou": 0.1187,
+    "median_best_iou": 0.0
+  },
+  "repeated_room": {
+    "strategy": "repeated_room",
+    "total_proposals": 211,
+    "gt_proposal_recall_10": 0.2365,
+    "gt_proposal_recall_25": 0.1351,
+    "gt_proposal_recall_50": 0.027,
+    "gt_proposal_recall_75": 0.0,
+    "gt_rooms_covered_25": 20,
+    "gt_rooms_covered_50": 4,
+    "mean_best_iou": 0.0781,
+    "median_best_iou": 0.0
+  },
+  "neighboring_room": {
+    "strategy": "neighboring_room",
+    "total_proposals": 101,
+    "gt_proposal_recall_10": 0.3311,
+    "gt_proposal_recall_25": 0.1959,
+    "gt_proposal_recall_50": 0.0473,
+    "gt_proposal_recall_75": 0.0135,
+    "gt_rooms_covered_25": 29,
+    "gt_rooms_covered_50": 7,
+    "mean_best_iou": 0.1168,
+    "median_best_iou": 0.0
+  },
+  "combined": {
+    "strategy": "combined",
+    "total_proposals": 4571,
+    "gt_proposal_recall_10": 0.5135,
+    "gt_proposal_recall_25": 0.3716,
+    "gt_proposal_recall_50": 0.2568,
+    "gt_proposal_recall_75": 0.1419,
+    "gt_rooms_covered_25": 55,
+    "gt_rooms_covered_50": 38,
+    "mean_best_iou": 0.2675,
+    "median_best_iou": 0.1246
+  }
+}

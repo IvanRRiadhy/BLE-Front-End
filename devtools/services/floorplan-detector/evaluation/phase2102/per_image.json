@@ -1,0 +1,1082 @@
+{
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+    "baseline": {
+      "gt": 3,
+      "pred": 3,
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_positive": {
+      "gt": 3,
+      "pred": 3,
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_negative": {
+      "gt": 3,
+      "pred": 3,
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "positive_negative": {
+      "gt": 3,
+      "pred": 3,
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door": {
+      "gt": 3,
+      "pred": 3,
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door_cavity": {
+      "gt": 3,
+      "pred": 3,
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door_structural": {
+      "gt": 3,
+      "pred": 3,
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "full_fusion": {
+      "gt": 3,
+      "pred": 3,
+      "tp": 0,
+      "fp": 3,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    }
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+    "baseline": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_positive": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_negative": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "positive_negative": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door_cavity": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door_structural": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "full_fusion": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    }
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+    "baseline": {
+      "gt": 5,
+      "pred": 10,
+      "tp": 0,
+      "fp": 10,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_positive": {
+      "gt": 5,
+      "pred": 10,
+      "tp": 0,
+      "fp": 10,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_negative": {
+      "gt": 5,
+      "pred": 10,
+      "tp": 0,
+      "fp": 10,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "positive_negative": {
+      "gt": 5,
+      "pred": 10,
+      "tp": 0,
+      "fp": 10,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door": {
+      "gt": 5,
+      "pred": 10,
+      "tp": 0,
+      "fp": 10,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door_cavity": {
+      "gt": 5,
+      "pred": 10,
+      "tp": 0,
+      "fp": 10,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door_structural": {
+      "gt": 5,
+      "pred": 10,
+      "tp": 0,
+      "fp": 10,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "full_fusion": {
+      "gt": 5,
+      "pred": 10,
+      "tp": 0,
+      "fp": 10,
+      "fn": 5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    }
+  },
+  "Floorplan-House.png": {
+    "baseline": {
+      "gt": 16,
+      "pred": 33,
+      "tp": 11,
+      "fp": 22,
+      "fn": 5,
+      "precision": 0.3333,
+      "recall": 0.6875,
+      "f1": 0.449,
+      "mean_iou": 0.5921
+    },
+    "text_positive": {
+      "gt": 16,
+      "pred": 33,
+      "tp": 11,
+      "fp": 22,
+      "fn": 5,
+      "precision": 0.3333,
+      "recall": 0.6875,
+      "f1": 0.449,
+      "mean_iou": 0.5921
+    },
+    "text_negative": {
+      "gt": 16,
+      "pred": 32,
+      "tp": 11,
+      "fp": 21,
+      "fn": 5,
+      "precision": 0.3438,
+      "recall": 0.6875,
+      "f1": 0.4583,
+      "mean_iou": 0.5921
+    },
+    "positive_negative": {
+      "gt": 16,
+      "pred": 32,
+      "tp": 11,
+      "fp": 21,
+      "fn": 5,
+      "precision": 0.3438,
+      "recall": 0.6875,
+      "f1": 0.4583,
+      "mean_iou": 0.5921
+    },
+    "text_door": {
+      "gt": 16,
+      "pred": 32,
+      "tp": 11,
+      "fp": 21,
+      "fn": 5,
+      "precision": 0.3438,
+      "recall": 0.6875,
+      "f1": 0.4583,
+      "mean_iou": 0.5921
+    },
+    "text_door_cavity": {
+      "gt": 16,
+      "pred": 32,
+      "tp": 11,
+      "fp": 21,
+      "fn": 5,
+      "precision": 0.3438,
+      "recall": 0.6875,
+      "f1": 0.4583,
+      "mean_iou": 0.5921
+    },
+    "text_door_structural": {
+      "gt": 16,
+      "pred": 32,
+      "tp": 11,
+      "fp": 21,
+      "fn": 5,
+      "precision": 0.3438,
+      "recall": 0.6875,
+      "f1": 0.4583,
+      "mean_iou": 0.5921
+    },
+    "full_fusion": {
+      "gt": 16,
+      "pred": 32,
+      "tp": 11,
+      "fp": 21,
+      "fn": 5,
+      "precision": 0.3438,
+      "recall": 0.6875,
+      "f1": 0.4583,
+      "mean_iou": 0.5921
+    }
+  },
+  "Lantai 1.jpg": {
+    "baseline": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "mean_iou": 0.4418
+    },
+    "text_positive": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "mean_iou": 0.4418
+    },
+    "text_negative": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "mean_iou": 0.4418
+    },
+    "positive_negative": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "mean_iou": 0.4418
+    },
+    "text_door": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "mean_iou": 0.4418
+    },
+    "text_door_cavity": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "mean_iou": 0.4418
+    },
+    "text_door_structural": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "mean_iou": 0.4418
+    },
+    "full_fusion": {
+      "gt": 5,
+      "pred": 5,
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "mean_iou": 0.4418
+    }
+  },
+  "Lantai 2.jpg": {
+    "baseline": {
+      "gt": 5,
+      "pred": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "mean_iou": 0.6778
+    },
+    "text_positive": {
+      "gt": 5,
+      "pred": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "mean_iou": 0.6778
+    },
+    "text_negative": {
+      "gt": 5,
+      "pred": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "mean_iou": 0.6778
+    },
+    "positive_negative": {
+      "gt": 5,
+      "pred": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "mean_iou": 0.6778
+    },
+    "text_door": {
+      "gt": 5,
+      "pred": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "mean_iou": 0.6778
+    },
+    "text_door_cavity": {
+      "gt": 5,
+      "pred": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "mean_iou": 0.6778
+    },
+    "text_door_structural": {
+      "gt": 5,
+      "pred": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "mean_iou": 0.6778
+    },
+    "full_fusion": {
+      "gt": 5,
+      "pred": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "mean_iou": 0.6778
+    }
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+    "baseline": {
+      "gt": 51,
+      "pred": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_positive": {
+      "gt": 51,
+      "pred": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_negative": {
+      "gt": 51,
+      "pred": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "positive_negative": {
+      "gt": 51,
+      "pred": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door": {
+      "gt": 51,
+      "pred": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door_cavity": {
+      "gt": 51,
+      "pred": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "text_door_structural": {
+      "gt": 51,
+      "pred": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    },
+    "full_fusion": {
+      "gt": 51,
+      "pred": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 51,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "mean_iou": 0.0
+    }
+  },
+  "library-floor-plan.png": {
+    "baseline": {
+      "gt": 5,
+      "pred": 3,
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "mean_iou": 0.4424
+    },
+    "text_positive": {
+      "gt": 5,
+      "pred": 3,
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "mean_iou": 0.4424
+    },
+    "text_negative": {
+      "gt": 5,
+      "pred": 3,
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "mean_iou": 0.4424
+    },
+    "positive_negative": {
+      "gt": 5,
+      "pred": 3,
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "mean_iou": 0.4424
+    },
+    "text_door": {
+      "gt": 5,
+      "pred": 3,
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "mean_iou": 0.4424
+    },
+    "text_door_cavity": {
+      "gt": 5,
+      "pred": 3,
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "mean_iou": 0.4424
+    },
+    "text_door_structural": {
+      "gt": 5,
+      "pred": 3,
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "mean_iou": 0.4424
+    },
+    "full_fusion": {
+      "gt": 5,
+      "pred": 3,
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "precision": 0.3333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "mean_iou": 0.4424
+    }
+  },
+  "sample-floorplan-house2.png": {
+    "baseline": {
+      "gt": 17,
+      "pred": 22,
+      "tp": 11,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.5,
+      "recall": 0.6471,
+      "f1": 0.5641,
+      "mean_iou": 0.6992
+    },
+    "text_positive": {
+      "gt": 17,
+      "pred": 22,
+      "tp": 11,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.5,
+      "recall": 0.6471,
+      "f1": 0.5641,
+      "mean_iou": 0.6992
+    },
+    "text_negative": {
+      "gt": 17,
+      "pred": 22,
+      "tp": 11,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.5,
+      "recall": 0.6471,
+      "f1": 0.5641,
+      "mean_iou": 0.6992
+    },
+    "positive_negative": {
+      "gt": 17,
+      "pred": 22,
+      "tp": 11,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.5,
+      "recall": 0.6471,
+      "f1": 0.5641,
+      "mean_iou": 0.6992
+    },
+    "text_door": {
+      "gt": 17,
+      "pred": 22,
+      "tp": 11,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.5,
+      "recall": 0.6471,
+      "f1": 0.5641,
+      "mean_iou": 0.6992
+    },
+    "text_door_cavity": {
+      "gt": 17,
+      "pred": 22,
+      "tp": 11,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.5,
+      "recall": 0.6471,
+      "f1": 0.5641,
+      "mean_iou": 0.6992
+    },
+    "text_door_structural": {
+      "gt": 17,
+      "pred": 22,
+      "tp": 11,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.5,
+      "recall": 0.6471,
+      "f1": 0.5641,
+      "mean_iou": 0.6992
+    },
+    "full_fusion": {
+      "gt": 17,
+      "pred": 22,
+      "tp": 11,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.5,
+      "recall": 0.6471,
+      "f1": 0.5641,
+      "mean_iou": 0.6992
+    }
+  },
+  "sample-floorplan-house3.png": {
+    "baseline": {
+      "gt": 21,
+      "pred": 32,
+      "tp": 3,
+      "fp": 29,
+      "fn": 18,
+      "precision": 0.0938,
+      "recall": 0.1429,
+      "f1": 0.1132,
+      "mean_iou": 0.4807
+    },
+    "text_positive": {
+      "gt": 21,
+      "pred": 32,
+      "tp": 3,
+      "fp": 29,
+      "fn": 18,
+      "precision": 0.0938,
+      "recall": 0.1429,
+      "f1": 0.1132,
+      "mean_iou": 0.4807
+    },
+    "text_negative": {
+      "gt": 21,
+      "pred": 32,
+      "tp": 3,
+      "fp": 29,
+      "fn": 18,
+      "precision": 0.0938,
+      "recall": 0.1429,
+      "f1": 0.1132,
+      "mean_iou": 0.4807
+    },
+    "positive_negative": {
+      "gt": 21,
+      "pred": 32,
+      "tp": 3,
+      "fp": 29,
+      "fn": 18,
+      "precision": 0.0938,
+      "recall": 0.1429,
+      "f1": 0.1132,
+      "mean_iou": 0.4807
+    },
+    "text_door": {
+      "gt": 21,
+      "pred": 32,
+      "tp": 3,
+      "fp": 29,
+      "fn": 18,
+      "precision": 0.0938,
+      "recall": 0.1429,
+      "f1": 0.1132,
+      "mean_iou": 0.4807
+    },
+    "text_door_cavity": {
+      "gt": 21,
+      "pred": 32,
+      "tp": 3,
+      "fp": 29,
+      "fn": 18,
+      "precision": 0.0938,
+      "recall": 0.1429,
+      "f1": 0.1132,
+      "mean_iou": 0.4807
+    },
+    "text_door_structural": {
+      "gt": 21,
+      "pred": 32,
+      "tp": 3,
+      "fp": 29,
+      "fn": 18,
+      "precision": 0.0938,
+      "recall": 0.1429,
+      "f1": 0.1132,
+      "mean_iou": 0.4807
+    },
+    "full_fusion": {
+      "gt": 21,
+      "pred": 32,
+      "tp": 3,
+      "fp": 29,
+      "fn": 18,
+      "precision": 0.0938,
+      "recall": 0.1429,
+      "f1": 0.1132,
+      "mean_iou": 0.4807
+    }
+  },
+  "sample-floorplan.png": {
+    "baseline": {
+      "gt": 8,
+      "pred": 8,
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "mean_iou": 0.8804
+    },
+    "text_positive": {
+      "gt": 8,
+      "pred": 8,
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "mean_iou": 0.8804
+    },
+    "text_negative": {
+      "gt": 8,
+      "pred": 8,
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "mean_iou": 0.8804
+    },
+    "positive_negative": {
+      "gt": 8,
+      "pred": 8,
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "mean_iou": 0.8804
+    },
+    "text_door": {
+      "gt": 8,
+      "pred": 8,
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "mean_iou": 0.8804
+    },
+    "text_door_cavity": {
+      "gt": 8,
+      "pred": 8,
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "mean_iou": 0.8804
+    },
+    "text_door_structural": {
+      "gt": 8,
+      "pred": 8,
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "mean_iou": 0.8804
+    },
+    "full_fusion": {
+      "gt": 8,
+      "pred": 8,
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "mean_iou": 0.8804
+    }
+  },
+  "simple-apartment-floor-plan.png": {
+    "baseline": {
+      "gt": 7,
+      "pred": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "mean_iou": 0.4768
+    },
+    "text_positive": {
+      "gt": 7,
+      "pred": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "mean_iou": 0.4768
+    },
+    "text_negative": {
+      "gt": 7,
+      "pred": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "mean_iou": 0.4768
+    },
+    "positive_negative": {
+      "gt": 7,
+      "pred": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "mean_iou": 0.4768
+    },
+    "text_door": {
+      "gt": 7,
+      "pred": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "mean_iou": 0.4768
+    },
+    "text_door_cavity": {
+      "gt": 7,
+      "pred": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "mean_iou": 0.4768
+    },
+    "text_door_structural": {
+      "gt": 7,
+      "pred": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "mean_iou": 0.4768
+    },
+    "full_fusion": {
+      "gt": 7,
+      "pred": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.6667,
+      "recall": 0.2857,
+      "f1": 0.4,
+      "mean_iou": 0.4768
+    }
+  }
+}

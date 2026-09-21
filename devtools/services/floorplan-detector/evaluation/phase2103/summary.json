@@ -1,0 +1,460 @@
+{
+  "phase": "2.10.3",
+  "description": "Candidate Selection Boundary & Lost-TP Root Cause Experiment",
+  "timestamp": "2026-09-21T09:14:25Z",
+  "experiments": {
+    "A_baseline_selection": {
+      "experiment_id": "A",
+      "name": "Phase 2.10.2 Baseline Selection",
+      "tp": 40,
+      "fp": 86,
+      "fn": 108,
+      "precision": 0.3175,
+      "recall": 0.2703,
+      "microF1": 0.292,
+      "per_image": {
+        "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 3
+        },
+        "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+          "tp": 0,
+          "fp": 5,
+          "fn": 5
+        },
+        "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+          "tp": 0,
+          "fp": 10,
+          "fn": 5
+        },
+        "Floorplan-House.png": {
+          "tp": 11,
+          "fp": 22,
+          "fn": 5
+        },
+        "Lantai 1.jpg": {
+          "tp": 3,
+          "fp": 2,
+          "fn": 2
+        },
+        "Lantai 2.jpg": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 3
+        },
+        "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 51
+        },
+        "library-floor-plan.png": {
+          "tp": 1,
+          "fp": 2,
+          "fn": 4
+        },
+        "sample-floorplan-house2.png": {
+          "tp": 11,
+          "fp": 11,
+          "fn": 6
+        },
+        "sample-floorplan-house3.png": {
+          "tp": 3,
+          "fp": 29,
+          "fn": 18
+        },
+        "sample-floorplan.png": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 1
+        },
+        "simple-apartment-floor-plan.png": {
+          "tp": 2,
+          "fp": 1,
+          "fn": 5
+        }
+      }
+    },
+    "B_unlimited_budget": {
+      "experiment_id": "B",
+      "name": "Unlimited Budget (Diagnostic)",
+      "tp": 40,
+      "fp": 105,
+      "fn": 108,
+      "precision": 0.2759,
+      "recall": 0.2703,
+      "microF1": 0.273,
+      "per_image": {
+        "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 3
+        },
+        "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+          "tp": 0,
+          "fp": 5,
+          "fn": 5
+        },
+        "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+          "tp": 0,
+          "fp": 10,
+          "fn": 5
+        },
+        "Floorplan-House.png": {
+          "tp": 11,
+          "fp": 26,
+          "fn": 5
+        },
+        "Lantai 1.jpg": {
+          "tp": 3,
+          "fp": 2,
+          "fn": 2
+        },
+        "Lantai 2.jpg": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 3
+        },
+        "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 51
+        },
+        "library-floor-plan.png": {
+          "tp": 1,
+          "fp": 2,
+          "fn": 4
+        },
+        "sample-floorplan-house2.png": {
+          "tp": 11,
+          "fp": 11,
+          "fn": 6
+        },
+        "sample-floorplan-house3.png": {
+          "tp": 3,
+          "fp": 44,
+          "fn": 18
+        },
+        "sample-floorplan.png": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 1
+        },
+        "simple-apartment-floor-plan.png": {
+          "tp": 2,
+          "fp": 1,
+          "fn": 5
+        }
+      }
+    },
+    "C_plus_25_budget": {
+      "experiment_id": "C",
+      "name": "+25% Candidate Budget",
+      "tp": 40,
+      "fp": 91,
+      "fn": 108,
+      "precision": 0.3053,
+      "recall": 0.2703,
+      "microF1": 0.2867,
+      "per_image": {
+        "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 3
+        },
+        "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+          "tp": 0,
+          "fp": 5,
+          "fn": 5
+        },
+        "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+          "tp": 0,
+          "fp": 10,
+          "fn": 5
+        },
+        "Floorplan-House.png": {
+          "tp": 11,
+          "fp": 24,
+          "fn": 5
+        },
+        "Lantai 1.jpg": {
+          "tp": 3,
+          "fp": 2,
+          "fn": 2
+        },
+        "Lantai 2.jpg": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 3
+        },
+        "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 51
+        },
+        "library-floor-plan.png": {
+          "tp": 1,
+          "fp": 2,
+          "fn": 4
+        },
+        "sample-floorplan-house2.png": {
+          "tp": 11,
+          "fp": 11,
+          "fn": 6
+        },
+        "sample-floorplan-house3.png": {
+          "tp": 3,
+          "fp": 32,
+          "fn": 18
+        },
+        "sample-floorplan.png": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 1
+        },
+        "simple-apartment-floor-plan.png": {
+          "tp": 2,
+          "fp": 1,
+          "fn": 5
+        }
+      }
+    },
+    "D_plus_50_budget": {
+      "experiment_id": "D",
+      "name": "+50% Candidate Budget",
+      "tp": 40,
+      "fp": 95,
+      "fn": 108,
+      "precision": 0.2963,
+      "recall": 0.2703,
+      "microF1": 0.2827,
+      "per_image": {
+        "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 3
+        },
+        "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+          "tp": 0,
+          "fp": 5,
+          "fn": 5
+        },
+        "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+          "tp": 0,
+          "fp": 10,
+          "fn": 5
+        },
+        "Floorplan-House.png": {
+          "tp": 11,
+          "fp": 26,
+          "fn": 5
+        },
+        "Lantai 1.jpg": {
+          "tp": 3,
+          "fp": 2,
+          "fn": 2
+        },
+        "Lantai 2.jpg": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 3
+        },
+        "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 51
+        },
+        "library-floor-plan.png": {
+          "tp": 1,
+          "fp": 2,
+          "fn": 4
+        },
+        "sample-floorplan-house2.png": {
+          "tp": 11,
+          "fp": 11,
+          "fn": 6
+        },
+        "sample-floorplan-house3.png": {
+          "tp": 3,
+          "fp": 34,
+          "fn": 18
+        },
+        "sample-floorplan.png": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 1
+        },
+        "simple-apartment-floor-plan.png": {
+          "tp": 2,
+          "fp": 1,
+          "fn": 5
+        }
+      }
+    },
+    "E_disable_duplicate_pruning": {
+      "experiment_id": "E",
+      "name": "Disable Duplicate Pruning (Diag)",
+      "tp": 40,
+      "fp": 80,
+      "fn": 108,
+      "precision": 0.3333,
+      "recall": 0.2703,
+      "microF1": 0.2985,
+      "per_image": {
+        "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 3
+        },
+        "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+          "tp": 0,
+          "fp": 5,
+          "fn": 5
+        },
+        "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+          "tp": 0,
+          "fp": 10,
+          "fn": 5
+        },
+        "Floorplan-House.png": {
+          "tp": 11,
+          "fp": 20,
+          "fn": 5
+        },
+        "Lantai 1.jpg": {
+          "tp": 3,
+          "fp": 2,
+          "fn": 2
+        },
+        "Lantai 2.jpg": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 3
+        },
+        "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 51
+        },
+        "library-floor-plan.png": {
+          "tp": 1,
+          "fp": 2,
+          "fn": 4
+        },
+        "sample-floorplan-house2.png": {
+          "tp": 11,
+          "fp": 11,
+          "fn": 6
+        },
+        "sample-floorplan-house3.png": {
+          "tp": 3,
+          "fp": 25,
+          "fn": 18
+        },
+        "sample-floorplan.png": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 1
+        },
+        "simple-apartment-floor-plan.png": {
+          "tp": 2,
+          "fp": 1,
+          "fn": 5
+        }
+      }
+    },
+    "F_disable_overlap_pruning": {
+      "experiment_id": "F",
+      "name": "Disable Overlap Pruning (Diag)",
+      "tp": 40,
+      "fp": 76,
+      "fn": 108,
+      "precision": 0.3448,
+      "recall": 0.2703,
+      "microF1": 0.303,
+      "per_image": {
+        "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 3
+        },
+        "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+          "tp": 0,
+          "fp": 5,
+          "fn": 5
+        },
+        "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+          "tp": 0,
+          "fp": 10,
+          "fn": 5
+        },
+        "Floorplan-House.png": {
+          "tp": 11,
+          "fp": 21,
+          "fn": 5
+        },
+        "Lantai 1.jpg": {
+          "tp": 3,
+          "fp": 2,
+          "fn": 2
+        },
+        "Lantai 2.jpg": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 3
+        },
+        "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 51
+        },
+        "library-floor-plan.png": {
+          "tp": 1,
+          "fp": 2,
+          "fn": 4
+        },
+        "sample-floorplan-house2.png": {
+          "tp": 11,
+          "fp": 11,
+          "fn": 6
+        },
+        "sample-floorplan-house3.png": {
+          "tp": 3,
+          "fp": 20,
+          "fn": 18
+        },
+        "sample-floorplan.png": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 1
+        },
+        "simple-apartment-floor-plan.png": {
+          "tp": 2,
+          "fp": 1,
+          "fn": 5
+        }
+      }
+    }
+  },
+  "lost_tp_statistics": {
+    "total_gt_rooms": 148,
+    "baseline_tps": 40,
+    "baseline_fns": 108,
+    "lost_tp_candidate_records": 14,
+    "fns_with_candidate": 11,
+    "fns_without_candidate": 97,
+    "rejection_taxonomy_counts": {
+      "BUDGET_REJECTED": 8,
+      "THRESHOLD_REJECTED": 1,
+      "DUPLICATE_REJECTED": 3,
+      "OVERLAP_REJECTED": 1,
+      "MERGED_REJECTED": 1,
+      "GEOMETRY_IOU_FAILURE": 0,
+      "TOPOLOGY_FAILURE": 0,
+      "OUTSIDE_ENVELOPE": 0,
+      "UNKNOWN": 0
+    }
+  },
+  "status": "PASS",
+  "ready_for_phase_2_10_4": true
+}

@@ -1,0 +1,862 @@
+{
+  "dataset_images_audited": 11,
+  "total_candidates_analyzed": 311,
+  "candidates_with_door_connection": 92,
+  "candidates_promoted": 74,
+  "candidates_demoted": 204,
+  "candidates_entered_budget": 0,
+  "per_image_audit": {
+    "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+      "total_candidates": 2,
+      "candidates_with_door_connection": 2,
+      "candidates_promoted": 1,
+      "candidates_demoted": 1,
+      "entered_final_budget": [],
+      "left_final_budget": [],
+      "baseline_accepted_count": 2,
+      "ml_on_accepted_count": 2,
+      "key_promotions": [
+        {
+          "id": "rec_rep_864_386.0",
+          "score_delta": 0.0096,
+          "rank_change": "2 -> 1",
+          "is_true_room": false
+        }
+      ]
+    },
+    "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+      "total_candidates": 4,
+      "candidates_with_door_connection": 1,
+      "candidates_promoted": 1,
+      "candidates_demoted": 1,
+      "entered_final_budget": [],
+      "left_final_budget": [],
+      "baseline_accepted_count": 4,
+      "ml_on_accepted_count": 4,
+      "key_promotions": [
+        {
+          "id": "rec_rep_465_437.0",
+          "score_delta": 0.0193,
+          "rank_change": "2 -> 1",
+          "is_true_room": false
+        }
+      ]
+    },
+    "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+      "total_candidates": 1,
+      "candidates_with_door_connection": 0,
+      "candidates_promoted": 0,
+      "candidates_demoted": 0,
+      "entered_final_budget": [],
+      "left_final_budget": [],
+      "baseline_accepted_count": 1,
+      "ml_on_accepted_count": 1,
+      "key_promotions": []
+    },
+    "Floorplan-House.png": {
+      "total_candidates": 61,
+      "candidates_with_door_connection": 32,
+      "candidates_promoted": 31,
+      "candidates_demoted": 30,
+      "entered_final_budget": [],
+      "left_final_budget": [
+        "rec_wall_enc_2",
+        "rec_wall_enc_7",
+        "rec_wall_enc_18",
+        "rec_wall_enc_36",
+        "rec_wall_enc_41",
+        "rec_wall_enc_42",
+        "rec_wall_enc_43",
+        "rec_wall_enc_46",
+        "rec_wall_enc_47",
+        "rec_wall_enc_76",
+        "rec_wall_enc_78",
+        "rec_wall_enc_109",
+        "rec_wall_enc_116",
+        "rec_wall_enc_117",
+        "rec_wall_enc_119",
+        "rec_wall_enc_127",
+        "rec_wall_enc_153",
+        "rec_wall_enc_154",
+        "rec_wall_enc_171",
+        "rec_wall_enc_173",
+        "rec_wall_enc_190",
+        "rec_wall_enc_227",
+        "rec_wall_enc_277",
+        "rec_wall_enc_298",
+        "rec_wall_enc_334",
+        "rec_wall_enc_341",
+        "rec_wall_enc_342",
+        "rec_wall_enc_344",
+        "rec_wall_enc_345",
+        "rec_wall_enc_347",
+        "rec_wall_enc_393",
+        "rec_wall_enc_507",
+        "rec_wall_enc_508",
+        "rec_rep_2205_928.0",
+        "rec_rep_1755_928.0",
+        "rec_rep_1696_936.0",
+        "rec_rep_1981_936.0",
+        "rec_rep_1126_936.0",
+        "rec_rep_841_936.0",
+        "rec_rep_1130_82",
+        "rec_rep_1493_1155.0",
+        "rec_rep_1493_928.0",
+        "rec_rep_1722_473.0",
+        "rec_rep_1002_1167.0",
+        "rec_rep_1290_1167.0",
+        "rec_rep_1423_931.0",
+        "rec_rep_1326_1155.0",
+        "rec_rep_730_1155.0",
+        "rec_rep_432_1155.0",
+        "rec_rep_1326_928.0",
+        "rec_rep_938_928.0",
+        "rec_rep_1326_517.0",
+        "rec_rep_96_517.0",
+        "rec_rep_1114_1217.0"
+      ],
+      "baseline_accepted_count": 61,
+      "ml_on_accepted_count": 7,
+      "key_promotions": [
+        {
+          "id": "rec_wall_enc_2",
+          "score_delta": 0.0886,
+          "rank_change": "50 -> 49",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_wall_enc_41",
+          "score_delta": 0.0882,
+          "rank_change": "43 -> 36",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_42",
+          "score_delta": 0.0895,
+          "rank_change": "44 -> 37",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_43",
+          "score_delta": 0.0895,
+          "rank_change": "42 -> 35",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_46",
+          "score_delta": 0.0878,
+          "rank_change": "61 -> 55",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_109",
+          "score_delta": 0.0838,
+          "rank_change": "60 -> 54",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_wall_enc_117",
+          "score_delta": 0.0881,
+          "rank_change": "49 -> 46",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_119",
+          "score_delta": 0.0881,
+          "rank_change": "47 -> 45",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_127",
+          "score_delta": 0.0886,
+          "rank_change": "53 -> 51",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_341",
+          "score_delta": 0.0872,
+          "rank_change": "58 -> 53",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_345",
+          "score_delta": 0.0929,
+          "rank_change": "51 -> 48",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_wall_enc_349",
+          "score_delta": 0.0872,
+          "rank_change": "8 -> 1",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_393",
+          "score_delta": 0.0903,
+          "rank_change": "57 -> 52",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_2205_928.0",
+          "score_delta": 0.0886,
+          "rank_change": "34 -> 27",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_1755_928.0",
+          "score_delta": 0.0895,
+          "rank_change": "31 -> 23",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_1696_936.0",
+          "score_delta": 0.0895,
+          "rank_change": "20 -> 10",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_1981_936.0",
+          "score_delta": 0.0886,
+          "rank_change": "29 -> 21",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1516_490",
+          "score_delta": 0.0895,
+          "rank_change": "17 -> 7",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1130_82",
+          "score_delta": 0.0895,
+          "rank_change": "19 -> 8",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1493_1155.0",
+          "score_delta": 0.0929,
+          "rank_change": "23 -> 9",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_1263_1155.0",
+          "score_delta": 0.0929,
+          "rank_change": "18 -> 6",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_2183_928.0",
+          "score_delta": 0.0886,
+          "rank_change": "14 -> 4",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_1493_928.0",
+          "score_delta": 0.0895,
+          "rank_change": "35 -> 26",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1722_473.0",
+          "score_delta": 0.0874,
+          "rank_change": "22 -> 11",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1002_1167.0",
+          "score_delta": 0.0877,
+          "rank_change": "12 -> 3",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1423_931.0",
+          "score_delta": 0.0895,
+          "rank_change": "37 -> 28",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1326_928.0",
+          "score_delta": 0.0881,
+          "rank_change": "32 -> 24",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1520_928.0",
+          "score_delta": 0.0895,
+          "rank_change": "11 -> 2",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1432_82",
+          "score_delta": 0.0895,
+          "rank_change": "15 -> 5",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1326_517.0",
+          "score_delta": 0.0895,
+          "rank_change": "40 -> 31",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1114_1217.0",
+          "score_delta": 0.0872,
+          "rank_change": "38 -> 30",
+          "is_true_room": false
+        }
+      ]
+    },
+    "Lantai 1.jpg": {
+      "total_candidates": 8,
+      "candidates_with_door_connection": 3,
+      "candidates_promoted": 0,
+      "candidates_demoted": 0,
+      "entered_final_budget": [],
+      "left_final_budget": [
+        "rec_wall_enc_3",
+        "rec_wall_enc_5",
+        "rec_wall_enc_6",
+        "rec_wall_enc_7",
+        "rec_rep_86_22.0"
+      ],
+      "baseline_accepted_count": 8,
+      "ml_on_accepted_count": 3,
+      "key_promotions": []
+    },
+    "Lantai 2.jpg": {
+      "total_candidates": 1,
+      "candidates_with_door_connection": 0,
+      "candidates_promoted": 0,
+      "candidates_demoted": 0,
+      "entered_final_budget": [],
+      "left_final_budget": [],
+      "baseline_accepted_count": 1,
+      "ml_on_accepted_count": 1,
+      "key_promotions": []
+    },
+    "library-floor-plan.png": {
+      "total_candidates": 1,
+      "candidates_with_door_connection": 1,
+      "candidates_promoted": 0,
+      "candidates_demoted": 0,
+      "entered_final_budget": [],
+      "left_final_budget": [
+        "rec_wall_enc_2"
+      ],
+      "baseline_accepted_count": 1,
+      "ml_on_accepted_count": 0,
+      "key_promotions": []
+    },
+    "sample-floorplan-house2.png": {
+      "total_candidates": 18,
+      "candidates_with_door_connection": 9,
+      "candidates_promoted": 6,
+      "candidates_demoted": 7,
+      "entered_final_budget": [],
+      "left_final_budget": [
+        "rec_wall_enc_7",
+        "rec_wall_enc_28",
+        "rec_wall_enc_45",
+        "rec_wall_enc_86",
+        "rec_wall_enc_99",
+        "rec_wall_enc_105"
+      ],
+      "baseline_accepted_count": 16,
+      "ml_on_accepted_count": 10,
+      "key_promotions": [
+        {
+          "id": "rec_wall_enc_7",
+          "score_delta": 0.0863,
+          "rank_change": "15 -> 13",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_18",
+          "score_delta": 0.0892,
+          "rank_change": "6 -> 3",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_28",
+          "score_delta": 0.0892,
+          "rank_change": "9 -> 7",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_wall_enc_33",
+          "score_delta": 0.0888,
+          "rank_change": "13 -> 12",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_wall_enc_45",
+          "score_delta": 0.0901,
+          "rank_change": "16 -> 14",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_105",
+          "score_delta": 0.0902,
+          "rank_change": "10 -> 8",
+          "is_true_room": true
+        }
+      ]
+    },
+    "sample-floorplan-house3.png": {
+      "total_candidates": 206,
+      "candidates_with_door_connection": 36,
+      "candidates_promoted": 35,
+      "candidates_demoted": 165,
+      "entered_final_budget": [],
+      "left_final_budget": [
+        "rec_wall_enc_14",
+        "rec_wall_enc_28",
+        "rec_wall_enc_34",
+        "rec_wall_enc_38",
+        "rec_wall_enc_60",
+        "rec_wall_enc_62",
+        "rec_wall_enc_72",
+        "rec_wall_enc_124",
+        "rec_wall_enc_126",
+        "rec_wall_enc_200",
+        "rec_wall_enc_282",
+        "rec_wall_enc_288",
+        "rec_wall_enc_290",
+        "rec_wall_enc_314",
+        "rec_wall_enc_333",
+        "rec_wall_enc_338",
+        "rec_wall_enc_339",
+        "rec_wall_enc_348",
+        "rec_wall_enc_385",
+        "rec_wall_enc_418",
+        "rec_wall_enc_422",
+        "rec_wall_enc_423",
+        "rec_wall_enc_427",
+        "rec_wall_enc_500",
+        "rec_wall_enc_501",
+        "rec_wall_enc_503",
+        "rec_wall_enc_505",
+        "rec_wall_enc_508",
+        "rec_wall_enc_513",
+        "rec_wall_enc_514",
+        "rec_wall_enc_515",
+        "rec_wall_enc_524",
+        "rec_wall_enc_525",
+        "rec_wall_enc_532",
+        "rec_wall_enc_545",
+        "rec_wall_enc_550",
+        "rec_wall_enc_553",
+        "rec_wall_enc_554",
+        "rec_wall_enc_567",
+        "rec_wall_enc_568",
+        "rec_wall_enc_598",
+        "rec_wall_enc_611",
+        "rec_wall_enc_638",
+        "rec_wall_enc_641",
+        "rec_wall_enc_669",
+        "rec_wall_enc_679",
+        "rec_wall_enc_746",
+        "rec_wall_enc_751",
+        "rec_wall_enc_754",
+        "rec_wall_enc_769",
+        "rec_wall_enc_859",
+        "rec_wall_enc_865",
+        "rec_wall_enc_895",
+        "rec_wall_enc_911",
+        "rec_wall_enc_1079",
+        "rec_wall_enc_1080",
+        "rec_wall_enc_1124",
+        "rec_wall_enc_1172",
+        "rec_wall_enc_1202",
+        "rec_wall_enc_1204",
+        "rec_wall_enc_1206",
+        "rec_wall_enc_1226",
+        "rec_wall_enc_1256",
+        "rec_wall_enc_1293",
+        "rec_wall_enc_1327",
+        "rec_wall_enc_1344",
+        "rec_wall_enc_1346",
+        "rec_wall_enc_1353",
+        "rec_wall_enc_1360",
+        "rec_wall_enc_1381",
+        "rec_wall_enc_1419",
+        "rec_wall_enc_1464",
+        "rec_wall_enc_1479",
+        "rec_wall_enc_1485",
+        "rec_wall_enc_1504",
+        "rec_wall_enc_1512",
+        "rec_wall_enc_1527",
+        "rec_wall_enc_1532",
+        "rec_wall_enc_1540",
+        "rec_wall_enc_1548",
+        "rec_wall_enc_1572",
+        "rec_wall_enc_1579",
+        "rec_wall_enc_1590",
+        "rec_wall_enc_1600",
+        "rec_wall_enc_1605",
+        "rec_wall_enc_1621",
+        "rec_wall_enc_1663",
+        "rec_wall_enc_1683",
+        "rec_wall_enc_1715",
+        "rec_wall_enc_1800",
+        "rec_wall_enc_1823",
+        "rec_wall_enc_1844",
+        "rec_wall_enc_1900",
+        "rec_wall_enc_1981",
+        "rec_wall_enc_1984",
+        "rec_wall_enc_2052",
+        "rec_wall_enc_2094",
+        "rec_wall_enc_2127",
+        "rec_wall_enc_2203",
+        "rec_wall_enc_2242",
+        "rec_wall_enc_2243",
+        "rec_wall_enc_2244",
+        "rec_wall_enc_2245",
+        "rec_wall_enc_2265",
+        "rec_wall_enc_2313",
+        "rec_wall_enc_2354",
+        "rec_wall_enc_2355",
+        "rec_wall_enc_2367",
+        "rec_wall_enc_2390",
+        "rec_wall_enc_2391",
+        "rec_wall_enc_2410",
+        "rec_wall_enc_2476",
+        "rec_wall_enc_2500",
+        "rec_wall_enc_2501",
+        "rec_wall_enc_2506",
+        "rec_wall_enc_2565",
+        "rec_wall_enc_2656",
+        "rec_wall_enc_2666",
+        "rec_wall_enc_2667",
+        "rec_wall_enc_2707",
+        "rec_wall_enc_2719",
+        "rec_wall_enc_2755",
+        "rec_wall_enc_2775",
+        "rec_wall_enc_2803",
+        "rec_wall_enc_2809",
+        "rec_wall_enc_2815",
+        "rec_wall_enc_2817",
+        "rec_wall_enc_2822",
+        "rec_wall_enc_2846",
+        "rec_wall_enc_2848",
+        "rec_wall_enc_2853",
+        "rec_wall_enc_2907",
+        "rec_wall_enc_2938",
+        "rec_wall_enc_2945",
+        "rec_wall_enc_3007",
+        "rec_wall_enc_3036",
+        "rec_wall_enc_3101",
+        "rec_wall_enc_3235",
+        "rec_wall_enc_3238",
+        "rec_wall_enc_3255",
+        "rec_wall_enc_3257",
+        "rec_wall_enc_3324",
+        "rec_wall_enc_3331",
+        "rec_wall_enc_3545",
+        "rec_wall_enc_3598",
+        "rec_wall_enc_3664",
+        "rec_wall_enc_3727",
+        "rec_wall_enc_4061",
+        "rec_wall_enc_4115",
+        "rec_wall_enc_4337",
+        "rec_wall_enc_4339",
+        "rec_wall_enc_4371",
+        "rec_wall_enc_4398",
+        "rec_wall_enc_4468",
+        "rec_wall_enc_4511",
+        "rec_wall_enc_4551",
+        "rec_wall_enc_4552",
+        "rec_wall_enc_4592",
+        "rec_wall_enc_4615",
+        "rec_wall_enc_4683",
+        "rec_wall_enc_4685",
+        "rec_wall_enc_4694",
+        "rec_wall_enc_4711",
+        "rec_wall_enc_4714",
+        "rec_wall_enc_4716",
+        "rec_wall_enc_4725",
+        "rec_wall_enc_4739",
+        "rec_wall_enc_4751",
+        "rec_rep_1300_1418.0",
+        "rec_rep_1786_1418.0",
+        "rec_rep_328_1418.0",
+        "rec_rep_2464_1552.0",
+        "rec_rep_260_1552.0",
+        "rec_rep_497_2111.0",
+        "rec_rep_656_2111.0",
+        "rec_rep_4801_3119.0",
+        "rec_rep_4339_3119.0",
+        "rec_rep_4108_3119.0",
+        "rec_rep_3209_859.0",
+        "rec_rep_3819_859.0",
+        "rec_rep_1989_859.0",
+        "rec_rep_1379_859.0",
+        "rec_rep_3901_859.0",
+        "rec_rep_3495_3769.0",
+        "rec_rep_2745_3769.0",
+        "rec_rep_2495_3769.0",
+        "rec_rep_415_1304.0",
+        "rec_rep_497_1517.0",
+        "rec_rep_656_1517.0",
+        "rec_rep_4286_3613.0",
+        "rec_rep_4029_3613.0",
+        "rec_rep_4521_2314.0",
+        "rec_rep_4935_2314.0",
+        "rec_rep_3693_2314.0",
+        "rec_rep_3279_2314.0",
+        "rec_rep_2136_308.0",
+        "rec_rep_3263_3114.0",
+        "rec_rep_1313_3114.0",
+        "rec_rep_2288_3114.0",
+        "rec_rep_2288_3114.0",
+        "rec_rep_2352_878.0"
+      ],
+      "baseline_accepted_count": 204,
+      "ml_on_accepted_count": 3,
+      "key_promotions": [
+        {
+          "id": "rec_wall_enc_338",
+          "score_delta": 0.0605,
+          "rank_change": "24 -> 20",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_339",
+          "score_delta": 0.0605,
+          "rank_change": "153 -> 151",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_500",
+          "score_delta": 0.0605,
+          "rank_change": "130 -> 117",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_611",
+          "score_delta": 0.0822,
+          "rank_change": "178 -> 154",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_751",
+          "score_delta": 0.0851,
+          "rank_change": "128 -> 110",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1172",
+          "score_delta": 0.0862,
+          "rank_change": "44 -> 8",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1202",
+          "score_delta": 0.0323,
+          "rank_change": "160 -> 155",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1204",
+          "score_delta": 0.0323,
+          "rank_change": "127 -> 123",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1256",
+          "score_delta": 0.0857,
+          "rank_change": "201 -> 160",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1346",
+          "score_delta": 0.0857,
+          "rank_change": "111 -> 100",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1464",
+          "score_delta": 0.0857,
+          "rank_change": "48 -> 10",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1512",
+          "score_delta": 0.0857,
+          "rank_change": "51 -> 11",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1540",
+          "score_delta": 0.0857,
+          "rank_change": "54 -> 12",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_1572",
+          "score_delta": 0.0856,
+          "rank_change": "146 -> 124",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_2656",
+          "score_delta": 0.0793,
+          "rank_change": "60 -> 14",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_3238",
+          "score_delta": 0.084,
+          "rank_change": "157 -> 146",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_3257",
+          "score_delta": 0.083,
+          "rank_change": "105 -> 29",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_3324",
+          "score_delta": 0.0876,
+          "rank_change": "196 -> 156",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_wall_enc_4061",
+          "score_delta": 0.0851,
+          "rank_change": "141 -> 121",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_wall_enc_4739",
+          "score_delta": 0.0859,
+          "rank_change": "85 -> 9",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1300_1418.0",
+          "score_delta": 0.0883,
+          "rank_change": "104 -> 27",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1786_1418.0",
+          "score_delta": 0.0883,
+          "rank_change": "93 -> 16",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1913_1552.0",
+          "score_delta": 0.0883,
+          "rank_change": "10 -> 2",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_811_1552.0",
+          "score_delta": 0.0844,
+          "rank_change": "13 -> 5",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_4801_3119.0",
+          "score_delta": 0.084,
+          "rank_change": "102 -> 26",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_3901_859.0",
+          "score_delta": 0.0605,
+          "rank_change": "121 -> 112",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_3495_3769.0",
+          "score_delta": 0.0862,
+          "rank_change": "98 -> 23",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_4286_3613.0",
+          "score_delta": 0.0852,
+          "rank_change": "91 -> 17",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_2136_308.0",
+          "score_delta": 0.0859,
+          "rank_change": "131 -> 111",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_2288_3114.0",
+          "score_delta": 0.0851,
+          "rank_change": "15 -> 6",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_3263_3114.0",
+          "score_delta": 0.0851,
+          "rank_change": "115 -> 104",
+          "is_true_room": false
+        },
+        {
+          "id": "rec_rep_1313_3114.0",
+          "score_delta": 0.0876,
+          "rank_change": "133 -> 113",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_2288_3114.0",
+          "score_delta": 0.0851,
+          "rank_change": "16 -> 7",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_2288_3114.0",
+          "score_delta": 0.0851,
+          "rank_change": "124 -> 107",
+          "is_true_room": true
+        },
+        {
+          "id": "rec_rep_2352_878.0",
+          "score_delta": 0.088,
+          "rank_change": "114 -> 103",
+          "is_true_room": false
+        }
+      ]
+    },
+    "sample-floorplan.png": {
+      "total_candidates": 6,
+      "candidates_with_door_connection": 6,
+      "candidates_promoted": 0,
+      "candidates_demoted": 0,
+      "entered_final_budget": [],
+      "left_final_budget": [
+        "rec_wall_enc_8",
+        "rec_wall_enc_9",
+        "rec_wall_enc_12",
+        "rec_wall_enc_13",
+        "rec_wall_enc_17",
+        "rec_rep_398_259.0"
+      ],
+      "baseline_accepted_count": 6,
+      "ml_on_accepted_count": 0,
+      "key_promotions": []
+    },
+    "simple-apartment-floor-plan.png": {
+      "total_candidates": 3,
+      "candidates_with_door_connection": 2,
+      "candidates_promoted": 0,
+      "candidates_demoted": 0,
+      "entered_final_budget": [],
+      "left_final_budget": [
+        "rec_wall_enc_5"
+      ],
+      "baseline_accepted_count": 3,
+      "ml_on_accepted_count": 2,
+      "key_promotions": []
+    }
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,12 @@
+{
+  "strategy": "wall_network_face",
+  "total_proposals": 4198,
+  "gt_proposal_recall_10": 0.3581,
+  "gt_proposal_recall_25": 0.277,
+  "gt_proposal_recall_50": 0.1824,
+  "gt_proposal_recall_75": 0.1014,
+  "gt_rooms_covered_25": 41,
+  "gt_rooms_covered_50": 27,
+  "mean_best_iou": 0.1927,
+  "median_best_iou": 0.0306
+}

@@ -118,7 +118,10 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
   }, [data]);
 
   useEffect(() => {
-    if (!data?.meta.floorplanImage) return;
+    if (!data?.meta.floorplanImage) {
+      setImageObj(null);
+      return;
+    }
 
     const img = new window.Image();
     img.src = `${data.meta.floorplanImage}`;
@@ -129,6 +132,10 @@ const AlarmPlaybackDialog = ({ open, onClose, data }: Props) => {
         width: img.width,
         height: img.height,
       });
+    };
+
+    return () => {
+      setImageObj(null);
     };
   }, [data]);
 

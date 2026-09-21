@@ -1,0 +1,207 @@
+{
+  "strategy": "D_distance_wall_support",
+  "suppression_mode": "D_distance_wall_support",
+  "gt": 148,
+  "pred": 376,
+  "tp": 43,
+  "fp": 333,
+  "fn": 105,
+  "precision": 0.1144,
+  "recall": 0.2905,
+  "microF1": 0.1641,
+  "macroF1": 0.3066,
+  "meanIoU": 0.5405,
+  "medianIoU": 0.475,
+  "wall_preservation": {
+    "initial_wall_pixels": 13334968,
+    "preserved_wall_pixels": 13334968,
+    "destroyed_wall_pixels": 0,
+    "wall_preservation_ratio": 1.0,
+    "thin_wall_breaks": 0,
+    "junction_degradations": 0
+  },
+  "fragmentation": {
+    "fragmented_rooms": 28,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "timing_ms": {
+    "masking_total_ms": 25361.64,
+    "downstream_total_ms": 94.01,
+    "total_e2e_ms": 28771.8,
+    "mean_latency_ms": 2397.65
+  },
+  "per_image_wall_stats": {
+    "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+      "initial_wall_pixels": 978552,
+      "preserved_wall_pixels": 978552,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+      "initial_wall_pixels": 1309890,
+      "preserved_wall_pixels": 1309890,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+      "initial_wall_pixels": 1466400,
+      "preserved_wall_pixels": 1466400,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "Floorplan-House.png": {
+      "initial_wall_pixels": 823746,
+      "preserved_wall_pixels": 823746,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "Lantai 1.jpg": {
+      "initial_wall_pixels": 122431,
+      "preserved_wall_pixels": 122431,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "Lantai 2.jpg": {
+      "initial_wall_pixels": 81756,
+      "preserved_wall_pixels": 81756,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+      "initial_wall_pixels": 979151,
+      "preserved_wall_pixels": 979151,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "library-floor-plan.png": {
+      "initial_wall_pixels": 59965,
+      "preserved_wall_pixels": 59965,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "sample-floorplan-house2.png": {
+      "initial_wall_pixels": 263526,
+      "preserved_wall_pixels": 263526,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "sample-floorplan-house3.png": {
+      "initial_wall_pixels": 7124109,
+      "preserved_wall_pixels": 7124109,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "sample-floorplan.png": {
+      "initial_wall_pixels": 47532,
+      "preserved_wall_pixels": 47532,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    },
+    "simple-apartment-floor-plan.png": {
+      "initial_wall_pixels": 77910,
+      "preserved_wall_pixels": 77910,
+      "destroyed_wall_pixels": 0,
+      "wall_preservation_ratio": 1.0,
+      "thin_wall_breaks": 0,
+      "junction_degradations": 0,
+      "edge_erosions": 0
+    }
+  },
+  "per_image_frags": {
+    "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+      "split_rooms": 0,
+      "merged_rooms": 0,
+      "micro_candidates": 0
+    },
+    "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+      "split_rooms": 2,
+      "merged_rooms": 0,
+      "micro_candidates": 0
+    },
+    "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+      "split_rooms": 0,
+      "merged_rooms": 0,
+      "micro_candidates": 0
+    },
+    "Floorplan-House.png": {
+      "split_rooms": 6,
+      "merged_rooms": 0,
+      "micro_candidates": 4
+    },
+    "Lantai 1.jpg": {
+      "split_rooms": 1,
+      "merged_rooms": 0,
+      "micro_candidates": 0
+    },
+    "Lantai 2.jpg": {
+      "split_rooms": 0,
+      "merged_rooms": 1,
+      "micro_candidates": 0
+    },
+    "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+      "split_rooms": 0,
+      "merged_rooms": 0,
+      "micro_candidates": 0
+    },
+    "library-floor-plan.png": {
+      "split_rooms": 0,
+      "merged_rooms": 1,
+      "micro_candidates": 0
+    },
+    "sample-floorplan-house2.png": {
+      "split_rooms": 6,
+      "merged_rooms": 3,
+      "micro_candidates": 0
+    },
+    "sample-floorplan-house3.png": {
+      "split_rooms": 11,
+      "merged_rooms": 0,
+      "micro_candidates": 2
+    },
+    "sample-floorplan.png": {
+      "split_rooms": 0,
+      "merged_rooms": 0,
+      "micro_candidates": 0
+    },
+    "simple-apartment-floor-plan.png": {
+      "split_rooms": 0,
+      "merged_rooms": 2,
+      "micro_candidates": 0
+    }
+  }
+}

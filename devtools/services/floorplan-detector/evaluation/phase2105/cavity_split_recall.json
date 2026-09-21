@@ -1,0 +1,86 @@
+{
+  "baseline_cavities": {
+    "strategy": "baseline_cavities",
+    "total_split_proposals": 0,
+    "cavity_split_recall_10": 0.7719,
+    "cavity_split_recall_25": 0.5088,
+    "cavity_split_recall_50": 0.3509,
+    "cavity_split_recall_75": 0.193,
+    "affected_gt_rooms_covered_25": 29,
+    "affected_gt_rooms_covered_50": 20,
+    "mean_best_iou": 0.3736,
+    "median_best_iou": 0.2703
+  },
+  "wall_network_split": {
+    "strategy": "wall_network_split",
+    "total_split_proposals": 122,
+    "cavity_split_recall_10": 0.614,
+    "cavity_split_recall_25": 0.386,
+    "cavity_split_recall_50": 0.2105,
+    "cavity_split_recall_75": 0.1404,
+    "affected_gt_rooms_covered_25": 22,
+    "affected_gt_rooms_covered_50": 12,
+    "mean_best_iou": 0.2722,
+    "median_best_iou": 0.1463
+  },
+  "planar_face_split": {
+    "strategy": "planar_face_split",
+    "total_split_proposals": 0,
+    "cavity_split_recall_10": 0.0,
+    "cavity_split_recall_25": 0.0,
+    "cavity_split_recall_50": 0.0,
+    "cavity_split_recall_75": 0.0,
+    "affected_gt_rooms_covered_25": 0,
+    "affected_gt_rooms_covered_50": 0,
+    "mean_best_iou": 0.0,
+    "median_best_iou": 0.0
+  },
+  "partition_split": {
+    "strategy": "partition_split",
+    "total_split_proposals": 112,
+    "cavity_split_recall_10": 0.5439,
+    "cavity_split_recall_25": 0.3333,
+    "cavity_split_recall_50": 0.1754,
+    "cavity_split_recall_75": 0.1053,
+    "affected_gt_rooms_covered_25": 19,
+    "affected_gt_rooms_covered_50": 10,
+    "mean_best_iou": 0.2394,
+    "median_best_iou": 0.1299
+  },
+  "doorway_topology_split": {
+    "strategy": "doorway_topology_split",
+    "total_split_proposals": 0,
+    "cavity_split_recall_10": 0.0,
+    "cavity_split_recall_25": 0.0,
+    "cavity_split_recall_50": 0.0,
+    "cavity_split_recall_75": 0.0,
+    "affected_gt_rooms_covered_25": 0,
+    "affected_gt_rooms_covered_50": 0,
+    "mean_best_iou": 0.0,
+    "median_best_iou": 0.0
+  },
+  "proposal_guided_split": {
+    "strategy": "proposal_guided_split",
+    "total_split_proposals": 4592,
+    "cavity_split_recall_10": 0.5965,
+    "cavity_split_recall_25": 0.3684,
+    "cavity_split_recall_50": 0.1228,
+    "cavity_split_recall_75": 0.0351,
+    "affected_gt_rooms_covered_25": 21,
+    "affected_gt_rooms_covered_50": 7,
+    "mean_best_iou": 0.2296,
+    "median_best_iou": 0.201
+  },
+  "hybrid_split": {
+    "strategy": "hybrid_split",
+    "total_split_proposals": 4664,
+    "cavity_split_recall_10": 0.7895,
+    "cavity_split_recall_25": 0.5614,
+    "cavity_split_recall_50": 0.2807,
+    "cavity_split_recall_75": 0.1754,
+    "affected_gt_rooms_covered_25": 32,
+    "affected_gt_rooms_covered_50": 16,
+    "mean_best_iou": 0.3692,
+    "median_best_iou": 0.3288
+  }
+}

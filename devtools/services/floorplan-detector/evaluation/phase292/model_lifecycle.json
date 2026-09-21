@@ -1,0 +1,11 @@
+{
+  "cold_start_latency_ms": 761.47,
+  "model_load_time_ms": 247.89,
+  "warm_request_2_latency_ms": 77.59,
+  "warm_request_3_latency_ms": 75.44,
+  "total_requests": 3,
+  "model_initializations": 1,
+  "shared_instance_preserved": true,
+  "lifecycle_policy": "singleton_persistent_process",
+  "status": "PASS"
+}

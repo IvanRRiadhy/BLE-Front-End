@@ -1,0 +1,8 @@
+{
+  "mean_text_analysis_ms": 61.2,
+  "mean_wall_protection_ms": 28.88,
+  "mean_safe_mask_ms": 2.63,
+  "total_overhead_ms": 92.71,
+  "baseline_runtime_ms": 33063.89,
+  "protected_runtime_ms": 30775.49
+}

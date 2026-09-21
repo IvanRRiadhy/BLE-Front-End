@@ -1,0 +1,548 @@
+{
+  "A_baseline": {
+    "fragmented_rooms": 27,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "B_distance_only": {
+    "fragmented_rooms": 28,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "C_wall_overlap_only": {
+    "fragmented_rooms": 28,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "D_distance_wall_support": {
+    "fragmented_rooms": 28,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "E_thickness_aware": {
+    "fragmented_rooms": 28,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "F_soft_mask": {
+    "fragmented_rooms": 27,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "G_adaptive_combined": {
+    "fragmented_rooms": 27,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "H_candidate_penalty": {
+    "fragmented_rooms": 27,
+    "split_rooms": 26,
+    "merged_rooms": 7,
+    "micro_candidates": 6
+  },
+  "per_image": {
+    "A_baseline": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "split_rooms": 2,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Floorplan-House.png": {
+        "split_rooms": 6,
+        "merged_rooms": 0,
+        "micro_candidates": 4
+      },
+      "Lantai 1.jpg": {
+        "split_rooms": 1,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Lantai 2.jpg": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "library-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house2.png": {
+        "split_rooms": 6,
+        "merged_rooms": 3,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house3.png": {
+        "split_rooms": 11,
+        "merged_rooms": 0,
+        "micro_candidates": 2
+      },
+      "sample-floorplan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "simple-apartment-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 2,
+        "micro_candidates": 0
+      }
+    },
+    "B_distance_only": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "split_rooms": 2,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Floorplan-House.png": {
+        "split_rooms": 6,
+        "merged_rooms": 0,
+        "micro_candidates": 4
+      },
+      "Lantai 1.jpg": {
+        "split_rooms": 1,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Lantai 2.jpg": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "library-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house2.png": {
+        "split_rooms": 6,
+        "merged_rooms": 3,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house3.png": {
+        "split_rooms": 11,
+        "merged_rooms": 0,
+        "micro_candidates": 2
+      },
+      "sample-floorplan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "simple-apartment-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 2,
+        "micro_candidates": 0
+      }
+    },
+    "C_wall_overlap_only": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "split_rooms": 2,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Floorplan-House.png": {
+        "split_rooms": 6,
+        "merged_rooms": 0,
+        "micro_candidates": 4
+      },
+      "Lantai 1.jpg": {
+        "split_rooms": 1,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Lantai 2.jpg": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "library-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house2.png": {
+        "split_rooms": 6,
+        "merged_rooms": 3,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house3.png": {
+        "split_rooms": 11,
+        "merged_rooms": 0,
+        "micro_candidates": 2
+      },
+      "sample-floorplan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "simple-apartment-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 2,
+        "micro_candidates": 0
+      }
+    },
+    "D_distance_wall_support": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "split_rooms": 2,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Floorplan-House.png": {
+        "split_rooms": 6,
+        "merged_rooms": 0,
+        "micro_candidates": 4
+      },
+      "Lantai 1.jpg": {
+        "split_rooms": 1,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Lantai 2.jpg": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "library-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house2.png": {
+        "split_rooms": 6,
+        "merged_rooms": 3,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house3.png": {
+        "split_rooms": 11,
+        "merged_rooms": 0,
+        "micro_candidates": 2
+      },
+      "sample-floorplan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "simple-apartment-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 2,
+        "micro_candidates": 0
+      }
+    },
+    "E_thickness_aware": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "split_rooms": 2,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Floorplan-House.png": {
+        "split_rooms": 6,
+        "merged_rooms": 0,
+        "micro_candidates": 4
+      },
+      "Lantai 1.jpg": {
+        "split_rooms": 1,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Lantai 2.jpg": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "library-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house2.png": {
+        "split_rooms": 6,
+        "merged_rooms": 3,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house3.png": {
+        "split_rooms": 11,
+        "merged_rooms": 0,
+        "micro_candidates": 2
+      },
+      "sample-floorplan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "simple-apartment-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 2,
+        "micro_candidates": 0
+      }
+    },
+    "F_soft_mask": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "split_rooms": 2,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Floorplan-House.png": {
+        "split_rooms": 6,
+        "merged_rooms": 0,
+        "micro_candidates": 4
+      },
+      "Lantai 1.jpg": {
+        "split_rooms": 1,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Lantai 2.jpg": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "library-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house2.png": {
+        "split_rooms": 6,
+        "merged_rooms": 3,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house3.png": {
+        "split_rooms": 11,
+        "merged_rooms": 0,
+        "micro_candidates": 2
+      },
+      "sample-floorplan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "simple-apartment-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 2,
+        "micro_candidates": 0
+      }
+    },
+    "G_adaptive_combined": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "split_rooms": 2,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Floorplan-House.png": {
+        "split_rooms": 6,
+        "merged_rooms": 0,
+        "micro_candidates": 4
+      },
+      "Lantai 1.jpg": {
+        "split_rooms": 1,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Lantai 2.jpg": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "library-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house2.png": {
+        "split_rooms": 6,
+        "merged_rooms": 3,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house3.png": {
+        "split_rooms": 11,
+        "merged_rooms": 0,
+        "micro_candidates": 2
+      },
+      "sample-floorplan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "simple-apartment-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 2,
+        "micro_candidates": 0
+      }
+    },
+    "H_candidate_penalty": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "split_rooms": 2,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Floorplan-House.png": {
+        "split_rooms": 6,
+        "merged_rooms": 0,
+        "micro_candidates": 4
+      },
+      "Lantai 1.jpg": {
+        "split_rooms": 1,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "Lantai 2.jpg": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "library-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 1,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house2.png": {
+        "split_rooms": 6,
+        "merged_rooms": 3,
+        "micro_candidates": 0
+      },
+      "sample-floorplan-house3.png": {
+        "split_rooms": 11,
+        "merged_rooms": 0,
+        "micro_candidates": 2
+      },
+      "sample-floorplan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 0,
+        "micro_candidates": 0
+      },
+      "simple-apartment-floor-plan.png": {
+        "split_rooms": 0,
+        "merged_rooms": 2,
+        "micro_candidates": 0
+      }
+    }
+  }
+}

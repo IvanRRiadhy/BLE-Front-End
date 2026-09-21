@@ -1,0 +1,3702 @@
+{
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png::gt_001": {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png::gt_002": {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.2004,
+      "combined": 0.2004
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_nbr_hyp_cavity_1_west",
+      "combined": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_1"
+    },
+    "overall_best_iou": 0.2004,
+    "overall_best_proposal_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_1",
+    "overall_best_strategy": "combined"
+  },
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png::gt_003": {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.2146,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.1579,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.2146,
+      "combined": 0.2146
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_part_hyp_cavity_1_2",
+      "repeated_room": null,
+      "neighboring_room": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_nbr_hyp_cavity_1_north",
+      "combined": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_3"
+    },
+    "overall_best_iou": 0.2146,
+    "overall_best_proposal_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_3",
+    "overall_best_strategy": "combined"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_001": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_002": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_003": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_004": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_005": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0532,
+      "wall_network_face": 0.002,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0478,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0532,
+      "combined": 0.0532
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_wnf_topo_128",
+      "doorway_connected": null,
+      "internal_partition": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_part_hyp_cavity_1_2",
+      "repeated_room": null,
+      "neighboring_room": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_nbr_hyp_cavity_1_north",
+      "combined": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_14"
+    },
+    "overall_best_iou": 0.0532,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_001": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0395,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_face_face_5",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0395,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_face_face_5",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_002": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0628,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.3387,
+      "combined": 0.1904
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_face_face_2",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_nbr_merged_hyp_cavity_1_hyp_face_face_4_south",
+      "combined": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_comb_3"
+    },
+    "overall_best_iou": 0.3387,
+    "overall_best_proposal_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_nbr_merged_hyp_cavity_1_hyp_face_face_4_south",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_003": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.13,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_face_face_5",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.13,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_face_face_5",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_004": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.2346,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.2698,
+      "combined": 0.2698
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_face_face_10",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_nbr_merged_hyp_cavity_1_hyp_face_face_10_south",
+      "combined": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_comb_3"
+    },
+    "overall_best_iou": 0.2698,
+    "overall_best_proposal_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_nbr_merged_hyp_cavity_1_hyp_face_face_10_south",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_005": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1676,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.1952,
+      "combined": 0.1952
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_face_face_10",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_nbr_merged_hyp_cavity_1_hyp_face_face_10_south",
+      "combined": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_comb_3"
+    },
+    "overall_best_iou": 0.1952,
+    "overall_best_proposal_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_comb_3",
+    "overall_best_strategy": "combined"
+  },
+  "Floorplan-House.png::gt_002": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0068,
+      "wall_network_face": 0.0408,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.3429,
+      "neighboring_room": 0.3294,
+      "combined": 0.3429
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_19",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_415",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_6_2",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_6_east",
+      "combined": "Floorplan-House.png__prop_comb_396"
+    },
+    "overall_best_iou": 0.3429,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_comb_396",
+    "overall_best_strategy": "combined"
+  },
+  "Floorplan-House.png::gt_005": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.8475,
+      "wall_network_face": 0.7975,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.2417,
+      "neighboring_room": 0.0529,
+      "combined": 0.7975
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_1",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_1260",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_face_face_1_58",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_1_south",
+      "combined": "Floorplan-House.png__prop_comb_274"
+    },
+    "overall_best_iou": 0.8475,
+    "overall_best_proposal_id": "hyp_face_face_1",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "Floorplan-House.png::gt_006": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.5299,
+      "wall_network_face": 0.471,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.4753,
+      "repeated_room": 0.2732,
+      "neighboring_room": 0.4476,
+      "combined": 0.471
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_8",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_359",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_8_1",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_7_50",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_3_south",
+      "combined": "Floorplan-House.png__prop_comb_293"
+    },
+    "overall_best_iou": 0.5299,
+    "overall_best_proposal_id": "hyp_cavity_8",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "Floorplan-House.png::gt_007": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.5197,
+      "wall_network_face": 0.5061,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.5073,
+      "repeated_room": 0.5051,
+      "neighboring_room": 0.3394,
+      "combined": 0.5061
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_10",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_519",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_10_2",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_face_face_16_16",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_16_sub2_north",
+      "combined": "Floorplan-House.png__prop_comb_220"
+    },
+    "overall_best_iou": 0.5197,
+    "overall_best_proposal_id": "hyp_cavity_10",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "Floorplan-House.png::gt_008": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_008",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.3528,
+      "wall_network_face": 0.405,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.277,
+      "repeated_room": 0.4104,
+      "neighboring_room": 0.3599,
+      "combined": 0.4104
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_14",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_809",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_9_1",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_12_31",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_14_north",
+      "combined": "Floorplan-House.png__prop_comb_386"
+    },
+    "overall_best_iou": 0.4104,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_comb_386",
+    "overall_best_strategy": "combined"
+  },
+  "Floorplan-House.png::gt_009": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_009",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.2327,
+      "wall_network_face": 0.2778,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.2534,
+      "repeated_room": 0.0369,
+      "neighboring_room": 0.0457,
+      "combined": 0.2778
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_11",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_morph_341",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_11_2",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_15_55",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_3_south",
+      "combined": "Floorplan-House.png__prop_comb_380"
+    },
+    "overall_best_iou": 0.2778,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_wnf_morph_341",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "Floorplan-House.png::gt_011": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_011",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.5684,
+      "wall_network_face": 0.7846,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.5685,
+      "repeated_room": 0.3807,
+      "neighboring_room": 0.0652,
+      "combined": 0.7846
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_15",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_1028",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_15_1",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_15_52",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_1_south",
+      "combined": "Floorplan-House.png__prop_comb_223"
+    },
+    "overall_best_iou": 0.7846,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_wnf_topo_1028",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "Floorplan-House.png::gt_012": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_012",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0235,
+      "wall_network_face": 0.0842,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0235,
+      "repeated_room": 0.0759,
+      "neighboring_room": 0.0,
+      "combined": 0.0842
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_15",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_1808",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_15_1",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_15_53",
+      "neighboring_room": null,
+      "combined": "Floorplan-House.png__prop_comb_263"
+    },
+    "overall_best_iou": 0.0842,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_wnf_topo_1808",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "Floorplan-House.png::gt_013": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_013",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0012,
+      "wall_network_face": 0.0307,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0455,
+      "neighboring_room": 0.0088,
+      "combined": 0.0455
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_1",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_1384",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_7_48",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_1_south",
+      "combined": "Floorplan-House.png__prop_comb_517"
+    },
+    "overall_best_iou": 0.0455,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_rep_hyp_cavity_7_48",
+    "overall_best_strategy": "repeated_room"
+  },
+  "Floorplan-House.png::gt_014": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_014",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0239,
+      "wall_network_face": 0.0316,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0132,
+      "neighboring_room": 0.0087,
+      "combined": 0.0316
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_1",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_1260",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_7_48",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_1_south",
+      "combined": "Floorplan-House.png__prop_comb_274"
+    },
+    "overall_best_iou": 0.0316,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_wnf_topo_1260",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "Floorplan-House.png::gt_015": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_015",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.8481,
+      "wall_network_face": 0.5307,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.8282,
+      "repeated_room": 0.3759,
+      "neighboring_room": 0.2176,
+      "combined": 0.8282
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_7",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_345",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_7_1",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_7_47",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_1_south",
+      "combined": "Floorplan-House.png__prop_comb_323"
+    },
+    "overall_best_iou": 0.8481,
+    "overall_best_proposal_id": "hyp_cavity_7",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "Floorplan-House.png::gt_016": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_016",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.6128,
+      "wall_network_face": 0.6042,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.237,
+      "repeated_room": 0.2856,
+      "neighboring_room": 0.2833,
+      "combined": 0.6042
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_19",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_14",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_face_face_19_sub1_2",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_face_face_19_29",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_16_sub2_north",
+      "combined": "Floorplan-House.png__prop_comb_277"
+    },
+    "overall_best_iou": 0.6128,
+    "overall_best_proposal_id": "hyp_face_face_19",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "Floorplan-House.png::gt_017": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_017",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0442,
+      "wall_network_face": 0.2579,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0841,
+      "repeated_room": 0.3288,
+      "neighboring_room": 0.2964,
+      "combined": 0.3288
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1_sub2",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_113",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_1_sub2_2",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_5_37",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_face_face_16_west",
+      "combined": "Floorplan-House.png__prop_comb_457"
+    },
+    "overall_best_iou": 0.3288,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_rep_hyp_cavity_5_37",
+    "overall_best_strategy": "repeated_room"
+  },
+  "Floorplan-House.png::gt_018": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_018",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.3986,
+      "wall_network_face": 0.1824,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.351,
+      "repeated_room": 0.6545,
+      "neighboring_room": 0.7464,
+      "combined": 0.7464
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_12",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_717",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_12_1",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_face_face_16_27",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_face_face_16_south",
+      "combined": "Floorplan-House.png__prop_comb_369"
+    },
+    "overall_best_iou": 0.7464,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_nbr_hyp_face_face_16_south",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "Floorplan-House.png::gt_019": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_019",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.9722,
+      "wall_network_face": 0.9161,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.9736,
+      "repeated_room": 0.0692,
+      "neighboring_room": 0.0722,
+      "combined": 0.9161
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_16",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_1036",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_16_2",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_15_53",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_1_sub2_south",
+      "combined": "Floorplan-House.png__prop_comb_242"
+    },
+    "overall_best_iou": 0.9736,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_part_hyp_cavity_16_2",
+    "overall_best_strategy": "internal_partition"
+  },
+  "Floorplan-House.png::gt_020": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_020",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.5072,
+      "wall_network_face": 0.473,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.5073,
+      "repeated_room": 0.0972,
+      "neighboring_room": 0.1345,
+      "combined": 0.473
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": "Floorplan-House.png__prop_wnf_topo_44",
+      "doorway_connected": null,
+      "internal_partition": "Floorplan-House.png__prop_part_hyp_cavity_1_2",
+      "repeated_room": "Floorplan-House.png__prop_rep_hyp_cavity_15_55",
+      "neighboring_room": "Floorplan-House.png__prop_nbr_hyp_cavity_3_west",
+      "combined": "Floorplan-House.png__prop_comb_265"
+    },
+    "overall_best_iou": 0.5073,
+    "overall_best_proposal_id": "Floorplan-House.png__prop_part_hyp_cavity_1_2",
+    "overall_best_strategy": "internal_partition"
+  },
+  "Lantai 1.jpg::gt_001": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.1427,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.2605,
+      "neighboring_room": 0.9055,
+      "combined": 0.9055
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "Lantai 1.jpg__prop_wnf_topo_1",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "Lantai 1.jpg__prop_rep_hyp_cavity_2_7",
+      "neighboring_room": "Lantai 1.jpg__prop_nbr_hyp_cavity_4_north",
+      "combined": "Lantai 1.jpg__prop_comb_9"
+    },
+    "overall_best_iou": 0.9055,
+    "overall_best_proposal_id": "Lantai 1.jpg__prop_comb_9",
+    "overall_best_strategy": "combined"
+  },
+  "Lantai 1.jpg::gt_002": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.4355,
+      "wall_network_face": 0.5029,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.4553,
+      "neighboring_room": 0.0192,
+      "combined": 0.5029
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_4",
+      "wall_network_face": "Lantai 1.jpg__prop_wnf_morph_6",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "Lantai 1.jpg__prop_rep_hyp_cavity_2_8",
+      "neighboring_room": "Lantai 1.jpg__prop_nbr_hyp_cavity_5_south",
+      "combined": "Lantai 1.jpg__prop_comb_6"
+    },
+    "overall_best_iou": 0.5029,
+    "overall_best_proposal_id": "Lantai 1.jpg__prop_wnf_morph_6",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "Lantai 1.jpg::gt_003": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.4829,
+      "wall_network_face": 0.3566,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.4645,
+      "repeated_room": 0.5727,
+      "neighboring_room": 0.5587,
+      "combined": 0.5727
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2",
+      "wall_network_face": "Lantai 1.jpg__prop_wnf_topo_3",
+      "doorway_connected": null,
+      "internal_partition": "Lantai 1.jpg__prop_part_hyp_cavity_2_1",
+      "repeated_room": "Lantai 1.jpg__prop_rep_hyp_cavity_3_4",
+      "neighboring_room": "Lantai 1.jpg__prop_nbr_hyp_cavity_3_west",
+      "combined": "Lantai 1.jpg__prop_comb_22"
+    },
+    "overall_best_iou": 0.5727,
+    "overall_best_proposal_id": "Lantai 1.jpg__prop_rep_hyp_cavity_3_4",
+    "overall_best_strategy": "repeated_room"
+  },
+  "Lantai 1.jpg::gt_004": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.062,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.062
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "Lantai 1.jpg__prop_wnf_morph_13",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "Lantai 1.jpg__prop_comb_24"
+    },
+    "overall_best_iou": 0.062,
+    "overall_best_proposal_id": "Lantai 1.jpg__prop_comb_24",
+    "overall_best_strategy": "combined"
+  },
+  "Lantai 1.jpg::gt_005": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.4013,
+      "wall_network_face": 0.3643,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.3686,
+      "repeated_room": 0.0916,
+      "neighboring_room": 0.1349,
+      "combined": 0.3643
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_3",
+      "wall_network_face": "Lantai 1.jpg__prop_wnf_morph_3",
+      "doorway_connected": null,
+      "internal_partition": "Lantai 1.jpg__prop_part_hyp_cavity_3_1",
+      "repeated_room": "Lantai 1.jpg__prop_rep_hyp_cavity_5_2",
+      "neighboring_room": "Lantai 1.jpg__prop_nbr_hyp_cavity_6_south",
+      "combined": "Lantai 1.jpg__prop_comb_12"
+    },
+    "overall_best_iou": 0.4013,
+    "overall_best_proposal_id": "hyp_cavity_3",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "Lantai 2.jpg::gt_001": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0962,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0962
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "Lantai 2.jpg__prop_wnf_topo_3",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "Lantai 2.jpg__prop_comb_3"
+    },
+    "overall_best_iou": 0.0962,
+    "overall_best_proposal_id": "Lantai 2.jpg__prop_wnf_topo_3",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "Lantai 2.jpg::gt_002": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.1563,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.1844,
+      "combined": 0.1844
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "Lantai 2.jpg__prop_wnf_topo_3",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "Lantai 2.jpg__prop_nbr_hyp_cavity_1_west",
+      "combined": "Lantai 2.jpg__prop_comb_11"
+    },
+    "overall_best_iou": 0.1844,
+    "overall_best_proposal_id": "Lantai 2.jpg__prop_comb_11",
+    "overall_best_strategy": "combined"
+  },
+  "Lantai 2.jpg::gt_003": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.8612,
+      "wall_network_face": 0.8438,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0025,
+      "combined": 0.8438
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": "Lantai 2.jpg__prop_wnf_morph_6",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "Lantai 2.jpg__prop_nbr_hyp_cavity_1_west",
+      "combined": "Lantai 2.jpg__prop_comb_12"
+    },
+    "overall_best_iou": 0.8612,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "Lantai 2.jpg::gt_004": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.8425,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.8425
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "Lantai 2.jpg__prop_wnf_morph_7",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "Lantai 2.jpg__prop_comb_14"
+    },
+    "overall_best_iou": 0.8425,
+    "overall_best_proposal_id": "Lantai 2.jpg__prop_wnf_morph_7",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "Lantai 2.jpg::gt_005": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.9545,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.4727,
+      "combined": 0.9545
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "Lantai 2.jpg__prop_wnf_morph_9",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "Lantai 2.jpg__prop_nbr_hyp_cavity_1_west",
+      "combined": "Lantai 2.jpg__prop_comb_13"
+    },
+    "overall_best_iou": 0.9545,
+    "overall_best_proposal_id": "Lantai 2.jpg__prop_wnf_morph_9",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_001": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_002": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0073,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0073
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_25",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_2"
+    },
+    "overall_best_iou": 0.0073,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_2",
+    "overall_best_strategy": "combined"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_003": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_004": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_005": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_006": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_007": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_008": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_008",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_009": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_009",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_010": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_010",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_011": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_011",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0187,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0187
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_394",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_11"
+    },
+    "overall_best_iou": 0.0187,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_394",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_012": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_012",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_013": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_013",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_014": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_014",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_015": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_015",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0056,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0056
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_243",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_7"
+    },
+    "overall_best_iou": 0.0056,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_7",
+    "overall_best_strategy": "combined"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_016": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_016",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0192,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0192
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_394",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_11"
+    },
+    "overall_best_iou": 0.0192,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_11",
+    "overall_best_strategy": "combined"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_017": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_017",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0097,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0097
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_260",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_8"
+    },
+    "overall_best_iou": 0.0097,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_8",
+    "overall_best_strategy": "combined"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_018": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_018",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0108,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0108
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_121",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_3"
+    },
+    "overall_best_iou": 0.0108,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_3",
+    "overall_best_strategy": "combined"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_019": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_019",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_020": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_020",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_021": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_021",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_022": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_022",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_023": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_023",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_024": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_024",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_025": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_025",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_026": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_026",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_027": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_027",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_028": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_028",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_029": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_029",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_030": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_030",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_031": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_031",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_032": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_032",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_033": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_033",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_034": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_034",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_035": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_035",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0084,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0084
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_394",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_11"
+    },
+    "overall_best_iou": 0.0084,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_394",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_036": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_036",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0425,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0425
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_237",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_6"
+    },
+    "overall_best_iou": 0.0425,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_237",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_037": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_037",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0271,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0271
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_237",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_6"
+    },
+    "overall_best_iou": 0.0271,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_237",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_038": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_038",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_039": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_039",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_040": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_040",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_041": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_041",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_042": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_042",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_043": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_043",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_044": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_044",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0245,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0245
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_390",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_9"
+    },
+    "overall_best_iou": 0.0245,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_390",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_045": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_045",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0878,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0878
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_121",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_3"
+    },
+    "overall_best_iou": 0.0878,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_121",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_046": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_046",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_047": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_047",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_048": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_048",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0026,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0026
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_121",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_3"
+    },
+    "overall_best_iou": 0.0026,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_121",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_049": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_049",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_050": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_050",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_051": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_051",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0187,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0187
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_236",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_5"
+    },
+    "overall_best_iou": 0.0187,
+    "overall_best_proposal_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_wnf_topo_236",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "library-floor-plan.png::gt_001": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1238,
+      "wall_network_face": 0.1239,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.1239
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_1",
+      "wall_network_face": "library-floor-plan.png__prop_wnf_morph_2",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "library-floor-plan.png__prop_comb_1"
+    },
+    "overall_best_iou": 0.1239,
+    "overall_best_proposal_id": "library-floor-plan.png__prop_wnf_morph_2",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "library-floor-plan.png::gt_002": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.4492,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.2191,
+      "combined": 0.2191
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_2",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "library-floor-plan.png__prop_nbr_hyp_face_face_1_north",
+      "combined": "library-floor-plan.png__prop_comb_2"
+    },
+    "overall_best_iou": 0.4492,
+    "overall_best_proposal_id": "hyp_face_face_2",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "library-floor-plan.png::gt_003": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1743,
+      "wall_network_face": 0.1723,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.1723
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_1",
+      "wall_network_face": "library-floor-plan.png__prop_wnf_morph_2",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "library-floor-plan.png__prop_comb_1"
+    },
+    "overall_best_iou": 0.1743,
+    "overall_best_proposal_id": "hyp_face_face_1",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "library-floor-plan.png::gt_004": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.025,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_2",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.025,
+    "overall_best_proposal_id": "hyp_face_face_2",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "library-floor-plan.png::gt_005": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.4126,
+      "wall_network_face": 0.2155,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.2004,
+      "combined": 0.2155
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_2",
+      "wall_network_face": "library-floor-plan.png__prop_wnf_morph_2",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "library-floor-plan.png__prop_nbr_hyp_face_face_1_north",
+      "combined": "library-floor-plan.png__prop_comb_1"
+    },
+    "overall_best_iou": 0.4126,
+    "overall_best_proposal_id": "hyp_face_face_2",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_001": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.6805,
+      "wall_network_face": 0.6548,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.2826,
+      "repeated_room": 0.313,
+      "neighboring_room": 0.1877,
+      "combined": 0.6548
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_39",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_3_1",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_face_face_16_20",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_3_west",
+      "combined": "sample-floorplan-house2.png__prop_comb_54"
+    },
+    "overall_best_iou": 0.6805,
+    "overall_best_proposal_id": "hyp_cavity_2",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_002": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.8611,
+      "wall_network_face": 0.9443,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.8476,
+      "repeated_room": 0.0225,
+      "neighboring_room": 0.1669,
+      "combined": 0.8476
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_3",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_morph_11",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_3_1",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_9_1",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_1_east",
+      "combined": "sample-floorplan-house2.png__prop_comb_128"
+    },
+    "overall_best_iou": 0.9443,
+    "overall_best_proposal_id": "sample-floorplan-house2.png__prop_wnf_morph_11",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "sample-floorplan-house2.png::gt_004": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1562,
+      "wall_network_face": 0.2894,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.1489,
+      "repeated_room": 0.6456,
+      "neighboring_room": 0.4485,
+      "combined": 0.6456
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_7",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_49",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_7_1",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_2_15",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_6_west",
+      "combined": "sample-floorplan-house2.png__prop_comb_190"
+    },
+    "overall_best_iou": 0.6456,
+    "overall_best_proposal_id": "sample-floorplan-house2.png__prop_comb_190",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house2.png::gt_005": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.7388,
+      "wall_network_face": 0.4732,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.6575,
+      "repeated_room": 0.4606,
+      "neighboring_room": 0.4805,
+      "combined": 0.6575
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_6",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_morph_28",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_6_1",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_12_13",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_2_south",
+      "combined": "sample-floorplan-house2.png__prop_comb_142"
+    },
+    "overall_best_iou": 0.7388,
+    "overall_best_proposal_id": "hyp_cavity_6",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_006": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.6761,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0436,
+      "neighboring_room": 0.34,
+      "combined": 0.6761
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_103",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_9_1",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_4_east",
+      "combined": "sample-floorplan-house2.png__prop_comb_7"
+    },
+    "overall_best_iou": 0.6761,
+    "overall_best_proposal_id": "sample-floorplan-house2.png__prop_wnf_topo_103",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "sample-floorplan-house2.png::gt_007": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.2279,
+      "wall_network_face": 0.2267,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0165,
+      "combined": 0.2267
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_8",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_123",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_8_east",
+      "combined": "sample-floorplan-house2.png__prop_comb_55"
+    },
+    "overall_best_iou": 0.2279,
+    "overall_best_proposal_id": "hyp_cavity_8",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_009": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_009",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.3849,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.1189,
+      "neighboring_room": 0.0224,
+      "combined": 0.3849
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_218",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_12_12",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_1_sub2_east",
+      "combined": "sample-floorplan-house2.png__prop_comb_84"
+    },
+    "overall_best_iou": 0.3849,
+    "overall_best_proposal_id": "sample-floorplan-house2.png__prop_comb_84",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house2.png::gt_010": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_010",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.5494,
+      "wall_network_face": 0.3982,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.5223,
+      "repeated_room": 0.4542,
+      "neighboring_room": 0.1913,
+      "combined": 0.5223
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_9",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_186",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_9_2",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_12_12",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_9_west",
+      "combined": "sample-floorplan-house2.png__prop_comb_127"
+    },
+    "overall_best_iou": 0.5494,
+    "overall_best_proposal_id": "hyp_cavity_9",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_011": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_011",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.8479,
+      "wall_network_face": 0.8219,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.8468,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.8468
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_10",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_243",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_10_1",
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "sample-floorplan-house2.png__prop_comb_123"
+    },
+    "overall_best_iou": 0.8479,
+    "overall_best_proposal_id": "hyp_cavity_10",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_014": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_014",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.7991,
+      "wall_network_face": 0.9029,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.7902,
+      "repeated_room": 0.0612,
+      "neighboring_room": 0.3193,
+      "combined": 0.9029
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_12",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_251",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_12_1",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_9_2",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_13_east",
+      "combined": "sample-floorplan-house2.png__prop_comb_70"
+    },
+    "overall_best_iou": 0.9029,
+    "overall_best_proposal_id": "sample-floorplan-house2.png__prop_wnf_topo_251",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "sample-floorplan-house2.png::gt_015": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_015",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.4798,
+      "wall_network_face": 0.269,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.4321,
+      "repeated_room": 0.3667,
+      "neighboring_room": 0.4772,
+      "combined": 0.4772
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_13",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_281",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_13_2",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_9_2",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_13_south",
+      "combined": "sample-floorplan-house2.png__prop_comb_105"
+    },
+    "overall_best_iou": 0.4798,
+    "overall_best_proposal_id": "hyp_cavity_13",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_016": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_016",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.3572,
+      "wall_network_face": 0.365,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.1881,
+      "neighboring_room": 0.4824,
+      "combined": 0.4824
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_8",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_123",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_10_19",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_8_east",
+      "combined": "sample-floorplan-house2.png__prop_comb_186"
+    },
+    "overall_best_iou": 0.4824,
+    "overall_best_proposal_id": "sample-floorplan-house2.png__prop_comb_186",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house2.png::gt_017": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_017",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.077,
+      "neighboring_room": 0.7606,
+      "combined": 0.7606
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_4_9",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_3_south",
+      "combined": "sample-floorplan-house2.png__prop_comb_185"
+    },
+    "overall_best_iou": 0.7606,
+    "overall_best_proposal_id": "sample-floorplan-house2.png__prop_comb_185",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house2.png::gt_018": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_018",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.9584,
+      "wall_network_face": 0.5288,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.8774,
+      "repeated_room": 0.4302,
+      "neighboring_room": 0.0499,
+      "combined": 0.8774
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_4",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_85",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_4_1",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_9_1",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_1_sub2_east",
+      "combined": "sample-floorplan-house2.png__prop_comb_145"
+    },
+    "overall_best_iou": 0.9584,
+    "overall_best_proposal_id": "hyp_cavity_4",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_019": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_019",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1656,
+      "wall_network_face": 0.5016,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.2833,
+      "combined": 0.5016
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_face_face_16",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_7",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_1_east",
+      "combined": "sample-floorplan-house2.png__prop_comb_81"
+    },
+    "overall_best_iou": 0.5016,
+    "overall_best_proposal_id": "sample-floorplan-house2.png__prop_wnf_topo_7",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "sample-floorplan-house2.png::gt_020": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_020",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.7539,
+      "wall_network_face": 0.5962,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.3257,
+      "repeated_room": 0.0388,
+      "neighboring_room": 0.0696,
+      "combined": 0.5962
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": "sample-floorplan-house2.png__prop_wnf_topo_2",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house2.png__prop_part_hyp_cavity_1_sub2_2",
+      "repeated_room": "sample-floorplan-house2.png__prop_rep_hyp_cavity_10_19",
+      "neighboring_room": "sample-floorplan-house2.png__prop_nbr_hyp_cavity_3_west",
+      "combined": "sample-floorplan-house2.png__prop_comb_91"
+    },
+    "overall_best_iou": 0.7539,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house2.png::gt_021": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_021",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "sample-floorplan-house3.png::gt_001": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0886,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.149,
+      "neighboring_room": 0.2047,
+      "combined": 0.2047
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_1724",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_7_8",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_4_south",
+      "combined": "sample-floorplan-house3.png__prop_comb_2732"
+    },
+    "overall_best_iou": 0.2047,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2732",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_002": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1368,
+      "wall_network_face": 0.0977,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.1368,
+      "repeated_room": 0.1459,
+      "neighboring_room": 0.6607,
+      "combined": 0.6607
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_7",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_6602",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_7_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_9_27",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub1_north",
+      "combined": "sample-floorplan-house3.png__prop_comb_2445"
+    },
+    "overall_best_iou": 0.6607,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2445",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_003": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0588,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0185,
+      "neighboring_room": 0.1016,
+      "combined": 0.1016
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_9564",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_9_16",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub2_north",
+      "combined": "sample-floorplan-house3.png__prop_comb_2304"
+    },
+    "overall_best_iou": 0.1016,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2304",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_004": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.2703,
+      "wall_network_face": 0.0708,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.2701,
+      "repeated_room": 0.2799,
+      "neighboring_room": 0.5713,
+      "combined": 0.5713
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_9",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_3225",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_9_1",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_9_18",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub2_north",
+      "combined": "sample-floorplan-house3.png__prop_comb_2304"
+    },
+    "overall_best_iou": 0.5713,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2304",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_005": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0379,
+      "wall_network_face": 0.0457,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0984,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0616,
+      "combined": 0.0984
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_15_sub2",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_13943",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_15_sub2_1",
+      "repeated_room": null,
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub2_north",
+      "combined": "sample-floorplan-house3.png__prop_comb_2123"
+    },
+    "overall_best_iou": 0.0984,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_part_hyp_cavity_15_sub2_1",
+    "overall_best_strategy": "internal_partition"
+  },
+  "sample-floorplan-house3.png::gt_006": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0538,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.1222,
+      "neighboring_room": 0.1254,
+      "combined": 0.1254
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_12404",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_11_29",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub1_north",
+      "combined": "sample-floorplan-house3.png__prop_comb_2445"
+    },
+    "overall_best_iou": 0.1254,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub1_north",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "sample-floorplan-house3.png::gt_007": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.8212,
+      "wall_network_face": 0.537,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.8211,
+      "repeated_room": 0.006,
+      "neighboring_room": 0.0403,
+      "combined": 0.8211
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_15",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_morph_3324",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_15_1",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_11_29",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub2_north",
+      "combined": "sample-floorplan-house3.png__prop_comb_2698"
+    },
+    "overall_best_iou": 0.8212,
+    "overall_best_proposal_id": "hyp_cavity_15",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house3.png::gt_008": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_008",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1202,
+      "wall_network_face": 0.0829,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.1196,
+      "repeated_room": 0.1202,
+      "neighboring_room": 0.4813,
+      "combined": 0.4813
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_18",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_14223",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_18_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_18_70",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub2_east",
+      "combined": "sample-floorplan-house3.png__prop_comb_2486"
+    },
+    "overall_best_iou": 0.4813,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub2_east",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "sample-floorplan-house3.png::gt_009": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_009",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0045,
+      "wall_network_face": 0.1958,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.2006,
+      "neighboring_room": 0.3326,
+      "combined": 0.3326
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_15985",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_18_64",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_18_north",
+      "combined": "sample-floorplan-house3.png__prop_comb_2193"
+    },
+    "overall_best_iou": 0.3326,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_18_north",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "sample-floorplan-house3.png::gt_010": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_010",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.3532,
+      "wall_network_face": 0.1232,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.3531,
+      "repeated_room": 0.3551,
+      "neighboring_room": 0.3771,
+      "combined": 0.3771
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_3",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_183",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_3_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_3_57",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_3_south",
+      "combined": "sample-floorplan-house3.png__prop_comb_2395"
+    },
+    "overall_best_iou": 0.3771,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2395",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_011": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_011",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1874,
+      "wall_network_face": 0.1212,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0572,
+      "repeated_room": 0.2434,
+      "neighboring_room": 0.4048,
+      "combined": 0.4048
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_3_hyp_face_face_6",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_183",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_2_sub1_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_3_60",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_3_east",
+      "combined": "sample-floorplan-house3.png__prop_comb_2560"
+    },
+    "overall_best_iou": 0.4048,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2560",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_012": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_012",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.042,
+      "wall_network_face": 0.1669,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0476,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.1669
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2_sub1",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_3779",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_2_sub1_2",
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "sample-floorplan-house3.png__prop_comb_2594"
+    },
+    "overall_best_iou": 0.1669,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2594",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_013": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_013",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0034,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.0034,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house3.png::gt_014": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_014",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0291,
+      "wall_network_face": 0.0706,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.1996,
+      "combined": 0.1996
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_1414",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_merged_hyp_cavity_3_hyp_face_face_6_east",
+      "combined": "sample-floorplan-house3.png__prop_comb_2832"
+    },
+    "overall_best_iou": 0.1996,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_nbr_merged_hyp_cavity_3_hyp_face_face_6_east",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "sample-floorplan-house3.png::gt_015": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_015",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1252,
+      "wall_network_face": 0.0649,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.1416,
+      "repeated_room": 0.0481,
+      "neighboring_room": 0.3288,
+      "combined": 0.3288
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2_sub1",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_1291",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_2_sub1_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_merged_hyp_cavity_3_hyp_face_face_6_62",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_merged_hyp_cavity_3_hyp_face_face_6_east",
+      "combined": "sample-floorplan-house3.png__prop_comb_2832"
+    },
+    "overall_best_iou": 0.3288,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2832",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_016": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_016",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.035,
+      "wall_network_face": 0.0278,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0164,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0415,
+      "combined": 0.0415
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_7005",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_2_sub1_2",
+      "repeated_room": null,
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_12_east",
+      "combined": "sample-floorplan-house3.png__prop_comb_2092"
+    },
+    "overall_best_iou": 0.0415,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_12_east",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "sample-floorplan-house3.png::gt_017": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_017",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0253,
+      "wall_network_face": 0.0314,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0124,
+      "repeated_room": 0.1547,
+      "neighboring_room": 0.1121,
+      "combined": 0.1547
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_13893",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_2_sub1_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_16_44",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_16_east",
+      "combined": "sample-floorplan-house3.png__prop_comb_3052"
+    },
+    "overall_best_iou": 0.1547,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_rep_hyp_cavity_16_44",
+    "overall_best_strategy": "repeated_room"
+  },
+  "sample-floorplan-house3.png::gt_018": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_018",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0408,
+      "wall_network_face": 0.0599,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0188,
+      "repeated_room": 0.2085,
+      "neighboring_room": 0.0281,
+      "combined": 0.2085
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_18761",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_2_sub1_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_17_102",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_16_east",
+      "combined": "sample-floorplan-house3.png__prop_comb_3132"
+    },
+    "overall_best_iou": 0.2085,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_rep_hyp_cavity_17_102",
+    "overall_best_strategy": "repeated_room"
+  },
+  "sample-floorplan-house3.png::gt_019": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_019",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.097,
+      "wall_network_face": 0.0497,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.1097,
+      "repeated_room": 0.2202,
+      "neighboring_room": 0.2357,
+      "combined": 0.2357
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2_sub1",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_18019",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_2_sub1_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_17_96",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_17_west",
+      "combined": "sample-floorplan-house3.png__prop_comb_2528"
+    },
+    "overall_best_iou": 0.2357,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_2528",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan-house3.png::gt_020": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_020",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.2011,
+      "wall_network_face": 0.0626,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.201,
+      "repeated_room": 0.1471,
+      "neighboring_room": 0.1463,
+      "combined": 0.201
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_17",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_6659",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_17_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_17_99",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_16_north",
+      "combined": "sample-floorplan-house3.png__prop_comb_2525"
+    },
+    "overall_best_iou": 0.2011,
+    "overall_best_proposal_id": "hyp_cavity_17",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan-house3.png::gt_021": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_021",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1641,
+      "wall_network_face": 0.0305,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.1802,
+      "repeated_room": 0.0308,
+      "neighboring_room": 0.2457,
+      "combined": 0.2457
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2_sub1",
+      "wall_network_face": "sample-floorplan-house3.png__prop_wnf_topo_6464",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan-house3.png__prop_part_hyp_cavity_2_sub1_2",
+      "repeated_room": "sample-floorplan-house3.png__prop_rep_hyp_cavity_16_52",
+      "neighboring_room": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_2_sub1_west",
+      "combined": "sample-floorplan-house3.png__prop_comb_3012"
+    },
+    "overall_best_iou": 0.2457,
+    "overall_best_proposal_id": "sample-floorplan-house3.png__prop_comb_3012",
+    "overall_best_strategy": "combined"
+  },
+  "sample-floorplan.png::gt_001": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.9554,
+      "wall_network_face": 0.9324,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.2141,
+      "neighboring_room": 0.2798,
+      "combined": 0.9324
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_4",
+      "wall_network_face": "sample-floorplan.png__prop_wnf_morph_9",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan.png__prop_rep_hyp_cavity_6_2",
+      "neighboring_room": "sample-floorplan.png__prop_nbr_hyp_cavity_6_north",
+      "combined": "sample-floorplan.png__prop_comb_16"
+    },
+    "overall_best_iou": 0.9554,
+    "overall_best_proposal_id": "hyp_cavity_4",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan.png::gt_002": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0057,
+      "neighboring_room": 0.0,
+      "combined": 0.0057
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": null,
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": "sample-floorplan.png__prop_rep_hyp_cavity_6_2",
+      "neighboring_room": null,
+      "combined": "sample-floorplan.png__prop_comb_23"
+    },
+    "overall_best_iou": 0.0057,
+    "overall_best_proposal_id": "sample-floorplan.png__prop_rep_hyp_cavity_6_2",
+    "overall_best_strategy": "repeated_room"
+  },
+  "sample-floorplan.png::gt_003": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.5702,
+      "wall_network_face": 0.5665,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.3735,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.5665
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_3",
+      "wall_network_face": "sample-floorplan.png__prop_wnf_topo_8",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan.png__prop_part_hyp_cavity_5_1",
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "sample-floorplan.png__prop_comb_4"
+    },
+    "overall_best_iou": 0.5702,
+    "overall_best_proposal_id": "hyp_cavity_3",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan.png::gt_004": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.9832,
+      "wall_network_face": 0.891,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.891
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_9",
+      "wall_network_face": "sample-floorplan.png__prop_wnf_topo_25",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "sample-floorplan.png__prop_comb_1"
+    },
+    "overall_best_iou": 0.9832,
+    "overall_best_proposal_id": "hyp_cavity_9",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan.png::gt_005": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.943,
+      "wall_network_face": 0.003,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.9417,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.9417
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_8",
+      "wall_network_face": "sample-floorplan.png__prop_wnf_topo_24",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan.png__prop_part_hyp_cavity_8_1",
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "sample-floorplan.png__prop_comb_18"
+    },
+    "overall_best_iou": 0.943,
+    "overall_best_proposal_id": "hyp_cavity_8",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan.png::gt_006": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.9407,
+      "wall_network_face": 0.8529,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.7944
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_6",
+      "wall_network_face": "sample-floorplan.png__prop_wnf_morph_13",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "sample-floorplan.png__prop_comb_8"
+    },
+    "overall_best_iou": 0.9407,
+    "overall_best_proposal_id": "hyp_cavity_6",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan.png::gt_007": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.9103,
+      "wall_network_face": 0.8249,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.8647,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.8249
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_10",
+      "wall_network_face": "sample-floorplan.png__prop_wnf_topo_26",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan.png__prop_part_hyp_cavity_10_1",
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "sample-floorplan.png__prop_comb_11"
+    },
+    "overall_best_iou": 0.9103,
+    "overall_best_proposal_id": "hyp_cavity_10",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "sample-floorplan.png::gt_008": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_008",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.9766,
+      "wall_network_face": 0.8667,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.9531,
+      "repeated_room": 0.1521,
+      "neighboring_room": 0.0,
+      "combined": 0.8667
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_7",
+      "wall_network_face": "sample-floorplan.png__prop_wnf_topo_17",
+      "doorway_connected": null,
+      "internal_partition": "sample-floorplan.png__prop_part_hyp_cavity_7_1",
+      "repeated_room": "sample-floorplan.png__prop_rep_hyp_cavity_6_3",
+      "neighboring_room": null,
+      "combined": "sample-floorplan.png__prop_comb_7"
+    },
+    "overall_best_iou": 0.9766,
+    "overall_best_proposal_id": "hyp_cavity_7",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "simple-apartment-floor-plan.png::gt_001": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.0972,
+      "wall_network_face": 0.193,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.193
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2",
+      "wall_network_face": "simple-apartment-floor-plan.png__prop_wnf_morph_4",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "simple-apartment-floor-plan.png__prop_comb_6"
+    },
+    "overall_best_iou": 0.193,
+    "overall_best_proposal_id": "simple-apartment-floor-plan.png__prop_wnf_morph_4",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "simple-apartment-floor-plan.png::gt_002": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.2916,
+      "wall_network_face": 0.3024,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.3024
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2",
+      "wall_network_face": "simple-apartment-floor-plan.png__prop_wnf_morph_5",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "simple-apartment-floor-plan.png__prop_comb_5"
+    },
+    "overall_best_iou": 0.3024,
+    "overall_best_proposal_id": "simple-apartment-floor-plan.png__prop_wnf_morph_5",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "simple-apartment-floor-plan.png::gt_003": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.5675,
+      "wall_network_face": 0.5432,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0003,
+      "combined": 0.5432
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_2",
+      "wall_network_face": "simple-apartment-floor-plan.png__prop_wnf_morph_5",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "simple-apartment-floor-plan.png__prop_nbr_hyp_cavity_2_west",
+      "combined": "simple-apartment-floor-plan.png__prop_comb_5"
+    },
+    "overall_best_iou": 0.5675,
+    "overall_best_proposal_id": "hyp_cavity_2",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "simple-apartment-floor-plan.png::gt_004": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.2245,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.634,
+      "combined": 0.634
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": "simple-apartment-floor-plan.png__prop_nbr_hyp_cavity_2_west",
+      "combined": "simple-apartment-floor-plan.png__prop_comb_7"
+    },
+    "overall_best_iou": 0.634,
+    "overall_best_proposal_id": "simple-apartment-floor-plan.png__prop_nbr_hyp_cavity_2_west",
+    "overall_best_strategy": "neighboring_room"
+  },
+  "simple-apartment-floor-plan.png::gt_005": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1485,
+      "wall_network_face": 0.9634,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.9634
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": "simple-apartment-floor-plan.png__prop_wnf_morph_2",
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": "simple-apartment-floor-plan.png__prop_comb_4"
+    },
+    "overall_best_iou": 0.9634,
+    "overall_best_proposal_id": "simple-apartment-floor-plan.png__prop_wnf_morph_2",
+    "overall_best_strategy": "wall_network_face"
+  },
+  "simple-apartment-floor-plan.png::gt_006": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.1996,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.1996,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_candidates"
+  },
+  "simple-apartment-floor-plan.png::gt_007": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_candidates": 0.4074,
+      "wall_network_face": 0.0,
+      "doorway_connected": 0.0,
+      "internal_partition": 0.0,
+      "repeated_room": 0.0,
+      "neighboring_room": 0.0,
+      "combined": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_candidates": "hyp_cavity_1",
+      "wall_network_face": null,
+      "doorway_connected": null,
+      "internal_partition": null,
+      "repeated_room": null,
+      "neighboring_room": null,
+      "combined": null
+    },
+    "overall_best_iou": 0.4074,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_candidates"
+  }
+}

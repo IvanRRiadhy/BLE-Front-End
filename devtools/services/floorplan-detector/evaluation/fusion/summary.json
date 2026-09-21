@@ -1,0 +1,86 @@
+{
+  "phase": "2.9.0",
+  "study": "ML + Classical CV Fusion Experiment",
+  "baseline": {
+    "strategyId": "baseline",
+    "strategyName": "Strategy A: Baseline (Pure Classical CV)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 103691.71,
+      "totalMs": 103890.29
+    }
+  },
+  "bestF1Strategy": {
+    "strategyId": "door_b10",
+    "strategyName": "Strategy C: Doorway Bonus (lambda=0.10)",
+    "gtCount": 148,
+    "predCount": 105,
+    "tpCount": 40,
+    "fpCount": 65,
+    "fnCount": 108,
+    "precision": 0.381,
+    "recall": 0.2703,
+    "microF1": 0.3162,
+    "macroF1": 0.3309,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1155.18,
+      "totalMs": 1353.76
+    }
+  },
+  "bestTpStrategy": {
+    "strategyId": "door_b10",
+    "strategyName": "Strategy C: Doorway Bonus (lambda=0.10)",
+    "gtCount": 148,
+    "predCount": 105,
+    "tpCount": 40,
+    "fpCount": 65,
+    "fnCount": 108,
+    "precision": 0.381,
+    "recall": 0.2703,
+    "microF1": 0.3162,
+    "macroF1": 0.3309,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1155.18,
+      "totalMs": 1353.76
+    }
+  },
+  "totalStrategiesEvaluated": 24
+}

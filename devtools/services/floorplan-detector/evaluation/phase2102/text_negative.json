@@ -1,0 +1,27 @@
+{
+  "strategyId": "text_negative",
+  "strategyName": "C_text_negative",
+  "config": {
+    "strategyId": "text_negative",
+    "strategyName": "C_text_negative",
+    "doorWeight": 0.1,
+    "textPositiveWeight": 0.0,
+    "textNegativeWeight": 0.1,
+    "cavityPenaltyWeight": 0.0,
+    "structuralScoreWeight": 0.0
+  },
+  "gtRoomCount": 148,
+  "predRoomCount": 125,
+  "tp": 40,
+  "fp": 85,
+  "fn": 108,
+  "precision": 0.32,
+  "recall": 0.2703,
+  "microF1": 0.293,
+  "macroF1": 0.3193,
+  "meanIoU": 0.5864,
+  "medianIoU": 0.5006,
+  "latencyMs": 989.34,
+  "promotedCandidates": 89,
+  "demotedCandidates": 182
+}

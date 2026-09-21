@@ -1,0 +1,12 @@
+{
+  "strategy": "internal_partition",
+  "total_proposals": 199,
+  "gt_proposal_recall_10": 0.2432,
+  "gt_proposal_recall_25": 0.1824,
+  "gt_proposal_recall_50": 0.1014,
+  "gt_proposal_recall_75": 0.0676,
+  "gt_rooms_covered_25": 27,
+  "gt_rooms_covered_50": 15,
+  "mean_best_iou": 0.1187,
+  "median_best_iou": 0.0
+}

@@ -1,0 +1,12 @@
+{
+  "total_cpu_time_sec": 401.23,
+  "timing_per_strategy_sec": {
+    "wall_network_split": 66.872,
+    "planar_face_split": 66.872,
+    "partition_split": 66.872,
+    "doorway_topology_split": 66.872,
+    "proposal_guided_split": 66.872,
+    "hybrid_split": 66.872
+  },
+  "mean_time_per_image_sec": 33.436
+}

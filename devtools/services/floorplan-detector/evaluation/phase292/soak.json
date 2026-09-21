@@ -1,0 +1,43 @@
+{
+  "total_requests": 50,
+  "error_count": 0,
+  "initial_ram_mb": 1449.41,
+  "final_ram_mb": 1433.71,
+  "ram_growth_mb": -15.7,
+  "initial_vram_mb": 461.71,
+  "final_vram_mb": 461.71,
+  "memory_leak_detected": false,
+  "checkpoints": [
+    {
+      "iteration": 10,
+      "latency_ms": 67.47,
+      "ram_mb": 1447.75,
+      "vram_mb": 461.71
+    },
+    {
+      "iteration": 20,
+      "latency_ms": 73.32,
+      "ram_mb": 1434.82,
+      "vram_mb": 461.71
+    },
+    {
+      "iteration": 30,
+      "latency_ms": 65.3,
+      "ram_mb": 1433.62,
+      "vram_mb": 461.71
+    },
+    {
+      "iteration": 40,
+      "latency_ms": 67.3,
+      "ram_mb": 1433.73,
+      "vram_mb": 461.71
+    },
+    {
+      "iteration": 50,
+      "latency_ms": 65.25,
+      "ram_mb": 1433.7,
+      "vram_mb": 461.71
+    }
+  ],
+  "status": "PASS"
+}

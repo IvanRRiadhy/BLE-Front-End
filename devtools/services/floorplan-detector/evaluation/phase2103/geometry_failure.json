@@ -1,0 +1,5 @@
+{
+  "total_geometry_failures": 0,
+  "records": [],
+  "key_finding": "Zero pure geometry distortion failures occurred; candidate polygon geometries accurately reflect the chambers, but downstream contour snapping to oversized primary cavities shifts final matches."
+}

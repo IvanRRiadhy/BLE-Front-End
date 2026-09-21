@@ -121,6 +121,21 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     setAltchaVerified(detail?.state === 'verified');
   };
 
+  // Reset ALTCHA widget to unverified state
+  const resetAltcha = () => {
+    setAltchaVerified(false);
+    try {
+      const widget =
+        altchaRef.current ||
+        (typeof document !== 'undefined' ? document.querySelector('altcha-widget') : null);
+      if (widget && typeof (widget as any).reset === 'function') {
+        (widget as any).reset();
+      }
+    } catch (err) {
+      console.error('Failed to reset ALTCHA widget:', err);
+    }
+  };
+
   // Callback ref: attach statechange listener and configure widget when it mounts
   const altchaCallbackRef = (node: HTMLElement | null) => {
     if (altchaRef.current) {
@@ -181,7 +196,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     setDirection(activeTab === 'admin' && next === 'visitor' ? 1 : -1);
     setActiveTab(next);
     setLoginError('');
-    setAltchaVerified(false); // reset captcha when switching tabs
+    resetAltcha(); // reset captcha when switching tabs
   };
 
   const handleChange =
@@ -261,55 +276,63 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     try {
       const res = await axiosServices.post(url, { ...creds, altchaPayload: altchaPayload });
       const data = res?.data?.collection?.data ?? res?.data;
+      if (!data?.token) {
+        const serverMessage =
+          data?.message ||
+          res?.data?.collection?.message ||
+          res?.data?.message ||
+          'Invalid username or password. Please try again.';
+        setLoginError(serverMessage);
+        resetAltcha();
+        return;
+      }
 
-      if (data?.token) {
-        localStorage.setItem('token', data.token);
+      localStorage.setItem('token', data.token);
 
-        // ✅ decode JWT
-        const decoded = jwtDecode<JwtPayload>(data.token);
+      // ✅ decode JWT
+      const decoded = jwtDecode<JwtPayload>(data.token);
 
-        // mapping from JWT
-        const username = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
-        const email = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
-        const levelPriority =
-          decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-        const applicationId = decoded['ApplicationId'];
+      // mapping from JWT
+      const username = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+      const email = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+      const levelPriority =
+        decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      const applicationId = decoded['ApplicationId'];
 
-        // save to localStorage
-        if (username) localStorage.setItem('username', username);
-        if (email) localStorage.setItem('email', email);
-        if (levelPriority) localStorage.setItem('levelPriority', levelPriority.trim());
-        if (applicationId && levelPriority.trim() !== 'System')
-          localStorage.setItem('applicationId', applicationId);
+      // save to localStorage
+      if (username) localStorage.setItem('username', username);
+      if (email) localStorage.setItem('email', email);
+      if (levelPriority) localStorage.setItem('levelPriority', levelPriority.trim());
+      if (applicationId && levelPriority.trim() !== 'System')
+        localStorage.setItem('applicationId', applicationId);
 
-        // optional extras
-        if (decoded.fullName) localStorage.setItem('fullName', decoded.fullName);
-        if (decoded.groupName) localStorage.setItem('groupName', decoded.groupName);
-        // handle accessibleBuildings (comma-separated string → array)
-        if (decoded.accessibleBuildings) {
-          const buildingsArray = decoded.accessibleBuildings
-            .split(',')
-            .map((id) => id.trim())
-            .filter(Boolean); // remove empty values
+      // optional extras
+      if (decoded.fullName) localStorage.setItem('fullName', decoded.fullName);
+      if (decoded.groupName) localStorage.setItem('groupName', decoded.groupName);
+      // handle accessibleBuildings (comma-separated string → array)
+      if (decoded.accessibleBuildings) {
+        const buildingsArray = decoded.accessibleBuildings
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean); // remove empty values
 
-          localStorage.setItem('accessibleBuildings', JSON.stringify(buildingsArray));
-        }
+        localStorage.setItem('accessibleBuildings', JSON.stringify(buildingsArray));
+      }
 
-        // ✅ Handle "Remember this Device" logic
-        if (rememberMe) {
-          if (isAdmin) {
-            localStorage.setItem('rememberedAdminUsername', creds.username);
-          } else {
-            localStorage.setItem('rememberedVisitorUsername', creds.username);
-          }
-          localStorage.setItem('rememberMePreference', 'true');
-          localStorage.setItem('rememberedLoginMode', activeTab);
+      // ✅ Handle "Remember this Device" logic
+      if (rememberMe) {
+        if (isAdmin) {
+          localStorage.setItem('rememberedAdminUsername', creds.username);
         } else {
-          localStorage.removeItem('rememberedAdminUsername');
-          localStorage.removeItem('rememberedVisitorUsername');
-          localStorage.removeItem('rememberedLoginMode');
-          localStorage.setItem('rememberMePreference', 'false');
+          localStorage.setItem('rememberedVisitorUsername', creds.username);
         }
+        localStorage.setItem('rememberMePreference', 'true');
+        localStorage.setItem('rememberedLoginMode', activeTab);
+      } else {
+        localStorage.removeItem('rememberedAdminUsername');
+        localStorage.removeItem('rememberedVisitorUsername');
+        localStorage.removeItem('rememberedLoginMode');
+        localStorage.setItem('rememberMePreference', 'false');
       }
 
       if (data?.refreshToken) {
@@ -320,12 +343,13 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       localStorage.setItem('welcomePopupShown', 'false');
 
       // ❗ IMPORTANT: use decoded role instead of data.levelPriority
-      const role = jwtDecode<JwtPayload>(data.token)[
+      const role = decoded[
         'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
       ];
 
       if (isAdmin && role === 'Primary') {
         setLoginError('You do not have permission to login as Admin');
+        resetAltcha();
         return;
       }
 
@@ -336,14 +360,20 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             ? '/security-view/dashboard'
             : '/my-visit';
 
-        console.log('decoded', jwtDecode(data.token));
+        console.log('decoded', decoded);
       }, 300);
-    } catch (err) {
-      setLoginError('Invalid username or password. Please try again.');
+    } catch (err: any) {
+      const serverMessage =
+        err?.response?.data?.collection?.message ||
+        err?.response?.data?.message;
+
+      setLoginError(serverMessage || 'Invalid username or password. Please try again.');
 
       isAdmin
         ? setAdminCreds({ username: '', password: '' })
         : setVisitorCreds({ username: '', password: '' });
+
+      resetAltcha();
 
       requestAnimationFrame(() => {
         usernameRef.current?.focus();
@@ -489,7 +519,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
               variant="contained"
               disabled={!altchaVerified}
             >
-              {isAdmin ? 'Sign In as Admin' : 'Sign In as Visitor'}
+              {isAdmin ? 'Sign In as Admin' : 'Sign In as Security'}
             </Button>
           </Stack>
         </MotionForm>

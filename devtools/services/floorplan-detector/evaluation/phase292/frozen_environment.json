@@ -1,0 +1,31 @@
+{
+  "gitCommit": "63c75023c554cbc3360ffb4e97e61e2be532f6c2",
+  "pythonVersion": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "nodeVersion": "v22.13.1",
+  "torchVersion": "2.5.1+cu121",
+  "cudaAvailable": true,
+  "cudaDeviceName": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "mlEnabledDefault": false,
+  "fusionFormula": "clamp(confidence + 0.10 * doorwayEvidence, 0.0, 1.0)",
+  "model": "RT-DETR-L (autoresearch_60ep)",
+  "modelPath": "ml/weights/rtdetr_l_autoresearch_60ep.pt",
+  "modelHash": "7c86051cc9f620f119ad16ee5c30a7c4893871ec8684897eac02e996d3307506",
+  "device": "cuda",
+  "activeFusionWeight": {
+    "doorWeight": 0.1,
+    "structuralWeight": 0.0,
+    "cavityWeight": 0.0
+  },
+  "supportedDevices": [
+    "auto",
+    "cpu",
+    "cuda"
+  ],
+  "dependencies": {
+    "torch": "2.5.1+cu121",
+    "ultralytics": "8.3.x",
+    "opencv": "4.13.0",
+    "numpy": "2.4.4",
+    "psutil": "7.2.2"
+  }
+}

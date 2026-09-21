@@ -1,0 +1,14 @@
+{
+  "total_merged_room_failures": 1,
+  "records": [
+    {
+      "candidate_id": "rec_rep_1377_758.0",
+      "image_id": "sample-floorplan-house2.png",
+      "gt_id": "gt_004",
+      "raw_iou": 0.4485313384114422,
+      "merge_status": "absorbed_into_merged_prediction_hyp_cavity_1_sub2",
+      "explanation": "Candidate polygon was absorbed into an adjacent merged room hypothesis"
+    }
+  ],
+  "key_finding": "In floorplans like simple-apartment-floor-plan.png and sample-floorplan-house2.png, recovery candidates that correctly enclose individual rooms are swallowed into composite contours by primary cavities during reconstruct_room_boundaries."
+}

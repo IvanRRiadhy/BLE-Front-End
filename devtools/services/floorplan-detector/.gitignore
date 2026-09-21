@@ -1,0 +1,86 @@
+# Byte-compiled / optimized / ambient Python files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Heavy ML Weights & Model Checkpoints
+ml/weights/
+*.pt
+*.pth
+*.onnx
+*.bin
+*.safetensors
+
+# Large binary evaluation caches & data caches
+evaluation/cache_precomputed_bundles.pkl
+*.pkl
+*.pickle
+
+# Evaluation runs, transient outputs, and failure dumps
+output/
+results/
+evaluation/results/
+evaluation/failures/
+evaluation/overlays/
+evaluation/fusion/overlays/
+evaluation/ml_feasibility/
+
+# Generated Evaluation Visualization artifacts (keep source code & reports, exclude bulky PNG dumps)
+evaluation/**/visualizations/
+evaluation/visualizations/
+
+# Dataset bulk downloads (preserve structure/instructions only)
+datasets/cubicasa5k/*
+!datasets/cubicasa5k/README.md
+!datasets/cubicasa5k/.gitkeep
+
+# Duplicate local working copy of datasets/my_floorplan
+my_floorplan/
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~

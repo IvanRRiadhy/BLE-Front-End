@@ -1,0 +1,347 @@
+{
+  "benchmarkName": "bionic_v2.6_baseline",
+  "dataset": "my_floorplan",
+  "detectorVersion": "2.6.0",
+  "timestamp": "2026-09-17T08:55:59.348516+00:00",
+  "gitCommit": "63c7502",
+  "config": {
+    "benchmark_name": "bionic_v2.6_baseline",
+    "dataset": {
+      "name": "cubicasa5k",
+      "path": "datasets/cubicasa5k",
+      "fallback_dataset": "synthetic"
+    },
+    "subset_selection": {
+      "target_samples": 50,
+      "seed": 42,
+      "min_rooms": 1,
+      "max_rooms": 15,
+      "stratify_by_room_count": true,
+      "image_resolution_filter": {
+        "min_width": 600,
+        "min_height": 500
+      }
+    },
+    "detector": {
+      "name": "current_cv",
+      "version": "2.6.0",
+      "config": {
+        "wall_close_kernel_size": 35,
+        "min_room_area_px": 1200,
+        "auto_scale_kernel": true,
+        "enable_multi_evidence": true
+      }
+    },
+    "matching": {
+      "min_iou": 0.25,
+      "iou_thresholds": [
+        0.25,
+        0.5,
+        0.75,
+        0.9
+      ],
+      "max_centroid_distance_px": 250.0
+    },
+    "topology": {
+      "merged_min_overlap_ratio": 0.3,
+      "split_min_overlap_ratio": 0.3
+    },
+    "validation": {
+      "min_vertices": 3,
+      "max_vertices": 200,
+      "min_area_px": 100.0
+    },
+    "output": {
+      "results_dir": "evaluation/results/latest",
+      "failures_dir": "evaluation/failures",
+      "visualizations_dir": "evaluation/results/latest/visualizations",
+      "baseline_dir": "evaluation/baselines/v2.6"
+    }
+  },
+  "totals": {
+    "imagesEvaluated": 12,
+    "imagesPassed": 3,
+    "imagePassRatePct": 25.0,
+    "groundTruthRooms": 148,
+    "predictedRooms": 74,
+    "truePositiveRooms": 39,
+    "falsePositiveRooms": 35,
+    "missedRooms": 109
+  },
+  "metrics": {
+    "microPrecision": 0.527,
+    "microRecall": 0.2635,
+    "microF1": 0.3514,
+    "macroPrecision": 0.3997,
+    "macroRecall": 0.3186,
+    "macroF1": 0.3365,
+    "meanIoU": 0.6586,
+    "medianIoU": 0.6805,
+    "minIoU": 0.2631,
+    "iouBins": {
+      "gte_0_25": 39,
+      "gte_0_25_pct": 26.35,
+      "gte_0_50": 27,
+      "gte_0_50_pct": 18.24,
+      "gte_0_75": 17,
+      "gte_0_75_pct": 11.49,
+      "gte_0_90": 9,
+      "gte_0_90_pct": 6.08
+    },
+    "meanAreaErrorPct": 35.4,
+    "medianAreaErrorPct": 31.95,
+    "meanCentroidErrorPx": 93.0,
+    "meanBoundaryErrorPx": 231.06
+  },
+  "roomSizeDistribution": {
+    "tiny": {
+      "gtCount": 0,
+      "tpCount": 0,
+      "fnCount": 0,
+      "recall": 0.0
+    },
+    "small": {
+      "gtCount": 0,
+      "tpCount": 0,
+      "fnCount": 0,
+      "recall": 0.0
+    },
+    "medium": {
+      "gtCount": 148,
+      "tpCount": 39,
+      "fnCount": 109,
+      "recall": 26.35
+    },
+    "large": {
+      "gtCount": 0,
+      "tpCount": 0,
+      "fnCount": 0,
+      "recall": 0.0
+    }
+  },
+  "resolutionBreakdown": {
+    "low": {
+      "imageCount": 4,
+      "gtCount": 23,
+      "tpCount": 14,
+      "meanF1": 0.5461,
+      "meanIoU": 0.5528
+    },
+    "medium": {
+      "imageCount": 5,
+      "gtCount": 71,
+      "tpCount": 2,
+      "meanF1": 0.0889,
+      "meanIoU": 0.0975
+    },
+    "high": {
+      "imageCount": 3,
+      "gtCount": 54,
+      "tpCount": 23,
+      "meanF1": 0.4699,
+      "meanIoU": 0.5597
+    }
+  },
+  "topology": {
+    "mergedRoomsCount": 6,
+    "splitRoomsCount": 10,
+    "invalidPredictionsCount": 0
+  },
+  "performance": {
+    "meanExecutionTimeMs": 4464.95
+  },
+  "failureSummary": [
+    {
+      "failureType": "missed",
+      "count": 109,
+      "affectedImages": [
+        "library-floor-plan",
+        "Lantai 2",
+        "ChatGPT Image Sep 9, 2026, 05_48_42 PM",
+        "sample-floorplan-house2",
+        "sample-floorplan-house3",
+        "WhatsApp Image 2025-11-28 at 14.52.53_d902a408",
+        "simple-apartment-floor-plan",
+        "Floorplan-House",
+        "Lantai 1",
+        "ChatGPT Image Sep 16, 2026, 01_19_00 PM",
+        "ChatGPT Image Sep 9, 2026, 05_41_12 PM"
+      ],
+      "affectedGtRooms": [
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_004",
+        "gt_005",
+        "gt_001",
+        "gt_002",
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_004",
+        "gt_005",
+        "gt_006",
+        "gt_007",
+        "gt_009",
+        "gt_017",
+        "gt_019",
+        "gt_021",
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_005",
+        "gt_006",
+        "gt_008",
+        "gt_009",
+        "gt_012",
+        "gt_013",
+        "gt_014",
+        "gt_015",
+        "gt_016",
+        "gt_017",
+        "gt_018",
+        "gt_019",
+        "gt_020",
+        "gt_021",
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_004",
+        "gt_005",
+        "gt_006",
+        "gt_007",
+        "gt_008",
+        "gt_009",
+        "gt_010",
+        "gt_011",
+        "gt_012",
+        "gt_013",
+        "gt_014",
+        "gt_015",
+        "gt_016",
+        "gt_017",
+        "gt_018",
+        "gt_019",
+        "gt_020",
+        "gt_021",
+        "gt_022",
+        "gt_023",
+        "gt_024",
+        "gt_025",
+        "gt_026",
+        "gt_027",
+        "gt_028",
+        "gt_029",
+        "gt_030",
+        "gt_031",
+        "gt_032",
+        "gt_033",
+        "gt_034",
+        "gt_035",
+        "gt_036",
+        "gt_037",
+        "gt_038",
+        "gt_039",
+        "gt_040",
+        "gt_041",
+        "gt_042",
+        "gt_043",
+        "gt_044",
+        "gt_045",
+        "gt_046",
+        "gt_047",
+        "gt_048",
+        "gt_049",
+        "gt_050",
+        "gt_051",
+        "gt_001",
+        "gt_002",
+        "gt_004",
+        "gt_005",
+        "gt_006",
+        "gt_002",
+        "gt_005",
+        "gt_009",
+        "gt_012",
+        "gt_013",
+        "gt_014",
+        "gt_016",
+        "gt_017",
+        "gt_001",
+        "gt_004",
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_004",
+        "gt_005"
+      ]
+    },
+    {
+      "failureType": "false_positive",
+      "count": 35,
+      "affectedImages": [
+        "library-floor-plan",
+        "ChatGPT Image Sep 9, 2026, 05_48_42 PM",
+        "sample-floorplan-house2",
+        "sample-floorplan-house3",
+        "Floorplan-House",
+        "Lantai 1",
+        "ChatGPT Image Sep 16, 2026, 01_19_00 PM",
+        "ChatGPT Image Sep 9, 2026, 05_41_12 PM",
+        "sample-floorplan"
+      ],
+      "affectedGtRooms": []
+    },
+    {
+      "failureType": "split",
+      "count": 10,
+      "affectedImages": [
+        "sample-floorplan-house2",
+        "Floorplan-House",
+        "Lantai 1",
+        "sample-floorplan"
+      ],
+      "affectedGtRooms": [
+        "gt_004",
+        "gt_006",
+        "gt_007",
+        "gt_008",
+        "gt_018",
+        "gt_020",
+        "gt_002",
+        "gt_003",
+        "gt_005",
+        "gt_003"
+      ]
+    },
+    {
+      "failureType": "merged",
+      "count": 6,
+      "affectedImages": [
+        "sample-floorplan-house2",
+        "simple-apartment-floor-plan",
+        "Floorplan-House"
+      ],
+      "affectedGtRooms": [
+        "gt_016",
+        "gt_020",
+        "gt_001",
+        "gt_002",
+        "gt_007",
+        "gt_016",
+        "gt_004",
+        "gt_005",
+        "gt_006",
+        "gt_007",
+        "gt_001",
+        "gt_002",
+        "gt_003",
+        "gt_011",
+        "gt_012"
+      ]
+    }
+  ]
+}

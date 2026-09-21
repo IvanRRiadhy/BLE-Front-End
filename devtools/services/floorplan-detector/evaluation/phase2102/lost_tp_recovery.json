@@ -1,0 +1,46 @@
+[
+  {
+    "image": "sample-floorplan-house2.png",
+    "candidateId": "rec_wall_enc_105",
+    "expectedGt": "gt_014",
+    "foundInRun": true,
+    "oldRank": 10,
+    "newRank": 8,
+    "rankDelta": 2,
+    "oldScore": 0.7184508695652174,
+    "newScore": 0.7184508695652174,
+    "iou": 0.8690985221327993,
+    "matchedGt": "gt_014",
+    "textEvidence": 0.6397403837942058,
+    "doorEvidence": 0.9019,
+    "cavityEvidence": 0.0,
+    "acceptedBefore": true,
+    "acceptedAfter": false,
+    "recoveredIntoBudget": false
+  },
+  {
+    "image": "sample-floorplan-house2.png",
+    "candidateId": "rec_wall_enc_42",
+    "expectedGt": "gt_009",
+    "foundInRun": false
+  },
+  {
+    "image": "Floorplan-House.png",
+    "candidateId": "rec_rep_1493_1155.0",
+    "expectedGt": "gt_008",
+    "foundInRun": true,
+    "oldRank": 23,
+    "newRank": 8,
+    "rankDelta": 15,
+    "oldScore": 0.8799408582834333,
+    "newScore": 0.8799408582834333,
+    "iou": 0.3752382858556587,
+    "matchedGt": "gt_008",
+    "textEvidence": 0.21745328939622702,
+    "doorEvidence": 0.9287,
+    "cavityEvidence": 0.0,
+    "acceptedBefore": true,
+    "acceptedAfter": false,
+    "recoveredIntoBudget": false
+  }
+]

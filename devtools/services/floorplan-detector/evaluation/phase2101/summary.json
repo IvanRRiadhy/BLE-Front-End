@@ -1,0 +1,40 @@
+{
+  "phase": "2.10.1",
+  "description": "Adaptive Text/Wall Separation Experiment",
+  "winning_strategy": "E_thickness_aware",
+  "baseline": {
+    "strategy": "A_baseline",
+    "tp": 43,
+    "fp": 335,
+    "fn": 105,
+    "precision": 0.1138,
+    "recall": 0.2905,
+    "microF1": 0.1635,
+    "macroF1": 0.301,
+    "meanIoU": 0.5405,
+    "wall_destruction_pixels": 0
+  },
+  "adaptive_winner": {
+    "strategy": "E_thickness_aware",
+    "tp": 43,
+    "fp": 330,
+    "fn": 105,
+    "precision": 0.1153,
+    "recall": 0.2905,
+    "microF1": 0.1651,
+    "macroF1": 0.3066,
+    "meanIoU": 0.5405,
+    "wall_destruction_pixels": 0
+  },
+  "delta_vs_baseline": {
+    "tp_delta": 0,
+    "fp_delta": -5,
+    "fn_delta": 0,
+    "microF1_delta": 0.0016,
+    "macroF1_delta": 0.0056,
+    "wall_loss_pixels": 0,
+    "wall_preservation_perfect": true
+  },
+  "status": "PASS",
+  "ready_for_phase_2_10_2": true
+}

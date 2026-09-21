@@ -1,0 +1,23 @@
+{
+  "strategy": "C_text_mask",
+  "gt": 148,
+  "pred": 367,
+  "tp": 60,
+  "fp": 307,
+  "fn": 88,
+  "precision": 0.1635,
+  "recall": 0.4054,
+  "microF1": 0.233,
+  "macroF1": 0.3612,
+  "meanIoU": 0.5279,
+  "medianIoU": 0.4534,
+  "total_runtime_ms": 315021.4,
+  "mean_latency_ms": 26251.78,
+  "fragmentation": {
+    "total_gt_rooms": 148,
+    "fragmented_rooms": 26,
+    "text_likely_cause": 3,
+    "text_possible_cause": 17,
+    "text_unrelated": 6
+  }
+}

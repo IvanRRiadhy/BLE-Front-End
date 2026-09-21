@@ -1,0 +1,1024 @@
+[
+  {
+    "candidate_id": "rec_wall_enc_341",
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_009",
+    "iou": 0.2778,
+    "initial_score": 0.5898,
+    "final_score": 0.5898,
+    "old_rank": 58,
+    "new_rank": 58,
+    "budget_limit": 12,
+    "budget_position": 58,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "hyp_cavity_11",
+    "overlap_ratio": 0.917,
+    "merge_status": "unmerged",
+    "rejection_reason": "BUDGET_REJECTED",
+    "text_room_evidence": 0.0883,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.8721,
+    "structural_evidence": 0.3606,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "wall_enclosure"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.5025931928687196,
+        "wall_support": 0.4051863857374392,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.08830812018191808,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.8721,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.3606
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.5898031928687196,
+        "final_score": 0.5898031928687196,
+        "old_rank": 58,
+        "new_rank": 58
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 58,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "hyp_cavity_11",
+        "max_iou": 0.5291004817609357,
+        "max_overlap_ratio": 0.9169597624625615,
+        "is_duplicate": true,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": false,
+        "merge_status": "unmerged",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.2777969698840937
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_1516_490",
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_017",
+    "iou": 0.2944,
+    "initial_score": 0.8846,
+    "final_score": 0.8846,
+    "old_rank": 17,
+    "new_rank": 17,
+    "budget_limit": 12,
+    "budget_position": 17,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "hyp_cavity_1_sub2",
+    "overlap_ratio": 0.9075,
+    "merge_status": "absorbed_into_merged_prediction_hyp_cavity_1_sub2",
+    "rejection_reason": "BUDGET_REJECTED",
+    "text_room_evidence": 0.272,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.8945,
+    "structural_evidence": 0.4693,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.7951057115809405,
+        "wall_support": 0.5702114231618807,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.27196709443646333,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.8945,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.4693
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.8845557115809405,
+        "final_score": 0.8845557115809405,
+        "old_rank": 17,
+        "new_rank": 17
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 17,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "hyp_cavity_1_sub2",
+        "max_iou": 0.24865028612482565,
+        "max_overlap_ratio": 0.9074889867841409,
+        "is_duplicate": false,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_hyp_cavity_1_sub2",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.2943821801848493
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_1002_1167.0",
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_009",
+    "iou": 0.263,
+    "initial_score": 0.9079,
+    "final_score": 0.9079,
+    "old_rank": 12,
+    "new_rank": 12,
+    "budget_limit": 12,
+    "budget_position": 12,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "hyp_cavity_11",
+    "overlap_ratio": 0.702,
+    "merge_status": "unmerged",
+    "rejection_reason": "DUPLICATE_REJECTED",
+    "text_room_evidence": 0.1219,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.8765,
+    "structural_evidence": 0.4285,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.8202423954372624,
+        "wall_support": 0.6204847908745247,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.12189878766696463,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.8765,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.4285
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.9078923954372624,
+        "final_score": 0.9078923954372624,
+        "old_rank": 12,
+        "new_rank": 12
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 12,
+        "passed_budget": true
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "hyp_cavity_11",
+        "max_iou": 0.6126649584946524,
+        "max_overlap_ratio": 0.7019930359634754,
+        "is_duplicate": true,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": false,
+        "merge_status": "unmerged",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.2630268604254578
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_86_22.0",
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_001",
+    "iou": 0.2571,
+    "initial_score": 0.8017,
+    "final_score": 0.8017,
+    "old_rank": 5,
+    "new_rank": 5,
+    "budget_limit": 8,
+    "budget_position": 5,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "hyp_cavity_4",
+    "overlap_ratio": 0.4255,
+    "merge_status": "unmerged",
+    "rejection_reason": "DUPLICATE_REJECTED",
+    "text_room_evidence": 0.3872,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.1603,
+    "structural_evidence": 0.1,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.7857132132132133,
+        "wall_support": 0.5514264264264265,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.38720993893707617,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.1603,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.1
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.8017432132132133,
+        "final_score": 0.8017432132132133,
+        "old_rank": 5,
+        "new_rank": 5
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 8,
+        "budget_position": 5,
+        "passed_budget": true
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "hyp_cavity_4",
+        "max_iou": 0.4202987547661191,
+        "max_overlap_ratio": 0.4255463042143717,
+        "is_duplicate": true,
+        "is_overlap": false
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": false,
+        "merge_status": "unmerged",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.2571229515776373
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_wall_enc_6",
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_019",
+    "iou": 0.4888,
+    "initial_score": 0.0911,
+    "final_score": 0.0911,
+    "old_rank": -1,
+    "new_rank": -1,
+    "budget_limit": 12,
+    "budget_position": -1,
+    "accepted_before_budget": false,
+    "accepted_after_budget": false,
+    "duplicate_target": null,
+    "overlap_ratio": 0.0,
+    "merge_status": "unmerged",
+    "rejection_reason": "THRESHOLD_REJECTED",
+    "text_room_evidence": 0.1425,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.9111,
+    "structural_evidence": 0.5729,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "wall_enclosure"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.0,
+        "wall_support": 0.43281129156999226,
+        "enclosure_score": 0.3625467876736912
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.1425467267454867,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.9111,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.5729
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.09111000000000001,
+        "final_score": 0.09111000000000001,
+        "old_rank": -1,
+        "new_rank": -1
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": -1,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": null,
+        "max_iou": 0.0,
+        "max_overlap_ratio": 0.0,
+        "is_duplicate": false,
+        "is_overlap": false
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": false,
+        "merge_status": "unmerged",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.4887622525823658
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_1377_758.0",
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_004",
+    "iou": 0.4485,
+    "initial_score": 0.848,
+    "final_score": 0.848,
+    "old_rank": 4,
+    "new_rank": 4,
+    "budget_limit": 12,
+    "budget_position": 4,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "hyp_cavity_1_sub2",
+    "overlap_ratio": 0.371,
+    "merge_status": "absorbed_into_merged_prediction_hyp_cavity_1_sub2",
+    "rejection_reason": "MERGED_REJECTED",
+    "text_room_evidence": 0.2554,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.0,
+    "structural_evidence": 0.152,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.8480160550458716,
+        "wall_support": 0.6760321100917431,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.2554267999290636,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.0,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.152
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.8480160550458716,
+        "final_score": 0.8480160550458716,
+        "old_rank": 4,
+        "new_rank": 4
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 4,
+        "passed_budget": true
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "hyp_cavity_1_sub2",
+        "max_iou": 0.02034964487927514,
+        "max_overlap_ratio": 0.3709677419354839,
+        "is_duplicate": false,
+        "is_overlap": false
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_hyp_cavity_1_sub2",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.4485313384114422
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_3209_859.0",
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_011",
+    "iou": 0.4048,
+    "initial_score": 0.8276,
+    "final_score": 0.8276,
+    "old_rank": 96,
+    "new_rank": 96,
+    "budget_limit": 12,
+    "budget_position": 96,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+    "overlap_ratio": 1.0,
+    "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+    "rejection_reason": "BUDGET_REJECTED",
+    "text_room_evidence": 0.1637,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.0,
+    "structural_evidence": 0.2754,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.8276332696648724,
+        "wall_support": 0.6352665393297448,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.16372907068435721,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.0,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.2754
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.8276332696648724,
+        "final_score": 0.8276332696648724,
+        "old_rank": 96,
+        "new_rank": 96
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 96,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+        "max_iou": 0.2415990700210377,
+        "max_overlap_ratio": 1.0,
+        "is_duplicate": false,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.40480752472593634
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_3819_859.0",
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_015",
+    "iou": 0.2935,
+    "initial_score": 0.8346,
+    "final_score": 0.8346,
+    "old_rank": 94,
+    "new_rank": 94,
+    "budget_limit": 12,
+    "budget_position": 94,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "hyp_cavity_2_sub1",
+    "overlap_ratio": 1.0,
+    "merge_status": "absorbed_into_merged_prediction_hyp_cavity_2_sub1",
+    "rejection_reason": "BUDGET_REJECTED",
+    "text_room_evidence": 0.1293,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.0,
+    "structural_evidence": 0.2355,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.8346223302656711,
+        "wall_support": 0.6492446605313422,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.12933234823959386,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.0,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.2355
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.8346223302656711,
+        "final_score": 0.8346223302656711,
+        "old_rank": 94,
+        "new_rank": 94
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 94,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "hyp_cavity_2_sub1",
+        "max_iou": 0.05015495979222101,
+        "max_overlap_ratio": 1.0,
+        "is_duplicate": false,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_hyp_cavity_2_sub1",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.2934520158543812
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_3901_859.0",
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_015",
+    "iou": 0.3288,
+    "initial_score": 0.7737,
+    "final_score": 0.7737,
+    "old_rank": 121,
+    "new_rank": 121,
+    "budget_limit": 12,
+    "budget_position": 121,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+    "overlap_ratio": 0.9912,
+    "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+    "rejection_reason": "BUDGET_REJECTED",
+    "text_room_evidence": 0.1916,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.6045,
+    "structural_evidence": 0.458,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.7132920597484277,
+        "wall_support": 0.5065841194968553,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.1915853264240633,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.6045,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.458
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.7737420597484277,
+        "final_score": 0.7737420597484277,
+        "old_rank": 121,
+        "new_rank": 121
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 121,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+        "max_iou": 0.0786969946078726,
+        "max_overlap_ratio": 0.9911651173444573,
+        "is_duplicate": false,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.3288154834347048
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_2288_3114.0",
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_008",
+    "iou": 0.4813,
+    "initial_score": 0.9414,
+    "final_score": 0.9414,
+    "old_rank": 15,
+    "new_rank": 15,
+    "budget_limit": 12,
+    "budget_position": 15,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+    "overlap_ratio": 0.681,
+    "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+    "rejection_reason": "BUDGET_REJECTED",
+    "text_room_evidence": 0.3046,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.8511,
+    "structural_evidence": 0.4135,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.8562890305705412,
+        "wall_support": 0.6925780611410822,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.3045980469142672,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.8511,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.4135
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.9413990305705412,
+        "final_score": 0.9413990305705412,
+        "old_rank": 15,
+        "new_rank": 15
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 15,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+        "max_iou": 0.05737114209619301,
+        "max_overlap_ratio": 0.681025641025641,
+        "is_duplicate": false,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.4812616846832733
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_3263_3114.0",
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_019",
+    "iou": 0.2542,
+    "initial_score": 0.8126,
+    "final_score": 0.8126,
+    "old_rank": 115,
+    "new_rank": 115,
+    "budget_limit": 12,
+    "budget_position": 115,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+    "overlap_ratio": 1.0,
+    "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+    "rejection_reason": "BUDGET_REJECTED",
+    "text_room_evidence": 0.4055,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.8511,
+    "structural_evidence": 0.4428,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.7274717999019128,
+        "wall_support": 0.5349435998038254,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.40549151894695434,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.8511,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.4428
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.8125817999019128,
+        "final_score": 0.8125817999019128,
+        "old_rank": 115,
+        "new_rank": 115
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 115,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+        "max_iou": 0.14326235779885196,
+        "max_overlap_ratio": 1.0,
+        "is_duplicate": false,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.2541612674007025
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_rep_2288_3114.0",
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_008",
+    "iou": 0.4813,
+    "initial_score": 0.9414,
+    "final_score": 0.9414,
+    "old_rank": 16,
+    "new_rank": 16,
+    "budget_limit": 12,
+    "budget_position": 16,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+    "overlap_ratio": 0.681,
+    "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+    "rejection_reason": "BUDGET_REJECTED",
+    "text_room_evidence": 0.3046,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.8511,
+    "structural_evidence": 0.4135,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "repeated_room"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.8562890305705412,
+        "wall_support": 0.6925780611410822,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.3045980469142672,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.8511,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.4135
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.9413990305705412,
+        "final_score": 0.9413990305705412,
+        "old_rank": 16,
+        "new_rank": 16
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 12,
+        "budget_position": 16,
+        "passed_budget": false
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "merged_hyp_cavity_1_hyp_cavity_2",
+        "max_iou": 0.05737114209619301,
+        "max_overlap_ratio": 0.681025641025641,
+        "is_duplicate": false,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_merged_hyp_cavity_1_hyp_cavity_2",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.4812616846832733
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_wall_enc_2",
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_005",
+    "iou": 0.9634,
+    "initial_score": 0.8357,
+    "final_score": 0.8357,
+    "old_rank": 1,
+    "new_rank": 1,
+    "budget_limit": 5,
+    "budget_position": 1,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "hyp_cavity_1",
+    "overlap_ratio": 0.9902,
+    "merge_status": "absorbed_into_merged_prediction_hyp_cavity_1",
+    "rejection_reason": "OVERLAP_REJECTED",
+    "text_room_evidence": 0.5451,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.8804,
+    "structural_evidence": 0.5909,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "wall_enclosure"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.7476245992422035,
+        "wall_support": 0.7952491984844069,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.5451297566815435,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.8804,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.5909
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.8356645992422035,
+        "final_score": 0.8356645992422035,
+        "old_rank": 1,
+        "new_rank": 1
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 5,
+        "budget_position": 1,
+        "passed_budget": true
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "hyp_cavity_1",
+        "max_iou": 0.1507839927642203,
+        "max_overlap_ratio": 0.9901513751423119,
+        "is_duplicate": false,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_hyp_cavity_1",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.9633630355023585
+      }
+    ]
+  },
+  {
+    "candidate_id": "rec_wall_enc_5",
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_002",
+    "iou": 0.3024,
+    "initial_score": 0.7353,
+    "final_score": 0.7353,
+    "old_rank": 2,
+    "new_rank": 2,
+    "budget_limit": 5,
+    "budget_position": 2,
+    "accepted_before_budget": true,
+    "accepted_after_budget": false,
+    "duplicate_target": "hyp_cavity_2",
+    "overlap_ratio": 0.9692,
+    "merge_status": "absorbed_into_merged_prediction_hyp_cavity_2",
+    "rejection_reason": "DUPLICATE_REJECTED",
+    "text_room_evidence": 0.1477,
+    "text_artifact_evidence": 0.0,
+    "door_evidence": 0.8872,
+    "structural_evidence": 0.5266,
+    "cavity_evidence": 0.0,
+    "lifecycle_history": [
+      {
+        "stage": "candidate_generation",
+        "status": "generated",
+        "source": "wall_enclosure"
+      },
+      {
+        "stage": "initial_confidence",
+        "confidence": 0.6466012797650268,
+        "wall_support": 0.5932025595300535,
+        "enclosure_score": 1.0
+      },
+      {
+        "stage": "evidence_features",
+        "text_room_evidence": 0.14767083969397246,
+        "text_artifact_evidence": 0.0,
+        "door_evidence": 0.8872,
+        "cavity_evidence": 0.0,
+        "structural_evidence": 0.5266
+      },
+      {
+        "stage": "fusion_scoring",
+        "initial_score": 0.7353212797650268,
+        "final_score": 0.7353212797650268,
+        "old_rank": 2,
+        "new_rank": 2
+      },
+      {
+        "stage": "budget_gate",
+        "budget_limit": 5,
+        "budget_position": 2,
+        "passed_budget": true
+      },
+      {
+        "stage": "duplicate_overlap_pruning",
+        "duplicate_target": "hyp_cavity_2",
+        "max_iou": 0.9376177684298804,
+        "max_overlap_ratio": 0.9691505894951762,
+        "is_duplicate": true,
+        "is_overlap": true
+      },
+      {
+        "stage": "boundary_reconstruction_and_evaluator",
+        "passed_topology": true,
+        "is_merged": true,
+        "merge_status": "absorbed_into_merged_prediction_hyp_cavity_2",
+        "matched_in_eval": false,
+        "reconstructed_iou": 0.3023969479555651
+      }
+    ]
+  }
+]

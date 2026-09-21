@@ -1,0 +1,27 @@
+{
+  "strategyId": "text_positive",
+  "strategyName": "B_text_positive",
+  "config": {
+    "strategyId": "text_positive",
+    "strategyName": "B_text_positive",
+    "doorWeight": 0.1,
+    "textPositiveWeight": 0.05,
+    "textNegativeWeight": 0.0,
+    "cavityPenaltyWeight": 0.0,
+    "structuralScoreWeight": 0.0
+  },
+  "gtRoomCount": 148,
+  "predRoomCount": 126,
+  "tp": 40,
+  "fp": 86,
+  "fn": 108,
+  "precision": 0.3175,
+  "recall": 0.2703,
+  "microF1": 0.292,
+  "macroF1": 0.3186,
+  "meanIoU": 0.5864,
+  "medianIoU": 0.5006,
+  "latencyMs": 995.23,
+  "promotedCandidates": 77,
+  "demotedCandidates": 202
+}

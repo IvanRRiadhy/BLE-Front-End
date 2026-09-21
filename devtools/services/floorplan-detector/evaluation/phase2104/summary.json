@@ -1,0 +1,13 @@
+{
+  "phase": "2.10.4",
+  "description": "Room Proposal / Candidate Generation Recovery Experiment",
+  "authoritative_gt_count": 148,
+  "baseline_gt_proposal_recall_25": 0.2635,
+  "combined_gt_proposal_recall_25": 0.3716,
+  "gt_proposal_recall_improvement_pct": 10.81,
+  "missing_gt_rooms_recovered_25": 20,
+  "missing_gt_rooms_total": 109,
+  "new_proposals_count": 4339,
+  "status": "PASS",
+  "ready_for_phase_2_10_5": true
+}

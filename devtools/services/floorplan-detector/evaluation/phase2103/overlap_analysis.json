@@ -1,0 +1,87 @@
+{
+  "total_overlap_rejected": 1,
+  "disable_overlap_experiment": {
+    "experiment_id": "F",
+    "name": "Disable Overlap Pruning (Diag)",
+    "tp": 40,
+    "fp": 76,
+    "fn": 108,
+    "precision": 0.3448,
+    "recall": 0.2703,
+    "microF1": 0.303,
+    "per_image": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 3
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "tp": 0,
+        "fp": 5,
+        "fn": 5
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "tp": 0,
+        "fp": 10,
+        "fn": 5
+      },
+      "Floorplan-House.png": {
+        "tp": 11,
+        "fp": 21,
+        "fn": 5
+      },
+      "Lantai 1.jpg": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 2
+      },
+      "Lantai 2.jpg": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 3
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 51
+      },
+      "library-floor-plan.png": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 4
+      },
+      "sample-floorplan-house2.png": {
+        "tp": 11,
+        "fp": 11,
+        "fn": 6
+      },
+      "sample-floorplan-house3.png": {
+        "tp": 3,
+        "fp": 20,
+        "fn": 18
+      },
+      "sample-floorplan.png": {
+        "tp": 7,
+        "fp": 1,
+        "fn": 1
+      },
+      "simple-apartment-floor-plan.png": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 5
+      }
+    }
+  },
+  "records": [
+    {
+      "candidate_id": "rec_wall_enc_2",
+      "image_id": "simple-apartment-floor-plan.png",
+      "gt_id": "gt_005",
+      "raw_iou": 0.9633630355023585,
+      "overlap_target": "hyp_cavity_1",
+      "overlap_ratio": 0.9901513751423119,
+      "explanation": "Rejected by overlap/containment suppression against hyp_cavity_1 (overlap ratio = 0.99)"
+    }
+  ],
+  "key_finding": "Disabling overlap pruning reduces false positives from 85 to 76 by preventing nested candidate fragments from competing with primary shapes, but does not recover new TPs without unmerged primary cavities."
+}

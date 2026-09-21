@@ -1,0 +1,161 @@
+{
+  "image_sizes": {
+    "256x256": {
+      "status": "PASS",
+      "area_count": 5,
+      "execution_time_ms": 0.0,
+      "valid_bounds": true
+    },
+    "512x512": {
+      "status": "PASS",
+      "area_count": 10,
+      "execution_time_ms": 0.0,
+      "valid_bounds": true
+    },
+    "1024x1024": {
+      "status": "PASS",
+      "area_count": 11,
+      "execution_time_ms": 0.0,
+      "valid_bounds": true
+    },
+    "1920x1080": {
+      "status": "PASS",
+      "area_count": 18,
+      "execution_time_ms": 0.0,
+      "valid_bounds": true
+    },
+    "2560x1608": {
+      "status": "PASS",
+      "area_count": 42,
+      "execution_time_ms": 0.0,
+      "valid_bounds": true
+    },
+    "2490x2420": {
+      "status": "PASS",
+      "area_count": 53,
+      "execution_time_ms": 0.0,
+      "valid_bounds": true
+    },
+    "623x431": {
+      "status": "PASS",
+      "area_count": 7,
+      "execution_time_ms": 0.0,
+      "valid_bounds": true
+    },
+    "3500x3500": {
+      "status": "PASS",
+      "area_count": 68,
+      "execution_time_ms": 0.0,
+      "valid_bounds": true
+    }
+  },
+  "image_formats": {
+    ".png": {
+      "status": "PASS",
+      "area_count": 7,
+      "encoded_size_bytes": 38645
+    },
+    ".jpg": {
+      "status": "PASS",
+      "area_count": 8,
+      "encoded_size_bytes": 45064
+    },
+    ".webp": {
+      "status": "PASS",
+      "area_count": 7,
+      "encoded_size_bytes": 7018
+    }
+  },
+  "color_modes": {
+    "RGB": {
+      "status": "PASS",
+      "area_count": 7
+    },
+    "RGBA": {
+      "status": "PASS",
+      "area_count": 7
+    },
+    "Grayscale": {
+      "status": "PASS",
+      "area_count": 7
+    },
+    "Grayscale_to_RGB": {
+      "status": "PASS",
+      "area_count": 7
+    }
+  },
+  "difficult_inputs": {
+    "all_walls_dense_grid": {
+      "status": "PASS",
+      "area_count": 0,
+      "execution_time_ms": 0.0
+    },
+    "faint_walls": {
+      "status": "PASS",
+      "area_count": 1,
+      "execution_time_ms": 0.0
+    },
+    "thick_walls": {
+      "status": "PASS",
+      "area_count": 1,
+      "execution_time_ms": 0.0
+    },
+    "high_contrast_cad": {
+      "status": "PASS",
+      "area_count": 2,
+      "execution_time_ms": 0.0
+    },
+    "low_contrast": {
+      "status": "PASS",
+      "area_count": 1,
+      "execution_time_ms": 0.0
+    },
+    "open_plan": {
+      "status": "PASS",
+      "area_count": 0,
+      "execution_time_ms": 0.0
+    }
+  },
+  "invalid_inputs": {
+    "blank_white": {
+      "status": "PASS",
+      "safe_handling": true,
+      "area_count": 0
+    },
+    "blank_black": {
+      "status": "PASS",
+      "safe_handling": true,
+      "area_count": 0
+    },
+    "near_blank_single_dot": {
+      "status": "PASS",
+      "safe_handling": true,
+      "area_count": 0
+    },
+    "extremely_wide": {
+      "status": "PASS",
+      "safe_handling": true,
+      "area_count": 0
+    },
+    "extremely_tall": {
+      "status": "PASS",
+      "safe_handling": true,
+      "area_count": 0
+    },
+    "tiny_1x1": {
+      "status": "PASS",
+      "safe_handling": true,
+      "area_count": 0
+    },
+    "tiny_5x5": {
+      "status": "PASS",
+      "safe_handling": true,
+      "area_count": 0
+    },
+    "corrupted_bytes": {
+      "status": "PASS",
+      "safe_handling": true,
+      "note": "Rejected at decode"
+    }
+  }
+}

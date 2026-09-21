@@ -1,0 +1,16 @@
+{
+  "health_endpoint": {
+    "status_code": 200,
+    "data": {
+      "status": "ok"
+    }
+  },
+  "detect_endpoint_default": {
+    "status_code": 200,
+    "areas_valid": true
+  },
+  "detected_area_schema_pure_geometry": true,
+  "no_leaked_ml_fields": true,
+  "main_repo_isolation": true,
+  "status": "PASS"
+}

@@ -1,0 +1,28 @@
+{
+  "repeated_room": {
+    "candidateCount": 77,
+    "acceptedCount": 20,
+    "rejectedCount": 57,
+    "budgetRejectedCount": 48,
+    "thresholdRejectedCount": 9,
+    "meanConfidence": 0.8283,
+    "medianConfidence": 0.8034,
+    "meanWallSupport": 0.6878,
+    "TP": 0,
+    "FP": 20,
+    "FN": 57
+  },
+  "wall_enclosure": {
+    "candidateCount": 234,
+    "acceptedCount": 21,
+    "rejectedCount": 213,
+    "budgetRejectedCount": 197,
+    "thresholdRejectedCount": 16,
+    "meanConfidence": 0.6711,
+    "medianConfidence": 0.6587,
+    "meanWallSupport": 0.6897,
+    "TP": 0,
+    "FP": 21,
+    "FN": 213
+  }
+}

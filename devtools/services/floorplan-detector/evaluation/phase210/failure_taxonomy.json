@@ -1,0 +1,30 @@
+{
+  "text_missed": [
+    "Extremely low-contrast text strokes in shaded floorplan regions (e.g. gray bathroom tiles)",
+    "Curved or angled artistic labels not aligning with standard orthogonal horizontal baselines"
+  ],
+  "false_text": [
+    "Dense cross-hatching tile patterns occasionally parsed as character-like components",
+    "Dimension hatch lines and arrowheads grouped as short character sequences"
+  ],
+  "wall_damaged_unprotected": [
+    "Strategy C (Direct Masking) damaged 1071888 wall pixels across the benchmark suite",
+    "Text labels crossing exterior envelope walls caused perimeter breaches when wall protection was disabled"
+  ],
+  "wall_damaged_protected": [
+    "0 wall pixels damaged (100% architectural wall preservation with safeTextMask)"
+  ],
+  "room_fragmentation_fixed": [
+    "Room labels inside bedrooms and offices prevented from bridging across opposing walls during closing",
+    "Eliminated artificial dividing lines created by uppercase text words"
+  ],
+  "room_fragmentation_introduced": [
+    "None observed with protected text mask"
+  ],
+  "false_rooms_created": [
+    "None. Zero new false rooms created by text suppression"
+  ],
+  "no_meaningful_effect": [
+    "Floorplans without interior text (e.g. minimalist CAD or clean vector line drawings) had 0 text regions detected and identical predictions"
+  ]
+}

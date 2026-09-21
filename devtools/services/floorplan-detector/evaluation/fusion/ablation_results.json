@@ -1,0 +1,650 @@
+[
+  {
+    "strategyId": "baseline",
+    "strategyName": "Strategy A: Baseline (Pure Classical CV)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 103691.71,
+      "totalMs": 103890.29
+    }
+  },
+  {
+    "strategyId": "cavity_p10",
+    "strategyName": "Strategy B: Cavity Penalty (lambda=0.10)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1256.0,
+      "totalMs": 1454.58
+    }
+  },
+  {
+    "strategyId": "cavity_p20",
+    "strategyName": "Strategy B: Cavity Penalty (lambda=0.20)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1202.15,
+      "totalMs": 1400.73
+    }
+  },
+  {
+    "strategyId": "cavity_p30",
+    "strategyName": "Strategy B: Cavity Penalty (lambda=0.30)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1210.28,
+      "totalMs": 1408.86
+    }
+  },
+  {
+    "strategyId": "cavity_p40",
+    "strategyName": "Strategy B: Cavity Penalty (lambda=0.40)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1208.69,
+      "totalMs": 1407.27
+    }
+  },
+  {
+    "strategyId": "cavity_p50",
+    "strategyName": "Strategy B: Cavity Penalty (lambda=0.50)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1257.44,
+      "totalMs": 1456.02
+    }
+  },
+  {
+    "strategyId": "door_b10",
+    "strategyName": "Strategy C: Doorway Bonus (lambda=0.10)",
+    "gtCount": 148,
+    "predCount": 105,
+    "tpCount": 40,
+    "fpCount": 65,
+    "fnCount": 108,
+    "precision": 0.381,
+    "recall": 0.2703,
+    "microF1": 0.3162,
+    "macroF1": 0.3309,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1155.18,
+      "totalMs": 1353.76
+    }
+  },
+  {
+    "strategyId": "door_b20",
+    "strategyName": "Strategy C: Doorway Bonus (lambda=0.20)",
+    "gtCount": 148,
+    "predCount": 106,
+    "tpCount": 40,
+    "fpCount": 66,
+    "fnCount": 108,
+    "precision": 0.3774,
+    "recall": 0.2703,
+    "microF1": 0.315,
+    "macroF1": 0.3306,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1141.85,
+      "totalMs": 1340.43
+    }
+  },
+  {
+    "strategyId": "door_b30",
+    "strategyName": "Strategy C: Doorway Bonus (lambda=0.30)",
+    "gtCount": 148,
+    "predCount": 106,
+    "tpCount": 40,
+    "fpCount": 66,
+    "fnCount": 108,
+    "precision": 0.3774,
+    "recall": 0.2703,
+    "microF1": 0.315,
+    "macroF1": 0.3306,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1138.99,
+      "totalMs": 1337.57
+    }
+  },
+  {
+    "strategyId": "door_b40",
+    "strategyName": "Strategy C: Doorway Bonus (lambda=0.40)",
+    "gtCount": 148,
+    "predCount": 107,
+    "tpCount": 40,
+    "fpCount": 67,
+    "fnCount": 108,
+    "precision": 0.3738,
+    "recall": 0.2703,
+    "microF1": 0.3137,
+    "macroF1": 0.3295,
+    "meanIoU": 0.6468,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1154.37,
+      "totalMs": 1352.95
+    }
+  },
+  {
+    "strategyId": "struct_s10",
+    "strategyName": "Strategy D: Structural Score (lambda=0.10)",
+    "gtCount": 148,
+    "predCount": 112,
+    "tpCount": 40,
+    "fpCount": 72,
+    "fnCount": 108,
+    "precision": 0.3571,
+    "recall": 0.2703,
+    "microF1": 0.3077,
+    "macroF1": 0.3261,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1226.7,
+      "totalMs": 1425.28
+    }
+  },
+  {
+    "strategyId": "struct_s20",
+    "strategyName": "Strategy D: Structural Score (lambda=0.20)",
+    "gtCount": 148,
+    "predCount": 110,
+    "tpCount": 40,
+    "fpCount": 70,
+    "fnCount": 108,
+    "precision": 0.3636,
+    "recall": 0.2703,
+    "microF1": 0.3101,
+    "macroF1": 0.3273,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1191.19,
+      "totalMs": 1389.77
+    }
+  },
+  {
+    "strategyId": "struct_s30",
+    "strategyName": "Strategy D: Structural Score (lambda=0.30)",
+    "gtCount": 148,
+    "predCount": 109,
+    "tpCount": 40,
+    "fpCount": 69,
+    "fnCount": 108,
+    "precision": 0.367,
+    "recall": 0.2703,
+    "microF1": 0.3113,
+    "macroF1": 0.3275,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1184.57,
+      "totalMs": 1383.15
+    }
+  },
+  {
+    "strategyId": "struct_s40",
+    "strategyName": "Strategy D: Structural Score (lambda=0.40)",
+    "gtCount": 148,
+    "predCount": 108,
+    "tpCount": 40,
+    "fpCount": 68,
+    "fnCount": 108,
+    "precision": 0.3704,
+    "recall": 0.2703,
+    "microF1": 0.3125,
+    "macroF1": 0.3289,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1175.26,
+      "totalMs": 1373.84
+    }
+  },
+  {
+    "strategyId": "hybrid_d20_c20",
+    "strategyName": "Strategy E: Hybrid (Door +0.20, Cavity -0.20)",
+    "gtCount": 148,
+    "predCount": 106,
+    "tpCount": 40,
+    "fpCount": 66,
+    "fnCount": 108,
+    "precision": 0.3774,
+    "recall": 0.2703,
+    "microF1": 0.315,
+    "macroF1": 0.3306,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1183.61,
+      "totalMs": 1382.19
+    }
+  },
+  {
+    "strategyId": "hybrid_d30_c30",
+    "strategyName": "Strategy E: Hybrid (Door +0.30, Cavity -0.30)",
+    "gtCount": 148,
+    "predCount": 106,
+    "tpCount": 40,
+    "fpCount": 66,
+    "fnCount": 108,
+    "precision": 0.3774,
+    "recall": 0.2703,
+    "microF1": 0.315,
+    "macroF1": 0.3306,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1139.95,
+      "totalMs": 1338.53
+    }
+  },
+  {
+    "strategyId": "hybrid_s20_c20",
+    "strategyName": "Strategy E: Hybrid (Struct +0.20, Cavity -0.20)",
+    "gtCount": 148,
+    "predCount": 110,
+    "tpCount": 40,
+    "fpCount": 70,
+    "fnCount": 108,
+    "precision": 0.3636,
+    "recall": 0.2703,
+    "microF1": 0.3101,
+    "macroF1": 0.3273,
+    "meanIoU": 0.6471,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 11,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1172.41,
+      "totalMs": 1370.99
+    }
+  },
+  {
+    "strategyId": "veto_c90_d05",
+    "strategyName": "Strategy F: ML Veto (Cavity >= 0.90, Door <= 0.05)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1209.17,
+      "totalMs": 1407.75
+    }
+  },
+  {
+    "strategyId": "veto_c95_d05",
+    "strategyName": "Strategy F: ML Veto (Cavity >= 0.95, Door <= 0.05)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1210.0,
+      "totalMs": 1408.58
+    }
+  },
+  {
+    "strategyId": "veto_c95_d10",
+    "strategyName": "Strategy F: ML Veto (Cavity >= 0.95, Door <= 0.10)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1232.58,
+      "totalMs": 1431.16
+    }
+  },
+  {
+    "strategyId": "second_chance_d80",
+    "strategyName": "Strategy G: ML Second Chance (Door >= 0.80)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1255.35,
+      "totalMs": 1453.93
+    }
+  },
+  {
+    "strategyId": "second_chance_d85",
+    "strategyName": "Strategy G: ML Second Chance (Door >= 0.85)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1227.09,
+      "totalMs": 1425.67
+    }
+  },
+  {
+    "strategyId": "second_chance_d90",
+    "strategyName": "Strategy G: ML Second Chance (Door >= 0.90)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1233.25,
+      "totalMs": 1431.83
+    }
+  },
+  {
+    "strategyId": "second_chance_d85_c20",
+    "strategyName": "Strategy G: Second Chance (Door >= 0.85) + Cavity Penalty (-0.20)",
+    "gtCount": 148,
+    "predCount": 114,
+    "tpCount": 38,
+    "fpCount": 76,
+    "fnCount": 110,
+    "precision": 0.3333,
+    "recall": 0.2568,
+    "microF1": 0.2901,
+    "macroF1": 0.3173,
+    "meanIoU": 0.6532,
+    "medianIoU": 0.592,
+    "anchors": {
+      "sampleFloorplanTp": 7,
+      "lantai1Tp": 3,
+      "lantai2Tp": 2,
+      "house2Tp": 10,
+      "anchorsPreserved": false
+    },
+    "performance": {
+      "inferenceMs": 198.58,
+      "fusionMs": 1272.74,
+      "totalMs": 1471.32
+    }
+  }
+]

@@ -1,0 +1,299 @@
+{
+  "baseline_budget": {
+    "experiment_id": "A",
+    "name": "Phase 2.10.2 Baseline Selection",
+    "tp": 40,
+    "fp": 86,
+    "fn": 108,
+    "precision": 0.3175,
+    "recall": 0.2703,
+    "microF1": 0.292,
+    "per_image": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 3
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "tp": 0,
+        "fp": 5,
+        "fn": 5
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "tp": 0,
+        "fp": 10,
+        "fn": 5
+      },
+      "Floorplan-House.png": {
+        "tp": 11,
+        "fp": 22,
+        "fn": 5
+      },
+      "Lantai 1.jpg": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 2
+      },
+      "Lantai 2.jpg": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 3
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 51
+      },
+      "library-floor-plan.png": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 4
+      },
+      "sample-floorplan-house2.png": {
+        "tp": 11,
+        "fp": 11,
+        "fn": 6
+      },
+      "sample-floorplan-house3.png": {
+        "tp": 3,
+        "fp": 29,
+        "fn": 18
+      },
+      "sample-floorplan.png": {
+        "tp": 7,
+        "fp": 1,
+        "fn": 1
+      },
+      "simple-apartment-floor-plan.png": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 5
+      }
+    }
+  },
+  "plus_25_budget": {
+    "experiment_id": "C",
+    "name": "+25% Candidate Budget",
+    "tp": 40,
+    "fp": 91,
+    "fn": 108,
+    "precision": 0.3053,
+    "recall": 0.2703,
+    "microF1": 0.2867,
+    "per_image": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 3
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "tp": 0,
+        "fp": 5,
+        "fn": 5
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "tp": 0,
+        "fp": 10,
+        "fn": 5
+      },
+      "Floorplan-House.png": {
+        "tp": 11,
+        "fp": 24,
+        "fn": 5
+      },
+      "Lantai 1.jpg": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 2
+      },
+      "Lantai 2.jpg": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 3
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 51
+      },
+      "library-floor-plan.png": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 4
+      },
+      "sample-floorplan-house2.png": {
+        "tp": 11,
+        "fp": 11,
+        "fn": 6
+      },
+      "sample-floorplan-house3.png": {
+        "tp": 3,
+        "fp": 32,
+        "fn": 18
+      },
+      "sample-floorplan.png": {
+        "tp": 7,
+        "fp": 1,
+        "fn": 1
+      },
+      "simple-apartment-floor-plan.png": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 5
+      }
+    }
+  },
+  "plus_50_budget": {
+    "experiment_id": "D",
+    "name": "+50% Candidate Budget",
+    "tp": 40,
+    "fp": 95,
+    "fn": 108,
+    "precision": 0.2963,
+    "recall": 0.2703,
+    "microF1": 0.2827,
+    "per_image": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 3
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "tp": 0,
+        "fp": 5,
+        "fn": 5
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "tp": 0,
+        "fp": 10,
+        "fn": 5
+      },
+      "Floorplan-House.png": {
+        "tp": 11,
+        "fp": 26,
+        "fn": 5
+      },
+      "Lantai 1.jpg": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 2
+      },
+      "Lantai 2.jpg": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 3
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 51
+      },
+      "library-floor-plan.png": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 4
+      },
+      "sample-floorplan-house2.png": {
+        "tp": 11,
+        "fp": 11,
+        "fn": 6
+      },
+      "sample-floorplan-house3.png": {
+        "tp": 3,
+        "fp": 34,
+        "fn": 18
+      },
+      "sample-floorplan.png": {
+        "tp": 7,
+        "fp": 1,
+        "fn": 1
+      },
+      "simple-apartment-floor-plan.png": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 5
+      }
+    }
+  },
+  "unlimited_budget": {
+    "experiment_id": "B",
+    "name": "Unlimited Budget (Diagnostic)",
+    "tp": 40,
+    "fp": 105,
+    "fn": 108,
+    "precision": 0.2759,
+    "recall": 0.2703,
+    "microF1": 0.273,
+    "per_image": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 3
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "tp": 0,
+        "fp": 5,
+        "fn": 5
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "tp": 0,
+        "fp": 10,
+        "fn": 5
+      },
+      "Floorplan-House.png": {
+        "tp": 11,
+        "fp": 26,
+        "fn": 5
+      },
+      "Lantai 1.jpg": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 2
+      },
+      "Lantai 2.jpg": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 3
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 51
+      },
+      "library-floor-plan.png": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 4
+      },
+      "sample-floorplan-house2.png": {
+        "tp": 11,
+        "fp": 11,
+        "fn": 6
+      },
+      "sample-floorplan-house3.png": {
+        "tp": 3,
+        "fp": 44,
+        "fn": 18
+      },
+      "sample-floorplan.png": {
+        "tp": 7,
+        "fp": 1,
+        "fn": 1
+      },
+      "simple-apartment-floor-plan.png": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 5
+      }
+    }
+  },
+  "rank_distribution": {
+    "within_top_3": 2,
+    "within_top_5": 4,
+    "within_top_8": 4,
+    "within_top_10": 4,
+    "within_top_20": 8,
+    "beyond_top_20": 5
+  },
+  "key_finding": "Expanding candidate budget alone (even to infinity) yields 0 additional True Positives (TP remains 40) because all lower-ranked true-room candidates collide with oversized primary cavities."
+}

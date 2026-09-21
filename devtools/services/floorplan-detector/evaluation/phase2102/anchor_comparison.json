@@ -1,0 +1,62 @@
+{
+  "simple-apartment-floor-plan.png": {
+    "gtRoomCount": 7,
+    "baseline": {
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "f1": 0.4,
+      "meanIoU": 0.4768
+    },
+    "winning": {
+      "tp": 2,
+      "fp": 1,
+      "fn": 5,
+      "f1": 0.4,
+      "meanIoU": 0.4768
+    },
+    "delta_tp": 0,
+    "delta_fp": 0,
+    "anchor_preserved": true
+  },
+  "library-floor-plan.png": {
+    "gtRoomCount": 5,
+    "baseline": {
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "f1": 0.25,
+      "meanIoU": 0.4424
+    },
+    "winning": {
+      "tp": 1,
+      "fp": 2,
+      "fn": 4,
+      "f1": 0.25,
+      "meanIoU": 0.4424
+    },
+    "delta_tp": 0,
+    "delta_fp": 0,
+    "anchor_preserved": true
+  },
+  "sample-floorplan.png": {
+    "gtRoomCount": 8,
+    "baseline": {
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "f1": 0.875,
+      "meanIoU": 0.8804
+    },
+    "winning": {
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "f1": 0.875,
+      "meanIoU": 0.8804
+    },
+    "delta_tp": 0,
+    "delta_fp": 0,
+    "anchor_preserved": true
+  }
+}

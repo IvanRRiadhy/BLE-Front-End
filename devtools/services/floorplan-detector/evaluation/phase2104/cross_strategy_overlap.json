@@ -1,0 +1,37 @@
+{
+  "wall_network_face": {
+    "wall_network_face": 1.0,
+    "doorway_connected": 0.0,
+    "internal_partition": 0.5341,
+    "repeated_room": 0.3673,
+    "neighboring_room": 0.3788
+  },
+  "doorway_connected": {
+    "wall_network_face": 0.0,
+    "doorway_connected": 1.0,
+    "internal_partition": 0.0,
+    "repeated_room": 0.0,
+    "neighboring_room": 0.0
+  },
+  "internal_partition": {
+    "wall_network_face": 0.5341,
+    "doorway_connected": 0.0,
+    "internal_partition": 1.0,
+    "repeated_room": 0.353,
+    "neighboring_room": 0.3252
+  },
+  "repeated_room": {
+    "wall_network_face": 0.3673,
+    "doorway_connected": 0.0,
+    "internal_partition": 0.353,
+    "repeated_room": 1.0,
+    "neighboring_room": 0.4284
+  },
+  "neighboring_room": {
+    "wall_network_face": 0.3788,
+    "doorway_connected": 0.0,
+    "internal_partition": 0.3252,
+    "repeated_room": 0.4284,
+    "neighboring_room": 1.0
+  }
+}

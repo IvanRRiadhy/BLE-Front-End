@@ -1,0 +1,122 @@
+{
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+    "total_text_regions": 1,
+    "relations": {
+      "INTERIOR_TEXT": 0,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 0,
+      "AMBIGUOUS_TEXT": 1
+    },
+    "strategies": {}
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+    "total_text_regions": 0,
+    "relations": {
+      "INTERIOR_TEXT": 0,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 0,
+      "AMBIGUOUS_TEXT": 0
+    },
+    "strategies": {}
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+    "total_text_regions": 0,
+    "relations": {
+      "INTERIOR_TEXT": 0,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 0,
+      "AMBIGUOUS_TEXT": 0
+    },
+    "strategies": {}
+  },
+  "Floorplan-House.png": {
+    "total_text_regions": 53,
+    "relations": {
+      "INTERIOR_TEXT": 0,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 15,
+      "AMBIGUOUS_TEXT": 38
+    },
+    "strategies": {}
+  },
+  "Lantai 1.jpg": {
+    "total_text_regions": 8,
+    "relations": {
+      "INTERIOR_TEXT": 0,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 2,
+      "AMBIGUOUS_TEXT": 6
+    },
+    "strategies": {}
+  },
+  "Lantai 2.jpg": {
+    "total_text_regions": 5,
+    "relations": {
+      "INTERIOR_TEXT": 0,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 3,
+      "AMBIGUOUS_TEXT": 2
+    },
+    "strategies": {}
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+    "total_text_regions": 127,
+    "relations": {
+      "INTERIOR_TEXT": 0,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 0,
+      "AMBIGUOUS_TEXT": 127
+    },
+    "strategies": {}
+  },
+  "library-floor-plan.png": {
+    "total_text_regions": 13,
+    "relations": {
+      "INTERIOR_TEXT": 4,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 9,
+      "AMBIGUOUS_TEXT": 0
+    },
+    "strategies": {}
+  },
+  "sample-floorplan-house2.png": {
+    "total_text_regions": 27,
+    "relations": {
+      "INTERIOR_TEXT": 8,
+      "NEAR_WALL_TEXT": 1,
+      "WALL_OVERLAP_TEXT": 17,
+      "AMBIGUOUS_TEXT": 1
+    },
+    "strategies": {}
+  },
+  "sample-floorplan-house3.png": {
+    "total_text_regions": 79,
+    "relations": {
+      "INTERIOR_TEXT": 0,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 22,
+      "AMBIGUOUS_TEXT": 57
+    },
+    "strategies": {}
+  },
+  "sample-floorplan.png": {
+    "total_text_regions": 9,
+    "relations": {
+      "INTERIOR_TEXT": 1,
+      "NEAR_WALL_TEXT": 0,
+      "WALL_OVERLAP_TEXT": 8,
+      "AMBIGUOUS_TEXT": 0
+    },
+    "strategies": {}
+  },
+  "simple-apartment-floor-plan.png": {
+    "total_text_regions": 12,
+    "relations": {
+      "INTERIOR_TEXT": 9,
+      "NEAR_WALL_TEXT": 1,
+      "WALL_OVERLAP_TEXT": 2,
+      "AMBIGUOUS_TEXT": 0
+    },
+    "strategies": {}
+  }
+}

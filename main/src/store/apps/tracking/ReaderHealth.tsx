@@ -69,7 +69,7 @@ export const { UpdateReaderHealth } = ReaderHealthSlice.actions;
  * Thunk to subscribe to reader health MQTT topic
  */
 export const fetchReaderHealth = () => (dispatch: AppDispatch) => {
-  const topic = 'people_tracking/gateway/+/+';
+  const topic = 'people_tracking/gateway/#';
   let lastDispatch = 0;
 
   const unsubscribe = startMQTTclient((data: any) => {

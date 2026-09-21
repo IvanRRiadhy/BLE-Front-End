@@ -1,0 +1,12 @@
+{
+  "strategy": "doorway_topology_split",
+  "total_split_proposals": 0,
+  "cavity_split_recall_10": 0.0,
+  "cavity_split_recall_25": 0.0,
+  "cavity_split_recall_50": 0.0,
+  "cavity_split_recall_75": 0.0,
+  "affected_gt_rooms_covered_25": 0,
+  "affected_gt_rooms_covered_50": 0,
+  "mean_best_iou": 0.0,
+  "median_best_iou": 0.0
+}

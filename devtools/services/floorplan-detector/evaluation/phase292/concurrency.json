@@ -1,0 +1,29 @@
+{
+  "2_concurrent": {
+    "requests": 2,
+    "completed": 2,
+    "errors": [],
+    "elapsed_total_ms": 281.39,
+    "throughput_req_per_sec": 7.11,
+    "no_cross_contamination": true,
+    "status": "PASS"
+  },
+  "5_concurrent": {
+    "requests": 5,
+    "completed": 5,
+    "errors": [],
+    "elapsed_total_ms": 684.23,
+    "throughput_req_per_sec": 7.31,
+    "no_cross_contamination": true,
+    "status": "PASS"
+  },
+  "10_concurrent": {
+    "requests": 10,
+    "completed": 10,
+    "errors": [],
+    "elapsed_total_ms": 1596.52,
+    "throughput_req_per_sec": 6.26,
+    "no_cross_contamination": true,
+    "status": "PASS"
+  }
+}

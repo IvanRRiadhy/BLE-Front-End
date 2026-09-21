@@ -1,0 +1,20 @@
+{
+  "name": "devtools-floorplan-detection",
+  "version": "1.0.0",
+  "description": "Floorplan Detection Engine Output and Serializer Subsystem",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "test": "npm run build && node --experimental-strip-types --test tests/floorplanSerializer.test.ts && node --experimental-strip-types --test tests/e2eIntegration.test.ts && node --experimental-strip-types --test tests/annotationWorkflow.test.ts",
+    "test:unit": "npm run build && node --experimental-strip-types --test tests/floorplanSerializer.test.ts",
+    "test:e2e": "node --experimental-strip-types --test tests/e2eIntegration.test.ts",
+    "test:watch": "node --watch --experimental-strip-types --test tests/floorplanSerializer.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "strategyId": "baseline",
+  "strategyName": "A_baseline",
+  "config": {
+    "strategyId": "baseline",
+    "strategyName": "A_baseline",
+    "doorWeight": 0.1,
+    "textPositiveWeight": 0.0,
+    "textNegativeWeight": 0.0,
+    "cavityPenaltyWeight": 0.0,
+    "structuralScoreWeight": 0.0
+  },
+  "gtRoomCount": 148,
+  "predRoomCount": 126,
+  "tp": 40,
+  "fp": 86,
+  "fn": 108,
+  "precision": 0.3175,
+  "recall": 0.2703,
+  "microF1": 0.292,
+  "macroF1": 0.3186,
+  "meanIoU": 0.5864,
+  "medianIoU": 0.5006,
+  "latencyMs": 1080.09,
+  "promotedCandidates": 74,
+  "demotedCandidates": 204
+}

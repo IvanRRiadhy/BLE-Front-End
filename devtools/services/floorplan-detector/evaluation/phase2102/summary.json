@@ -1,0 +1,42 @@
+{
+  "phase": "2.10.2",
+  "description": "Text-Aware Candidate Ranking & Recovery Experiment",
+  "winning_strategy": "text_negative",
+  "baseline": {
+    "strategy": "A_baseline",
+    "tp": 40,
+    "fp": 86,
+    "fn": 108,
+    "precision": 0.3175,
+    "recall": 0.2703,
+    "microF1": 0.292,
+    "macroF1": 0.3186,
+    "meanIoU": 0.5864
+  },
+  "winner": {
+    "strategy": "C_text_negative",
+    "tp": 40,
+    "fp": 85,
+    "fn": 108,
+    "precision": 0.32,
+    "recall": 0.2703,
+    "microF1": 0.293,
+    "macroF1": 0.3193,
+    "meanIoU": 0.5864
+  },
+  "delta": {
+    "tp_delta": 0,
+    "fp_delta": -1,
+    "fn_delta": 0,
+    "microF1_delta": 0.001,
+    "macroF1_delta": 0.0007,
+    "promoted_candidates": 89,
+    "demoted_candidates": 182
+  },
+  "timing_overhead_ms": {
+    "mean_text_detection_ms": 35.82,
+    "mean_candidate_feature_ms": 16.49
+  },
+  "status": "PASS",
+  "ready_for_phase_2_10_3": true
+}

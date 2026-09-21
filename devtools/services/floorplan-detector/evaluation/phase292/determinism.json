@@ -1,0 +1,9 @@
+{
+  "ml_off_repetitions": 5,
+  "ml_off_deterministic": true,
+  "ml_off_area_count": 7,
+  "ml_on_repetitions": 5,
+  "ml_on_deterministic": true,
+  "ml_on_area_count": 7,
+  "status": "PASS"
+}

@@ -1,0 +1,12 @@
+{
+  "phase": "2.10.0",
+  "timestamp": "2026-09-21T04:59:56Z",
+  "objective": "Evaluate whether text-aware processing improves floorplan room detection while preserving architectural walls.",
+  "best_experimental_strategy": "D_protected_text_mask",
+  "baseline_f1": 0.1635,
+  "experimental_f1": 0.1635,
+  "wall_damage_prevented": true,
+  "fragmentation_reduction": 0,
+  "final_gate": "RECOMMENDED",
+  "ready_for_phase_2_10_1": true
+}

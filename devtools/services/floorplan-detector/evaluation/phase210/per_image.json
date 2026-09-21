@@ -1,0 +1,98 @@
+{
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+    "text_regions_count": 1,
+    "text_coverage_ratio": 0.00019,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.0003,
+    "baseline_detected_areas": 2,
+    "protected_text_detected_areas": 2
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+    "text_regions_count": 0,
+    "text_coverage_ratio": 0.0,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.0,
+    "baseline_detected_areas": 13,
+    "protected_text_detected_areas": 13
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+    "text_regions_count": 0,
+    "text_coverage_ratio": 0.0,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.0,
+    "baseline_detected_areas": 3,
+    "protected_text_detected_areas": 3
+  },
+  "Floorplan-House.png": {
+    "text_regions_count": 53,
+    "text_coverage_ratio": 0.03459,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.18448,
+    "baseline_detected_areas": 31,
+    "protected_text_detected_areas": 31
+  },
+  "Lantai 1.jpg": {
+    "text_regions_count": 8,
+    "text_coverage_ratio": 0.02519,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.0626,
+    "baseline_detected_areas": 8,
+    "protected_text_detected_areas": 8
+  },
+  "Lantai 2.jpg": {
+    "text_regions_count": 5,
+    "text_coverage_ratio": 0.01438,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.04812,
+    "baseline_detected_areas": 2,
+    "protected_text_detected_areas": 2
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+    "text_regions_count": 127,
+    "text_coverage_ratio": 0.12787,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.13351,
+    "baseline_detected_areas": 0,
+    "protected_text_detected_areas": 0
+  },
+  "library-floor-plan.png": {
+    "text_regions_count": 13,
+    "text_coverage_ratio": 0.04932,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.10829,
+    "baseline_detected_areas": 1,
+    "protected_text_detected_areas": 1
+  },
+  "sample-floorplan-house2.png": {
+    "text_regions_count": 27,
+    "text_coverage_ratio": 0.01876,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.1401,
+    "baseline_detected_areas": 24,
+    "protected_text_detected_areas": 24
+  },
+  "sample-floorplan-house3.png": {
+    "text_regions_count": 79,
+    "text_coverage_ratio": 0.02722,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.09262,
+    "baseline_detected_areas": 282,
+    "protected_text_detected_areas": 282
+  },
+  "sample-floorplan.png": {
+    "text_regions_count": 9,
+    "text_coverage_ratio": 0.05983,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.02503,
+    "baseline_detected_areas": 7,
+    "protected_text_detected_areas": 7
+  },
+  "simple-apartment-floor-plan.png": {
+    "text_regions_count": 12,
+    "text_coverage_ratio": 0.03342,
+    "wall_preservation_protected": 0.0,
+    "wall_preservation_unprotected": 0.03463,
+    "baseline_detected_areas": 5,
+    "protected_text_detected_areas": 5
+  }
+}

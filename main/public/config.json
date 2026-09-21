@@ -1,9 +1,9 @@
 {
   "API_BASE_URL": "http://192.168.1.166:5000",
   "API_ENGINE_URL": "http://192.168.1.166:3300",
-  "MQTT_URL": "ws://192.168.1.96:9005",
+  "MQTT_URL": "ws://192.168.1.166:9005",
   "ALARM_TOPIC": "people_tracking/alarm/+/+/+/+/+",
-  "CDN_URL": "http://192.168.1.96:5099",
+  "CDN_URL": "http://192.168.1.166:5099",
   "API_KEY": "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
   "NTFY_TOPIC": "alarm-ntfy",
   "MQTT_USERNAME": "bio_mqtt",

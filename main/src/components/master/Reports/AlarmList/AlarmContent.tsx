@@ -676,6 +676,8 @@ const AlarmContent = () => {
               <img
                 src={imgSrc}
                 alt="Floorplan"
+                loading="lazy"
+                decoding="async"
                 style={{
                   width: '100%',
                   height: '100%',
@@ -1819,11 +1821,13 @@ const AlarmContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <AlarmPlaybackDialog
-        open={openPlaybackDialog}
-        onClose={() => setOpenPlaybackDialog(false)}
-        data={playbackData}
-      />
+      {openPlaybackDialog && (
+        <AlarmPlaybackDialog
+          open={openPlaybackDialog}
+          onClose={() => setOpenPlaybackDialog(false)}
+          data={playbackData}
+        />
+      )}
     </Box>
   );
 };

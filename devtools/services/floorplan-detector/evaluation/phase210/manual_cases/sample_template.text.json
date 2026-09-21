@@ -1,0 +1,29 @@
+{
+  "image": "sample-floorplan.png",
+  "regions": [
+    {
+      "id": "text_sample_01",
+      "type": "room_label",
+      "polygon": [
+        [
+          150,
+          200
+        ],
+        [
+          280,
+          200
+        ],
+        [
+          280,
+          230
+        ],
+        [
+          150,
+          230
+        ]
+      ],
+      "confidence": 1.0,
+      "notes": "Living room text label"
+    }
+  ]
+}

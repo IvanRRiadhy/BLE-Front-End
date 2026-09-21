@@ -1,0 +1,20 @@
+{
+  "baseline_fragmentation": {
+    "total_gt_rooms": 148,
+    "fragmented_rooms": 27,
+    "text_likely_cause": 6,
+    "text_possible_cause": 17,
+    "text_unrelated": 4
+  },
+  "protected_text_fragmentation": {
+    "total_gt_rooms": 148,
+    "fragmented_rooms": 27,
+    "text_likely_cause": 6,
+    "text_possible_cause": 17,
+    "text_unrelated": 4
+  },
+  "comparison": {
+    "fragmented_rooms_delta": 0,
+    "text_likely_cause_delta": 0
+  }
+}

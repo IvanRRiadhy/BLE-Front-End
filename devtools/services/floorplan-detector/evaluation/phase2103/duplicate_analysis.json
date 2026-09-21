@@ -1,0 +1,105 @@
+{
+  "total_duplicate_rejected": 3,
+  "disable_duplicate_experiment": {
+    "experiment_id": "E",
+    "name": "Disable Duplicate Pruning (Diag)",
+    "tp": 40,
+    "fp": 80,
+    "fn": 108,
+    "precision": 0.3333,
+    "recall": 0.2703,
+    "microF1": 0.2985,
+    "per_image": {
+      "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 3
+      },
+      "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+        "tp": 0,
+        "fp": 5,
+        "fn": 5
+      },
+      "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+        "tp": 0,
+        "fp": 10,
+        "fn": 5
+      },
+      "Floorplan-House.png": {
+        "tp": 11,
+        "fp": 20,
+        "fn": 5
+      },
+      "Lantai 1.jpg": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 2
+      },
+      "Lantai 2.jpg": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 3
+      },
+      "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 51
+      },
+      "library-floor-plan.png": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 4
+      },
+      "sample-floorplan-house2.png": {
+        "tp": 11,
+        "fp": 11,
+        "fn": 6
+      },
+      "sample-floorplan-house3.png": {
+        "tp": 3,
+        "fp": 25,
+        "fn": 18
+      },
+      "sample-floorplan.png": {
+        "tp": 7,
+        "fp": 1,
+        "fn": 1
+      },
+      "simple-apartment-floor-plan.png": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 5
+      }
+    }
+  },
+  "records": [
+    {
+      "candidate_id": "rec_rep_1002_1167.0",
+      "image_id": "Floorplan-House.png",
+      "gt_id": "gt_009",
+      "raw_iou": 0.2630268604254578,
+      "duplicate_target": "hyp_cavity_11",
+      "collision_iou": 0.6126649584946524,
+      "explanation": "Rejected by duplicate suppression against hyp_cavity_11 (IoU >= threshold)"
+    },
+    {
+      "candidate_id": "rec_rep_86_22.0",
+      "image_id": "Lantai 1.jpg",
+      "gt_id": "gt_001",
+      "raw_iou": 0.2571229515776373,
+      "duplicate_target": "hyp_cavity_4",
+      "collision_iou": 0.4202987547661191,
+      "explanation": "Rejected by duplicate suppression against hyp_cavity_4 (IoU >= threshold)"
+    },
+    {
+      "candidate_id": "rec_wall_enc_5",
+      "image_id": "simple-apartment-floor-plan.png",
+      "gt_id": "gt_002",
+      "raw_iou": 0.3023969479555651,
+      "duplicate_target": "hyp_cavity_2",
+      "collision_iou": 0.9376177684298804,
+      "explanation": "Rejected by duplicate suppression against hyp_cavity_2 (IoU >= threshold)"
+    }
+  ],
+  "key_finding": "Candidates rejected by duplicate pruning overlap with primary room hypotheses that already span the space or represent oversized cavity polygons."
+}

@@ -1,0 +1,102 @@
+{
+  "sample-floorplan": {
+    "baseline": {
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "meanIoU": 0.8804
+    },
+    "phase290": {
+      "tp": 7,
+      "fp": 1
+    },
+    "phase291": {
+      "tp": 7,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "meanIoU": 0.8804
+    },
+    "status": "PASS"
+  },
+  "Lantai 1": {
+    "baseline": {
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "meanIoU": 0.4418
+    },
+    "phase290": {
+      "tp": 3,
+      "fp": 2
+    },
+    "phase291": {
+      "tp": 3,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1": 0.6,
+      "meanIoU": 0.4418
+    },
+    "status": "PASS"
+  },
+  "Lantai 2": {
+    "baseline": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "meanIoU": 0.6778
+    },
+    "phase290": {
+      "tp": 2,
+      "fp": 0
+    },
+    "phase291": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714,
+      "meanIoU": 0.6778
+    },
+    "status": "PASS"
+  },
+  "sample-floorplan-house2": {
+    "baseline": {
+      "tp": 10,
+      "fp": 9,
+      "fn": 7,
+      "precision": 0.5263,
+      "recall": 0.5882,
+      "f1": 0.5556,
+      "meanIoU": 0.6988
+    },
+    "phase290": {
+      "tp": 4,
+      "fp": 7
+    },
+    "phase291": {
+      "tp": 11,
+      "fp": 9,
+      "fn": 6,
+      "precision": 0.55,
+      "recall": 0.6471,
+      "f1": 0.5946,
+      "meanIoU": 0.6992
+    },
+    "status": "PASS"
+  }
+}

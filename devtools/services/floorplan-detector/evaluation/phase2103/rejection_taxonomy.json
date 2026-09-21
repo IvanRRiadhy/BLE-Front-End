@@ -1,0 +1,69 @@
+{
+  "total_lost_tp_records": 14,
+  "taxonomy": {
+    "BUDGET_REJECTED": {
+      "count": 8,
+      "percentage": 57.14,
+      "candidates": [
+        "Floorplan-House.png::rec_wall_enc_341::gt_009",
+        "Floorplan-House.png::rec_rep_1516_490::gt_017",
+        "sample-floorplan-house3.png::rec_rep_3209_859.0::gt_011",
+        "sample-floorplan-house3.png::rec_rep_3819_859.0::gt_015",
+        "sample-floorplan-house3.png::rec_rep_3901_859.0::gt_015",
+        "sample-floorplan-house3.png::rec_rep_2288_3114.0::gt_008",
+        "sample-floorplan-house3.png::rec_rep_3263_3114.0::gt_019",
+        "sample-floorplan-house3.png::rec_rep_2288_3114.0::gt_008"
+      ]
+    },
+    "THRESHOLD_REJECTED": {
+      "count": 1,
+      "percentage": 7.14,
+      "candidates": [
+        "sample-floorplan-house2.png::rec_wall_enc_6::gt_019"
+      ]
+    },
+    "DUPLICATE_REJECTED": {
+      "count": 3,
+      "percentage": 21.43,
+      "candidates": [
+        "Floorplan-House.png::rec_rep_1002_1167.0::gt_009",
+        "Lantai 1.jpg::rec_rep_86_22.0::gt_001",
+        "simple-apartment-floor-plan.png::rec_wall_enc_5::gt_002"
+      ]
+    },
+    "OVERLAP_REJECTED": {
+      "count": 1,
+      "percentage": 7.14,
+      "candidates": [
+        "simple-apartment-floor-plan.png::rec_wall_enc_2::gt_005"
+      ]
+    },
+    "MERGED_REJECTED": {
+      "count": 1,
+      "percentage": 7.14,
+      "candidates": [
+        "sample-floorplan-house2.png::rec_rep_1377_758.0::gt_004"
+      ]
+    },
+    "GEOMETRY_IOU_FAILURE": {
+      "count": 0,
+      "percentage": 0.0,
+      "candidates": []
+    },
+    "TOPOLOGY_FAILURE": {
+      "count": 0,
+      "percentage": 0.0,
+      "candidates": []
+    },
+    "OUTSIDE_ENVELOPE": {
+      "count": 0,
+      "percentage": 0.0,
+      "candidates": []
+    },
+    "UNKNOWN": {
+      "count": 0,
+      "percentage": 0.0,
+      "candidates": []
+    }
+  }
+}

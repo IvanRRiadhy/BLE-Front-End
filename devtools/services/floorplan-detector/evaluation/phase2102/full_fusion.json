@@ -1,0 +1,27 @@
+{
+  "strategyId": "full_fusion",
+  "strategyName": "H_full_fusion",
+  "config": {
+    "strategyId": "full_fusion",
+    "strategyName": "H_full_fusion",
+    "doorWeight": 0.1,
+    "textPositiveWeight": 0.05,
+    "textNegativeWeight": 0.1,
+    "cavityPenaltyWeight": 0.04,
+    "structuralScoreWeight": 0.02
+  },
+  "gtRoomCount": 148,
+  "predRoomCount": 125,
+  "tp": 40,
+  "fp": 85,
+  "fn": 108,
+  "precision": 0.32,
+  "recall": 0.2703,
+  "microF1": 0.293,
+  "macroF1": 0.3193,
+  "meanIoU": 0.5864,
+  "medianIoU": 0.5006,
+  "latencyMs": 1027.16,
+  "promotedCandidates": 97,
+  "demotedCandidates": 183
+}

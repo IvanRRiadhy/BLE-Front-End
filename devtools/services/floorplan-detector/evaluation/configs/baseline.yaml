@@ -1,0 +1,49 @@
+# BIONIC Floorplan Evaluation Harness — Baseline Configuration
+benchmark_name: "bionic_v2.6_baseline"
+dataset:
+  name: "cubicasa5k"
+  path: "datasets/cubicasa5k"
+  fallback_dataset: "synthetic"
+
+subset_selection:
+  target_samples: 50
+  seed: 42
+  min_rooms: 1
+  max_rooms: 15
+  stratify_by_room_count: true
+  image_resolution_filter:
+    min_width: 600
+    min_height: 500
+
+detector:
+  name: "current_cv"
+  version: "2.6.0"
+  config:
+    wall_close_kernel_size: 35
+    min_room_area_px: 1200
+    auto_scale_kernel: true
+    enable_multi_evidence: true
+
+matching:
+  min_iou: 0.25
+  iou_thresholds:
+    - 0.25
+    - 0.50
+    - 0.75
+    - 0.90
+  max_centroid_distance_px: 250.0
+
+topology:
+  merged_min_overlap_ratio: 0.30
+  split_min_overlap_ratio: 0.30
+
+validation:
+  min_vertices: 3
+  max_vertices: 200
+  min_area_px: 100.0
+
+output:
+  results_dir: "evaluation/results/latest"
+  failures_dir: "evaluation/failures"
+  visualizations_dir: "evaluation/results/latest/visualizations"
+  baseline_dir: "evaluation/baselines/v2.6"

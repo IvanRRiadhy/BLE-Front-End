@@ -1,0 +1,12 @@
+{
+  "total_cpu_time_sec": 381.25,
+  "timing_per_strategy_sec": {
+    "wall_network_face": 63.541,
+    "doorway_connected": 63.541,
+    "internal_partition": 63.541,
+    "repeated_room": 63.541,
+    "neighboring_room": 63.541,
+    "combined": 63.541
+  },
+  "mean_time_per_image_sec": 31.771
+}

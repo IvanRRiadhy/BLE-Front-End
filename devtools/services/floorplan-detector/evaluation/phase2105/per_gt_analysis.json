@@ -1,0 +1,3702 @@
+{
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png::gt_001": {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png::gt_002": {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png::gt_003": {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.2146,
+      "wall_network_split": 0.1246,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1246,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.1579,
+      "hybrid_split": 0.1579
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": "hyp_cavity_1__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_1__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1__split_prop_1",
+      "hybrid_split": "hyp_cavity_1__split_hyb_2"
+    },
+    "overall_best_iou": 0.2146,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_001": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_002": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_003": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_004": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png::gt_005": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0532,
+      "wall_network_split": 0.0304,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0304,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.038,
+      "hybrid_split": 0.038
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": "hyp_cavity_1__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_1__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1__split_prop_1",
+      "hybrid_split": "hyp_cavity_1__split_hyb_3"
+    },
+    "overall_best_iou": 0.0532,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_001": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0395,
+      "wall_network_split": 0.055,
+      "planar_face_split": 0.0,
+      "partition_split": 0.055,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.055
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_face_face_5",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_face_face_5__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_face_face_5__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "merged_hyp_cavity_1_hyp_face_face_5__split_hyb_1"
+    },
+    "overall_best_iou": 0.055,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_face_face_5__split_hyb_1",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_002": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0628,
+      "wall_network_split": 0.1197,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1197,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.1197
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_face_face_2",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_face_face_2__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_face_face_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "merged_hyp_cavity_1_hyp_face_face_2__split_hyb_2"
+    },
+    "overall_best_iou": 0.1197,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_face_face_2__split_wns_1_2",
+    "overall_best_strategy": "wall_network_split"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_003": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.13,
+      "wall_network_split": 0.1812,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1812,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.1812
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_face_face_5",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_face_face_5__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_face_face_5__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "merged_hyp_cavity_1_hyp_face_face_5__split_hyb_1"
+    },
+    "overall_best_iou": 0.1812,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_face_face_5__split_wns_1_1",
+    "overall_best_strategy": "wall_network_split"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_004": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.2346,
+      "wall_network_split": 0.1824,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1824,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.1824
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_face_face_10",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_face_face_10__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_face_face_10__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "merged_hyp_cavity_1_hyp_face_face_10__split_hyb_1"
+    },
+    "overall_best_iou": 0.2346,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_face_face_10",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png::gt_005": {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1676,
+      "wall_network_split": 0.1365,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1365,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.1365
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_face_face_10",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_face_face_10__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_face_face_10__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "merged_hyp_cavity_1_hyp_face_face_10__split_hyb_1"
+    },
+    "overall_best_iou": 0.1676,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_face_face_10",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_002": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0068,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0006,
+      "hybrid_split": 0.0006
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_19",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_face_face_19__split_prop_3",
+      "hybrid_split": "hyp_face_face_19__split_hyb_3"
+    },
+    "overall_best_iou": 0.0068,
+    "overall_best_proposal_id": "hyp_face_face_19",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_005": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.8475,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.8475,
+    "overall_best_proposal_id": "hyp_face_face_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_006": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.5299,
+      "wall_network_split": 0.4753,
+      "planar_face_split": 0.0,
+      "partition_split": 0.4753,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.255,
+      "hybrid_split": 0.4753
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_8",
+      "wall_network_split": "hyp_cavity_8__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_8__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_13__split_prop_8",
+      "hybrid_split": "hyp_cavity_8__split_hyb_1"
+    },
+    "overall_best_iou": 0.5299,
+    "overall_best_proposal_id": "hyp_cavity_8",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_007": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.5197,
+      "wall_network_split": 0.5073,
+      "planar_face_split": 0.0,
+      "partition_split": 0.5073,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.2327,
+      "hybrid_split": 0.5073
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_10",
+      "wall_network_split": "hyp_cavity_10__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_10__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_10__split_prop_2",
+      "hybrid_split": "hyp_cavity_10__split_hyb_2"
+    },
+    "overall_best_iou": 0.5197,
+    "overall_best_proposal_id": "hyp_cavity_10",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_008": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_008",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.3528,
+      "wall_network_split": 0.1969,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1969,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.2477,
+      "hybrid_split": 0.2477
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_14",
+      "wall_network_split": "hyp_cavity_9__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_9__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_9__split_prop_3",
+      "hybrid_split": "hyp_cavity_9__split_hyb_5"
+    },
+    "overall_best_iou": 0.3528,
+    "overall_best_proposal_id": "hyp_cavity_14",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_009": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_009",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.2327,
+      "wall_network_split": 0.2534,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.2778,
+      "hybrid_split": 0.2778
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_11",
+      "wall_network_split": "hyp_cavity_11__split_wns_2_2",
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_11__split_prop_2",
+      "hybrid_split": "hyp_cavity_11__split_hyb_2"
+    },
+    "overall_best_iou": 0.2778,
+    "overall_best_proposal_id": "hyp_cavity_11__split_prop_2",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "Floorplan-House.png::gt_011": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_011",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.5684,
+      "wall_network_split": 0.5981,
+      "planar_face_split": 0.0,
+      "partition_split": 0.5981,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.7846,
+      "hybrid_split": 0.7846
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_15",
+      "wall_network_split": "hyp_cavity_15__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_15__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_15__split_prop_2",
+      "hybrid_split": "hyp_cavity_15__split_hyb_4"
+    },
+    "overall_best_iou": 0.7846,
+    "overall_best_proposal_id": "hyp_cavity_15__split_prop_2",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "Floorplan-House.png::gt_012": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_012",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0235,
+      "wall_network_split": 0.0247,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0247,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0689,
+      "hybrid_split": 0.0689
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_15",
+      "wall_network_split": "hyp_cavity_15__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_15__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_15__split_prop_7",
+      "hybrid_split": "hyp_cavity_15__split_hyb_9"
+    },
+    "overall_best_iou": 0.0689,
+    "overall_best_proposal_id": "hyp_cavity_15__split_hyb_9",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "Floorplan-House.png::gt_013": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_013",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0012,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0012,
+    "overall_best_proposal_id": "hyp_face_face_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_014": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_014",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0239,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0239,
+    "overall_best_proposal_id": "hyp_face_face_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_015": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_015",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.8481,
+      "wall_network_split": 0.8282,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.5307,
+      "hybrid_split": 0.8282
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_7",
+      "wall_network_split": "hyp_cavity_7__split_wns_2_1",
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_7__split_prop_1",
+      "hybrid_split": "hyp_cavity_7__split_hyb_1"
+    },
+    "overall_best_iou": 0.8481,
+    "overall_best_proposal_id": "hyp_cavity_7",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_016": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_016",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.6128,
+      "wall_network_split": 0.4285,
+      "planar_face_split": 0.0,
+      "partition_split": 0.4285,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.237,
+      "hybrid_split": 0.4285
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_19",
+      "wall_network_split": "hyp_face_face_19_sub1__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_face_face_19_sub1__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_face_face_19_sub1__split_prop_10",
+      "hybrid_split": "hyp_face_face_19_sub1__split_hyb_1"
+    },
+    "overall_best_iou": 0.6128,
+    "overall_best_proposal_id": "hyp_face_face_19",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_017": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_017",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0442,
+      "wall_network_split": 0.0444,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0444,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.3288,
+      "hybrid_split": 0.3288
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1_sub2",
+      "wall_network_split": "hyp_cavity_1_sub2__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_1_sub2__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1_sub2__split_prop_29",
+      "hybrid_split": "hyp_cavity_1_sub2__split_hyb_31"
+    },
+    "overall_best_iou": 0.3288,
+    "overall_best_proposal_id": "hyp_cavity_1_sub2__split_prop_29",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "Floorplan-House.png::gt_018": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_018",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.3986,
+      "wall_network_split": 0.351,
+      "planar_face_split": 0.0,
+      "partition_split": 0.351,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.2161,
+      "hybrid_split": 0.351
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_12",
+      "wall_network_split": "hyp_cavity_12__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_12__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_12__split_prop_2",
+      "hybrid_split": "hyp_cavity_12__split_hyb_1"
+    },
+    "overall_best_iou": 0.3986,
+    "overall_best_proposal_id": "hyp_cavity_12",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Floorplan-House.png::gt_019": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_019",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.9722,
+      "wall_network_split": 0.9808,
+      "planar_face_split": 0.0,
+      "partition_split": 0.9808,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.4938,
+      "hybrid_split": 0.9808
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_16",
+      "wall_network_split": "hyp_cavity_16__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_16__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_16__split_prop_15",
+      "hybrid_split": "hyp_cavity_16__split_hyb_2"
+    },
+    "overall_best_iou": 0.9808,
+    "overall_best_proposal_id": "hyp_cavity_16__split_wns_1_2",
+    "overall_best_strategy": "wall_network_split"
+  },
+  "Floorplan-House.png::gt_020": {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_020",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.5072,
+      "wall_network_split": 0.5073,
+      "planar_face_split": 0.0,
+      "partition_split": 0.5073,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.1973,
+      "hybrid_split": 0.5073
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": "hyp_cavity_1__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_1__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1_sub2__split_prop_24",
+      "hybrid_split": "hyp_cavity_1__split_hyb_2"
+    },
+    "overall_best_iou": 0.5073,
+    "overall_best_proposal_id": "hyp_cavity_1__split_hyb_2",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "Lantai 1.jpg::gt_001": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "Lantai 1.jpg::gt_002": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.4355,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_4",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.4355,
+    "overall_best_proposal_id": "hyp_cavity_4",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Lantai 1.jpg::gt_003": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.4829,
+      "wall_network_split": 0.4645,
+      "planar_face_split": 0.0,
+      "partition_split": 0.4645,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.4645
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2",
+      "wall_network_split": "hyp_cavity_2__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_2__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "hyp_cavity_2__split_hyb_1"
+    },
+    "overall_best_iou": 0.4829,
+    "overall_best_proposal_id": "hyp_cavity_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Lantai 1.jpg::gt_004": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.062,
+      "hybrid_split": 0.062
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_3__split_prop_4",
+      "hybrid_split": "hyp_cavity_3__split_hyb_5"
+    },
+    "overall_best_iou": 0.062,
+    "overall_best_proposal_id": "hyp_cavity_3__split_hyb_5",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "Lantai 1.jpg::gt_005": {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.4013,
+      "wall_network_split": 0.3942,
+      "planar_face_split": 0.0,
+      "partition_split": 0.3942,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0328,
+      "hybrid_split": 0.3942
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_3",
+      "wall_network_split": "hyp_cavity_3__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_3__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_3__split_prop_2",
+      "hybrid_split": "hyp_cavity_3__split_hyb_1"
+    },
+    "overall_best_iou": 0.4013,
+    "overall_best_proposal_id": "hyp_cavity_3",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Lantai 2.jpg::gt_001": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "Lantai 2.jpg::gt_002": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "Lantai 2.jpg::gt_003": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.8612,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.8612,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "Lantai 2.jpg::gt_004": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "Lantai 2.jpg::gt_005": {
+    "image_id": "Lantai 2.jpg",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_001": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_002": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_003": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_004": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_005": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_006": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_007": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_008": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_008",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_009": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_009",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_010": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_010",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_011": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_011",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_012": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_012",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_013": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_013",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_014": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_014",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_015": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_015",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_016": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_016",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_017": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_017",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_018": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_018",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_019": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_019",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_020": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_020",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_021": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_021",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_022": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_022",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_023": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_023",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_024": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_024",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_025": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_025",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_026": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_026",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_027": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_027",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_028": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_028",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_029": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_029",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_030": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_030",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_031": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_031",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_032": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_032",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_033": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_033",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_034": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_034",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_035": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_035",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_036": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_036",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_037": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_037",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_038": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_038",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_039": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_039",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_040": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_040",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_041": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_041",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_042": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_042",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_043": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_043",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_044": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_044",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_045": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_045",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_046": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_046",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_047": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_047",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_048": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_048",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_049": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_049",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_050": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_050",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png::gt_051": {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "gt_id": "gt_051",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "library-floor-plan.png::gt_001": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1238,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.1238,
+    "overall_best_proposal_id": "hyp_face_face_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "library-floor-plan.png::gt_002": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.4492,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_2",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.4492,
+    "overall_best_proposal_id": "hyp_face_face_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "library-floor-plan.png::gt_003": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1743,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.1743,
+    "overall_best_proposal_id": "hyp_face_face_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "library-floor-plan.png::gt_004": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.025,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_2",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.025,
+    "overall_best_proposal_id": "hyp_face_face_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "library-floor-plan.png::gt_005": {
+    "image_id": "library-floor-plan.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.4126,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_2",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.4126,
+    "overall_best_proposal_id": "hyp_face_face_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_001": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.6805,
+      "wall_network_split": 0.0842,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0842,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.2997,
+      "hybrid_split": 0.2997
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2",
+      "wall_network_split": "hyp_cavity_3__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_3__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_3__split_prop_1",
+      "hybrid_split": "hyp_cavity_3__split_hyb_3"
+    },
+    "overall_best_iou": 0.6805,
+    "overall_best_proposal_id": "hyp_cavity_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_002": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.8611,
+      "wall_network_split": 0.8476,
+      "planar_face_split": 0.0,
+      "partition_split": 0.8476,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0155,
+      "hybrid_split": 0.8476
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_3",
+      "wall_network_split": "hyp_cavity_3__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_3__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_3__split_prop_2",
+      "hybrid_split": "hyp_cavity_3__split_hyb_1"
+    },
+    "overall_best_iou": 0.8611,
+    "overall_best_proposal_id": "hyp_cavity_3",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_004": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1562,
+      "wall_network_split": 0.1145,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1145,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.6456,
+      "hybrid_split": 0.6456
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_7",
+      "wall_network_split": "hyp_cavity_7__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_7__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1_sub2__split_prop_30",
+      "hybrid_split": "hyp_cavity_1_sub2__split_hyb_31"
+    },
+    "overall_best_iou": 0.6456,
+    "overall_best_proposal_id": "hyp_cavity_1_sub2__split_hyb_31",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house2.png::gt_005": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.7388,
+      "wall_network_split": 0.7095,
+      "planar_face_split": 0.0,
+      "partition_split": 0.7095,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.4732,
+      "hybrid_split": 0.7095
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_6",
+      "wall_network_split": "hyp_cavity_6__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_6__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_6__split_prop_1",
+      "hybrid_split": "hyp_cavity_6__split_hyb_1"
+    },
+    "overall_best_iou": 0.7388,
+    "overall_best_proposal_id": "hyp_cavity_6",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_006": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "sample-floorplan-house2.png::gt_007": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.2279,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0165,
+      "hybrid_split": 0.0165
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_8",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1__split_prop_10",
+      "hybrid_split": "hyp_cavity_1__split_hyb_10"
+    },
+    "overall_best_iou": 0.2279,
+    "overall_best_proposal_id": "hyp_cavity_8",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_009": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_009",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.049,
+      "hybrid_split": 0.049
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_9__split_prop_4",
+      "hybrid_split": "hyp_cavity_9__split_hyb_4"
+    },
+    "overall_best_iou": 0.049,
+    "overall_best_proposal_id": "hyp_cavity_9__split_hyb_4",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house2.png::gt_010": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_010",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.5494,
+      "wall_network_split": 0.3504,
+      "planar_face_split": 0.0,
+      "partition_split": 0.3504,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.3982,
+      "hybrid_split": 0.3982
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_9",
+      "wall_network_split": "hyp_cavity_9__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_9__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_9__split_prop_1",
+      "hybrid_split": "hyp_cavity_9__split_hyb_2"
+    },
+    "overall_best_iou": 0.5494,
+    "overall_best_proposal_id": "hyp_cavity_9",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_011": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_011",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.8479,
+      "wall_network_split": 0.8476,
+      "planar_face_split": 0.0,
+      "partition_split": 0.8476,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0977,
+      "hybrid_split": 0.8476
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_10",
+      "wall_network_split": "hyp_cavity_10__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_10__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_10__split_prop_1",
+      "hybrid_split": "hyp_cavity_10__split_hyb_1"
+    },
+    "overall_best_iou": 0.8479,
+    "overall_best_proposal_id": "hyp_cavity_10",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_014": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_014",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.7991,
+      "wall_network_split": 0.7902,
+      "planar_face_split": 0.0,
+      "partition_split": 0.7902,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0831,
+      "hybrid_split": 0.7902
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_12",
+      "wall_network_split": "hyp_cavity_12__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_12__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_11__split_prop_1",
+      "hybrid_split": "hyp_cavity_12__split_hyb_1"
+    },
+    "overall_best_iou": 0.7991,
+    "overall_best_proposal_id": "hyp_cavity_12",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_015": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_015",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.4798,
+      "wall_network_split": 0.3038,
+      "planar_face_split": 0.0,
+      "partition_split": 0.3038,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.269,
+      "hybrid_split": 0.269
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_13",
+      "wall_network_split": "hyp_cavity_13__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_13__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_13__split_prop_1",
+      "hybrid_split": "hyp_cavity_13__split_hyb_2"
+    },
+    "overall_best_iou": 0.4798,
+    "overall_best_proposal_id": "hyp_cavity_13",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_016": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_016",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.3572,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.4824,
+      "hybrid_split": 0.4824
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_8",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1__split_prop_10",
+      "hybrid_split": "hyp_cavity_1__split_hyb_10"
+    },
+    "overall_best_iou": 0.4824,
+    "overall_best_proposal_id": "hyp_cavity_1__split_hyb_10",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house2.png::gt_017": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_017",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "sample-floorplan-house2.png::gt_018": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_018",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.9584,
+      "wall_network_split": 0.9278,
+      "planar_face_split": 0.0,
+      "partition_split": 0.9278,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.5288,
+      "hybrid_split": 0.9278
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_4",
+      "wall_network_split": "hyp_cavity_4__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_4__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_4__split_prop_2",
+      "hybrid_split": "hyp_cavity_4__split_hyb_1"
+    },
+    "overall_best_iou": 0.9584,
+    "overall_best_proposal_id": "hyp_cavity_4",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_019": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_019",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1656,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_face_face_16",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.1656,
+    "overall_best_proposal_id": "hyp_face_face_16",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_020": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_020",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.7539,
+      "wall_network_split": 0.4081,
+      "planar_face_split": 0.0,
+      "partition_split": 0.4081,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.5962,
+      "hybrid_split": 0.5962
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": "hyp_cavity_1_sub2__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_1_sub2__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1__split_prop_3",
+      "hybrid_split": "hyp_cavity_1__split_hyb_3"
+    },
+    "overall_best_iou": 0.7539,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house2.png::gt_021": {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_021",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "sample-floorplan-house3.png::gt_001": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "sample-floorplan-house3.png::gt_002": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1368,
+      "wall_network_split": 0.1293,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1293,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0261,
+      "hybrid_split": 0.1293
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_7",
+      "wall_network_split": "hyp_cavity_7__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_7__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_7__split_prop_5",
+      "hybrid_split": "hyp_cavity_7__split_hyb_2"
+    },
+    "overall_best_iou": 0.1368,
+    "overall_best_proposal_id": "hyp_cavity_7",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house3.png::gt_003": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "sample-floorplan-house3.png::gt_004": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.2703,
+      "wall_network_split": 0.2085,
+      "planar_face_split": 0.0,
+      "partition_split": 0.2085,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0529,
+      "hybrid_split": 0.2085
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_9",
+      "wall_network_split": "hyp_cavity_9__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_9__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_9__split_prop_3",
+      "hybrid_split": "hyp_cavity_9__split_hyb_1"
+    },
+    "overall_best_iou": 0.2703,
+    "overall_best_proposal_id": "hyp_cavity_9",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house3.png::gt_005": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0379,
+      "wall_network_split": 0.0719,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0719,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0984,
+      "hybrid_split": 0.0984
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_15_sub2",
+      "wall_network_split": "hyp_cavity_15_sub2__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_15_sub2__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_15_sub2__split_prop_2",
+      "hybrid_split": "hyp_cavity_15_sub2__split_hyb_4"
+    },
+    "overall_best_iou": 0.0984,
+    "overall_best_proposal_id": "hyp_cavity_15_sub2__split_prop_2",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "sample-floorplan-house3.png::gt_006": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "sample-floorplan-house3.png::gt_007": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.8212,
+      "wall_network_split": 0.809,
+      "planar_face_split": 0.0,
+      "partition_split": 0.2386,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.4713,
+      "hybrid_split": 0.809
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_15",
+      "wall_network_split": "hyp_cavity_15__split_wns_2_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_15_sub2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_15__split_prop_1",
+      "hybrid_split": "hyp_cavity_15__split_hyb_1"
+    },
+    "overall_best_iou": 0.8212,
+    "overall_best_proposal_id": "hyp_cavity_15",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house3.png::gt_008": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_008",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1202,
+      "wall_network_split": 0.1036,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1036,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.2406,
+      "hybrid_split": 0.2406
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_18",
+      "wall_network_split": "hyp_cavity_18__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_18__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_2038",
+      "hybrid_split": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2039"
+    },
+    "overall_best_iou": 0.2406,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2039",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house3.png::gt_009": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_009",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0045,
+      "wall_network_split": 0.0045,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0045,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.3326,
+      "hybrid_split": 0.3326
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_cavity_2__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_1568",
+      "hybrid_split": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_1570"
+    },
+    "overall_best_iou": 0.3326,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_1568",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "sample-floorplan-house3.png::gt_010": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_010",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.3532,
+      "wall_network_split": 0.1957,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1957,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.3771,
+      "hybrid_split": 0.3771
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_3",
+      "wall_network_split": "hyp_cavity_3__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_3__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_1713",
+      "hybrid_split": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_1715"
+    },
+    "overall_best_iou": 0.3771,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_1715",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house3.png::gt_011": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_011",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1874,
+      "wall_network_split": 0.1463,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1463,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.4048,
+      "hybrid_split": 0.4048
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_3_hyp_face_face_6",
+      "wall_network_split": "merged_hyp_cavity_3_hyp_face_face_6__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_3_hyp_face_face_6__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "merged_hyp_cavity_3_hyp_face_face_6__split_prop_12",
+      "hybrid_split": "merged_hyp_cavity_3_hyp_face_face_6__split_hyb_13"
+    },
+    "overall_best_iou": 0.4048,
+    "overall_best_proposal_id": "merged_hyp_cavity_3_hyp_face_face_6__split_hyb_13",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house3.png::gt_012": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_012",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.042,
+      "wall_network_split": 0.0476,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0158,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.1669,
+      "hybrid_split": 0.1669
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2_sub1",
+      "wall_network_split": "hyp_cavity_2_sub1__split_wns_2_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_2_sub1__split_prop_1023",
+      "hybrid_split": "hyp_cavity_2_sub1__split_hyb_1025"
+    },
+    "overall_best_iou": 0.1669,
+    "overall_best_proposal_id": "hyp_cavity_2_sub1__split_hyb_1025",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house3.png::gt_013": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_013",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0034,
+      "wall_network_split": 0.0034,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0034,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0034
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_cavity_2__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2"
+    },
+    "overall_best_iou": 0.0034,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house3.png::gt_014": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_014",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0291,
+      "wall_network_split": 0.0292,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0292,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.1996,
+      "hybrid_split": 0.1996
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_cavity_2__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_2023",
+      "hybrid_split": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2024"
+    },
+    "overall_best_iou": 0.1996,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_2023",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "sample-floorplan-house3.png::gt_015": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_015",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1252,
+      "wall_network_split": 0.1416,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0466,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.3288,
+      "hybrid_split": 0.3288
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2_sub1",
+      "wall_network_split": "hyp_cavity_2_sub1__split_wns_2_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_2023",
+      "hybrid_split": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2024"
+    },
+    "overall_best_iou": 0.3288,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2024",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house3.png::gt_016": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_016",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.035,
+      "wall_network_split": 0.0351,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0351,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0415,
+      "hybrid_split": 0.0415
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_cavity_2__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_2_sub1__split_prop_853",
+      "hybrid_split": "hyp_cavity_2_sub1__split_hyb_855"
+    },
+    "overall_best_iou": 0.0415,
+    "overall_best_proposal_id": "hyp_cavity_2_sub1__split_prop_853",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "sample-floorplan-house3.png::gt_017": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_017",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0253,
+      "wall_network_split": 0.0253,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0253,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.1547,
+      "hybrid_split": 0.1547
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_cavity_2__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_2_sub1__split_prop_1236",
+      "hybrid_split": "hyp_cavity_2_sub1__split_hyb_1237"
+    },
+    "overall_best_iou": 0.1547,
+    "overall_best_proposal_id": "hyp_cavity_2_sub1__split_prop_1236",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "sample-floorplan-house3.png::gt_018": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_018",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0408,
+      "wall_network_split": 0.0409,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0409,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.2085,
+      "hybrid_split": 0.2085
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "merged_hyp_cavity_1_hyp_cavity_2",
+      "wall_network_split": "merged_hyp_cavity_1_hyp_cavity_2__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_2268",
+      "hybrid_split": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2269"
+    },
+    "overall_best_iou": 0.2085,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_2268",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "sample-floorplan-house3.png::gt_019": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_019",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.097,
+      "wall_network_split": 0.1097,
+      "planar_face_split": 0.0,
+      "partition_split": 0.036,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.2357,
+      "hybrid_split": 0.2357
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2_sub1",
+      "wall_network_split": "hyp_cavity_2_sub1__split_wns_2_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_2_sub1__split_prop_1002",
+      "hybrid_split": "hyp_cavity_2_sub1__split_hyb_1004"
+    },
+    "overall_best_iou": 0.2357,
+    "overall_best_proposal_id": "hyp_cavity_2_sub1__split_hyb_1004",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan-house3.png::gt_020": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_020",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.2011,
+      "wall_network_split": 0.1299,
+      "planar_face_split": 0.0,
+      "partition_split": 0.1299,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.201,
+      "hybrid_split": 0.201
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_17",
+      "wall_network_split": "hyp_cavity_17__split_wns_1_2",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_17__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_2_sub1__split_prop_1001",
+      "hybrid_split": "hyp_cavity_2_sub1__split_hyb_1003"
+    },
+    "overall_best_iou": 0.2011,
+    "overall_best_proposal_id": "hyp_cavity_17",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan-house3.png::gt_021": {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_021",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1641,
+      "wall_network_split": 0.1802,
+      "planar_face_split": 0.0,
+      "partition_split": 0.162,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.1844,
+      "hybrid_split": 0.1844
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2_sub1",
+      "wall_network_split": "hyp_cavity_2_sub1__split_wns_2_2",
+      "planar_face_split": null,
+      "partition_split": "merged_hyp_cavity_1_hyp_cavity_2__split_part_2",
+      "doorway_topology_split": null,
+      "proposal_guided_split": "merged_hyp_cavity_1_hyp_cavity_2__split_prop_2038",
+      "hybrid_split": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2039"
+    },
+    "overall_best_iou": 0.1844,
+    "overall_best_proposal_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_2039",
+    "overall_best_strategy": "hybrid_split"
+  },
+  "sample-floorplan.png::gt_001": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.9554,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_4",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.9554,
+    "overall_best_proposal_id": "hyp_cavity_4",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan.png::gt_002": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": null,
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0,
+    "overall_best_proposal_id": null,
+    "overall_best_strategy": null
+  },
+  "sample-floorplan.png::gt_003": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.5702,
+      "wall_network_split": 0.3735,
+      "planar_face_split": 0.0,
+      "partition_split": 0.3735,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.3735
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_3",
+      "wall_network_split": "hyp_cavity_5__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_5__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "hyp_cavity_5__split_hyb_1"
+    },
+    "overall_best_iou": 0.5702,
+    "overall_best_proposal_id": "hyp_cavity_3",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan.png::gt_004": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.9832,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_9",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.9832,
+    "overall_best_proposal_id": "hyp_cavity_9",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan.png::gt_005": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.943,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_8",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.943,
+    "overall_best_proposal_id": "hyp_cavity_8",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan.png::gt_006": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.9407,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_6",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.9407,
+    "overall_best_proposal_id": "hyp_cavity_6",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan.png::gt_007": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.9103,
+      "wall_network_split": 0.8647,
+      "planar_face_split": 0.0,
+      "partition_split": 0.8647,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.8647
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_10",
+      "wall_network_split": "hyp_cavity_10__split_wns_1_1",
+      "planar_face_split": null,
+      "partition_split": "hyp_cavity_10__split_part_1",
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": "hyp_cavity_10__split_hyb_1"
+    },
+    "overall_best_iou": 0.9103,
+    "overall_best_proposal_id": "hyp_cavity_10",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "sample-floorplan.png::gt_008": {
+    "image_id": "sample-floorplan.png",
+    "gt_id": "gt_008",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.9766,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_7",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.9766,
+    "overall_best_proposal_id": "hyp_cavity_7",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "simple-apartment-floor-plan.png::gt_001": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_001",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.0972,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.0972,
+    "overall_best_proposal_id": "hyp_cavity_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "simple-apartment-floor-plan.png::gt_002": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_002",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.2916,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.2916,
+    "overall_best_proposal_id": "hyp_cavity_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "simple-apartment-floor-plan.png::gt_003": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_003",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.5675,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0003,
+      "hybrid_split": 0.0003
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_2",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1__split_prop_2",
+      "hybrid_split": "hyp_cavity_1__split_hyb_2"
+    },
+    "overall_best_iou": 0.5675,
+    "overall_best_proposal_id": "hyp_cavity_2",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "simple-apartment-floor-plan.png::gt_004": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_004",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.2245,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.634,
+      "hybrid_split": 0.634
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1__split_prop_2",
+      "hybrid_split": "hyp_cavity_1__split_hyb_2"
+    },
+    "overall_best_iou": 0.634,
+    "overall_best_proposal_id": "hyp_cavity_1__split_prop_2",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "simple-apartment-floor-plan.png::gt_005": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_005",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1485,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.9634,
+      "hybrid_split": 0.9634
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": "hyp_cavity_1__split_prop_1",
+      "hybrid_split": "hyp_cavity_1__split_hyb_1"
+    },
+    "overall_best_iou": 0.9634,
+    "overall_best_proposal_id": "hyp_cavity_1__split_prop_1",
+    "overall_best_strategy": "proposal_guided_split"
+  },
+  "simple-apartment-floor-plan.png::gt_006": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_006",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.1996,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.1996,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_cavities"
+  },
+  "simple-apartment-floor-plan.png::gt_007": {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_007",
+    "best_iou_per_strategy": {
+      "baseline_cavities": 0.4074,
+      "wall_network_split": 0.0,
+      "planar_face_split": 0.0,
+      "partition_split": 0.0,
+      "doorway_topology_split": 0.0,
+      "proposal_guided_split": 0.0,
+      "hybrid_split": 0.0
+    },
+    "best_proposal_per_strategy": {
+      "baseline_cavities": "hyp_cavity_1",
+      "wall_network_split": null,
+      "planar_face_split": null,
+      "partition_split": null,
+      "doorway_topology_split": null,
+      "proposal_guided_split": null,
+      "hybrid_split": null
+    },
+    "overall_best_iou": 0.4074,
+    "overall_best_proposal_id": "hyp_cavity_1",
+    "overall_best_strategy": "baseline_cavities"
+  }
+}

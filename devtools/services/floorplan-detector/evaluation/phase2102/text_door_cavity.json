@@ -1,0 +1,27 @@
+{
+  "strategyId": "text_door_cavity",
+  "strategyName": "F_text_door_cavity",
+  "config": {
+    "strategyId": "text_door_cavity",
+    "strategyName": "F_text_door_cavity",
+    "doorWeight": 0.1,
+    "textPositiveWeight": 0.05,
+    "textNegativeWeight": 0.1,
+    "cavityPenaltyWeight": 0.04,
+    "structuralScoreWeight": 0.0
+  },
+  "gtRoomCount": 148,
+  "predRoomCount": 125,
+  "tp": 40,
+  "fp": 85,
+  "fn": 108,
+  "precision": 0.32,
+  "recall": 0.2703,
+  "microF1": 0.293,
+  "macroF1": 0.3193,
+  "meanIoU": 0.5864,
+  "medianIoU": 0.5006,
+  "latencyMs": 1040.4,
+  "promotedCandidates": 87,
+  "demotedCandidates": 189
+}

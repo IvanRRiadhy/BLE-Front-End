@@ -1,0 +1,12 @@
+{
+  "strategy": "partition_split",
+  "total_split_proposals": 112,
+  "cavity_split_recall_10": 0.5439,
+  "cavity_split_recall_25": 0.3333,
+  "cavity_split_recall_50": 0.1754,
+  "cavity_split_recall_75": 0.1053,
+  "affected_gt_rooms_covered_25": 19,
+  "affected_gt_rooms_covered_50": 10,
+  "mean_best_iou": 0.2394,
+  "median_best_iou": 0.1299
+}

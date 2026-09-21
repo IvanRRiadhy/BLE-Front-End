@@ -1,0 +1,4322 @@
+[
+  {
+    "cavityId": "hyp_cavity_1",
+    "imageId": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "polygon": [
+      [
+        1450.0,
+        386.0
+      ],
+      [
+        1450.0,
+        473.0
+      ],
+      [
+        2036.0,
+        473.0
+      ],
+      [
+        2036.0,
+        386.0
+      ]
+    ],
+    "areaPx": 50982.0,
+    "bbox": [
+      1450.0,
+      386.0,
+      586.0,
+      87.0
+    ],
+    "oversizedScore": 0.85,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 6,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_1",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "polygon": [
+      [
+        113.0,
+        437.0
+      ],
+      [
+        113.0,
+        521.0
+      ],
+      [
+        465.0,
+        521.0
+      ],
+      [
+        465.0,
+        437.0
+      ]
+    ],
+    "areaPx": 29568.0,
+    "bbox": [
+      113.0,
+      437.0,
+      352.0,
+      84.0
+    ],
+    "oversizedScore": 0.85,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 7,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_10",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        463,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        463,
+        312.0
+      ]
+    ],
+    "areaPx": 340600.0,
+    "bbox": [
+      463.0,
+      112.0,
+      1703.0,
+      200.0
+    ],
+    "oversizedScore": 0.65,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_4",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        33,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        33,
+        312.0
+      ]
+    ],
+    "areaPx": 426600.0,
+    "bbox": [
+      33.0,
+      112.0,
+      2133.0,
+      200.0
+    ],
+    "oversizedScore": 0.65,
+    "areaEvidence": 0.0001,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_5",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        34,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        34,
+        312.0
+      ]
+    ],
+    "areaPx": 426400.0,
+    "bbox": [
+      34.0,
+      112.0,
+      2132.0,
+      200.0
+    ],
+    "oversizedScore": 0.65,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_7",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        34,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        34,
+        312.0
+      ]
+    ],
+    "areaPx": 426400.0,
+    "bbox": [
+      34.0,
+      112.0,
+      2132.0,
+      200.0
+    ],
+    "oversizedScore": 0.65,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_8",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        33,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        33,
+        312.0
+      ]
+    ],
+    "areaPx": 426600.0,
+    "bbox": [
+      33.0,
+      112.0,
+      2133.0,
+      200.0
+    ],
+    "oversizedScore": 0.65,
+    "areaEvidence": 0.0001,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_9",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        34,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        34,
+        312.0
+      ]
+    ],
+    "areaPx": 426400.0,
+    "bbox": [
+      34.0,
+      112.0,
+      2132.0,
+      200.0
+    ],
+    "oversizedScore": 0.65,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_11",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        34,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        34,
+        312.0
+      ]
+    ],
+    "areaPx": 426400.0,
+    "bbox": [
+      34.0,
+      112.0,
+      2132.0,
+      200.0
+    ],
+    "oversizedScore": 0.65,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_3",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        32,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        32,
+        312.0
+      ]
+    ],
+    "areaPx": 426800.0,
+    "bbox": [
+      32.0,
+      112.0,
+      2134.0,
+      200.0
+    ],
+    "oversizedScore": 0.65,
+    "areaEvidence": 0.0003,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_2",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        32,
+        112.0
+      ],
+      [
+        2166.0,
+        112.0
+      ],
+      [
+        2166.0,
+        323
+      ],
+      [
+        32,
+        323
+      ]
+    ],
+    "areaPx": 450274.0,
+    "bbox": [
+      32.0,
+      112.0,
+      2134.0,
+      211.0
+    ],
+    "oversizedScore": 0.6522,
+    "areaEvidence": 0.0223,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_face_face_12",
+    "imageId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "polygon": [
+      [
+        35,
+        88
+      ],
+      [
+        2166.0,
+        88
+      ],
+      [
+        2166.0,
+        312.0
+      ],
+      [
+        35,
+        312.0
+      ]
+    ],
+    "areaPx": 477344.0,
+    "bbox": [
+      35.0,
+      88.0,
+      2131.0,
+      224.0
+    ],
+    "oversizedScore": 0.7214,
+    "areaEvidence": 0.0477,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.3333,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 2,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_6",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1980.0,
+        928.0
+      ],
+      [
+        1980.0,
+        1107.0
+      ],
+      [
+        2112.0,
+        1107.0
+      ],
+      [
+        2115.0,
+        1060.0
+      ],
+      [
+        2205.0,
+        1059.0
+      ],
+      [
+        2205.0,
+        928.0
+      ]
+    ],
+    "areaPx": 35929.5,
+    "bbox": [
+      1980.0,
+      928.0,
+      225.0,
+      179.0
+    ],
+    "oversizedScore": 0.7333,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.6667,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 3,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_9",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1451.0,
+        936.0
+      ],
+      [
+        1451.0,
+        1019.0
+      ],
+      [
+        1411.0,
+        1038.0
+      ],
+      [
+        1411.0,
+        1134.0
+      ],
+      [
+        1696.0,
+        1134.0
+      ],
+      [
+        1696.0,
+        1029.0
+      ],
+      [
+        1571.0,
+        1027.0
+      ],
+      [
+        1567.0,
+        937.0
+      ]
+    ],
+    "areaPx": 40988.0,
+    "bbox": [
+      1411.0,
+      936.0,
+      285.0,
+      198.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 17,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_face_face_16",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1743.0,
+        490.0
+      ],
+      [
+        1749.0,
+        897.0
+      ],
+      [
+        1777.0,
+        806.0
+      ],
+      [
+        1783.0,
+        897.0
+      ],
+      [
+        1847.0,
+        897.0
+      ],
+      [
+        1851.0,
+        806.0
+      ],
+      [
+        1872.0,
+        897.0
+      ],
+      [
+        1876.0,
+        798.0
+      ],
+      [
+        1918.0,
+        897.0
+      ],
+      [
+        1924.0,
+        797.0
+      ],
+      [
+        1956.0,
+        897.0
+      ],
+      [
+        1960.0,
+        794.0
+      ],
+      [
+        1969.0,
+        897.0
+      ],
+      [
+        1969.0,
+        490.0
+      ]
+    ],
+    "areaPx": 83230.0,
+    "bbox": [
+      1743.0,
+      490.0,
+      226.0,
+      407.0
+    ],
+    "oversizedScore": 0.668,
+    "areaEvidence": 0.008,
+    "wallEvidence": 0.7897,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.6667,
+    "repetitionEvidence": 0.1504,
+    "splitCandidateCount": 3,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_face_face_19",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1735.0,
+        82.0
+      ],
+      [
+        1924.0,
+        86.0
+      ],
+      [
+        1735.0,
+        111.0
+      ],
+      [
+        1743.0,
+        431.0
+      ],
+      [
+        2229.0,
+        435.0
+      ],
+      [
+        2071.0,
+        441.0
+      ],
+      [
+        2214.0,
+        445.0
+      ],
+      [
+        2071.0,
+        451.0
+      ],
+      [
+        2159.0,
+        456.0
+      ],
+      [
+        2071.0,
+        462.0
+      ],
+      [
+        2071.0,
+        909.0
+      ],
+      [
+        2207.0,
+        913.0
+      ],
+      [
+        2211.0,
+        798.0
+      ],
+      [
+        2339.0,
+        888.0
+      ],
+      [
+        2339.0,
+        111.0
+      ],
+      [
+        2176.0,
+        107.0
+      ],
+      [
+        2339.0,
+        91.0
+      ]
+    ],
+    "areaPx": 320808.5,
+    "bbox": [
+      1735.0,
+      82.0,
+      604.0,
+      831.0
+    ],
+    "oversizedScore": 0.9,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 4,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_12",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1726.0,
+        1155.0
+      ],
+      [
+        1723.0,
+        1327.0
+      ],
+      [
+        1953.0,
+        1327.0
+      ],
+      [
+        1953.0,
+        1155.0
+      ]
+    ],
+    "areaPx": 39302.0,
+    "bbox": [
+      1723.0,
+      1155.0,
+      230.0,
+      172.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 12,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_5",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1732.0,
+        928.0
+      ],
+      [
+        1723.0,
+        1082.0
+      ],
+      [
+        1953.0,
+        1082.0
+      ],
+      [
+        1953.0,
+        928.0
+      ]
+    ],
+    "areaPx": 34727.0,
+    "bbox": [
+      1723.0,
+      928.0,
+      230.0,
+      154.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 12,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_7",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        180.0,
+        931.0
+      ],
+      [
+        180.0,
+        1442.0
+      ],
+      [
+        682.0,
+        1420.0
+      ],
+      [
+        682.0,
+        1167.0
+      ],
+      [
+        540.0,
+        1167.0
+      ],
+      [
+        515.0,
+        1215.0
+      ],
+      [
+        364.0,
+        1213.0
+      ],
+      [
+        356.0,
+        1163.0
+      ],
+      [
+        682.0,
+        1134.0
+      ],
+      [
+        682.0,
+        931.0
+      ]
+    ],
+    "areaPx": 237104.0,
+    "bbox": [
+      180.0,
+      931.0,
+      502.0,
+      511.0
+    ],
+    "oversizedScore": 0.8729,
+    "areaEvidence": 0.7622,
+    "wallEvidence": 0.9904,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 10,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_15",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1354.0,
+        1331.0
+      ],
+      [
+        964.0,
+        1311.0
+      ],
+      [
+        964.0,
+        1462.0
+      ],
+      [
+        1065.0,
+        1483.0
+      ],
+      [
+        821.0,
+        1488.0
+      ],
+      [
+        720.0,
+        1573.0
+      ],
+      [
+        712.0,
+        1919.0
+      ],
+      [
+        1165.0,
+        1921.0
+      ],
+      [
+        1144.0,
+        1557.0
+      ],
+      [
+        1201.0,
+        1581.0
+      ],
+      [
+        1207.0,
+        1838.0
+      ],
+      [
+        1354.0,
+        1837.0
+      ]
+    ],
+    "areaPx": 305565.5,
+    "bbox": [
+      712.0,
+      1311.0,
+      642.0,
+      610.0
+    ],
+    "oversizedScore": 0.9,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 17,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_face_face_1",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        186.0,
+        1473.0
+      ],
+      [
+        177.0,
+        2089.0
+      ],
+      [
+        671.0,
+        2099.0
+      ],
+      [
+        670.0,
+        1506.0
+      ],
+      [
+        512.0,
+        1506.0
+      ],
+      [
+        508.0,
+        1861.0
+      ],
+      [
+        475.0,
+        1541.0
+      ],
+      [
+        471.0,
+        1867.0
+      ],
+      [
+        427.0,
+        1541.0
+      ],
+      [
+        412.0,
+        1867.0
+      ],
+      [
+        405.0,
+        1541.0
+      ]
+    ],
+    "areaPx": 266476.5,
+    "bbox": [
+      177.0,
+      1473.0,
+      494.0,
+      626.0
+    ],
+    "oversizedScore": 0.6906,
+    "areaEvidence": 0.9062,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_2",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1722.0,
+        473.0
+      ],
+      [
+        1405.0,
+        495.0
+      ],
+      [
+        1405.0,
+        839.0
+      ],
+      [
+        1506.0,
+        839.0
+      ],
+      [
+        1518.0,
+        695.0
+      ],
+      [
+        1581.0,
+        713.0
+      ],
+      [
+        1583.0,
+        630.0
+      ],
+      [
+        1722.0,
+        622.0
+      ]
+    ],
+    "areaPx": 73224.0,
+    "bbox": [
+      1405.0,
+      473.0,
+      317.0,
+      366.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 8,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_13",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        714.0,
+        1193.0
+      ],
+      [
+        714.0,
+        1301.0
+      ],
+      [
+        1002.0,
+        1301.0
+      ],
+      [
+        1000.0,
+        1167.0
+      ],
+      [
+        788.0,
+        1167.0
+      ],
+      [
+        784.0,
+        1190.0
+      ]
+    ],
+    "areaPx": 36697.0,
+    "bbox": [
+      714.0,
+      1167.0,
+      288.0,
+      134.0
+    ],
+    "oversizedScore": 0.8162,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.3246,
+    "splitCandidateCount": 27,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_8",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        785.0,
+        932.0
+      ],
+      [
+        785.0,
+        1100.0
+      ],
+      [
+        926.0,
+        1100.0
+      ],
+      [
+        930.0,
+        1132.0
+      ],
+      [
+        1067.0,
+        1128.0
+      ],
+      [
+        1104.0,
+        1103.0
+      ],
+      [
+        1104.0,
+        931.0
+      ]
+    ],
+    "areaPx": 58499.0,
+    "bbox": [
+      785.0,
+      931.0,
+      319.0,
+      201.0
+    ],
+    "oversizedScore": 0.7355,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.6667,
+    "repetitionEvidence": 0.0435,
+    "splitCandidateCount": 3,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_11",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1028.0,
+        1184.0
+      ],
+      [
+        1028.0,
+        1286.0
+      ],
+      [
+        1178.0,
+        1286.0
+      ],
+      [
+        1185.0,
+        1256.0
+      ],
+      [
+        1326.0,
+        1257.0
+      ],
+      [
+        1326.0,
+        1155.0
+      ],
+      [
+        1133.0,
+        1155.0
+      ],
+      [
+        1130.0,
+        1173.0
+      ]
+    ],
+    "areaPx": 32349.5,
+    "bbox": [
+      1028.0,
+      1155.0,
+      298.0,
+      131.0
+    ],
+    "oversizedScore": 0.8194,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.3874,
+    "splitCandidateCount": 9,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_4",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1132.0,
+        928.0
+      ],
+      [
+        1133.0,
+        1134.0
+      ],
+      [
+        1326.0,
+        1134.0
+      ],
+      [
+        1326.0,
+        928.0
+      ]
+    ],
+    "areaPx": 39861.0,
+    "bbox": [
+      1132.0,
+      928.0,
+      194.0,
+      206.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 8,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_face_face_19_sub1",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1735,
+        82
+      ],
+      [
+        2037.5,
+        82
+      ],
+      [
+        2037.5,
+        914
+      ],
+      [
+        1735,
+        914
+      ]
+    ],
+    "areaPx": 251680.0,
+    "bbox": [
+      1735.0,
+      82.0,
+      302.5,
+      832.0
+    ],
+    "oversizedScore": 0.9146,
+    "areaEvidence": 0.8336,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.6252,
+    "splitCandidateCount": 27,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_3",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        711.0,
+        546.0
+      ],
+      [
+        711.0,
+        902.0
+      ],
+      [
+        1326.0,
+        918.0
+      ],
+      [
+        1326.0,
+        517.0
+      ],
+      [
+        747.0,
+        517.0
+      ]
+    ],
+    "areaPx": 241173.0,
+    "bbox": [
+      711.0,
+      517.0,
+      615.0,
+      401.0
+    ],
+    "oversizedScore": 0.8791,
+    "areaEvidence": 0.7821,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0168,
+    "splitCandidateCount": 11,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_16_sub2",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1895.0,
+        1339.0
+      ],
+      [
+        2372.0,
+        1339.0
+      ],
+      [
+        2372.0,
+        2288.0
+      ],
+      [
+        1895.0,
+        2288.0
+      ]
+    ],
+    "areaPx": 452673.0,
+    "bbox": [
+      1895.0,
+      1339.0,
+      477.0,
+      949.0
+    ],
+    "oversizedScore": 0.9122,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.2448,
+    "splitCandidateCount": 7,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_10",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        2372.0,
+        1080.0
+      ],
+      [
+        2255.0,
+        1080.0
+      ],
+      [
+        2231.0,
+        1145.0
+      ],
+      [
+        1980.0,
+        1143.0
+      ],
+      [
+        1980.0,
+        1327.0
+      ],
+      [
+        2372.0,
+        1327.0
+      ]
+    ],
+    "areaPx": 79980.0,
+    "bbox": [
+      1980.0,
+      1080.0,
+      392.0,
+      247.0
+    ],
+    "oversizedScore": 0.4354,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.356,
+    "partitionEvidence": 0.4346,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0435,
+    "splitCandidateCount": 5,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_16",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1438.0,
+        1339.0
+      ],
+      [
+        1418.0,
+        2288.0
+      ],
+      [
+        2372.0,
+        2288.0
+      ],
+      [
+        2372.0,
+        1368.0
+      ]
+    ],
+    "areaPx": 882313.0,
+    "bbox": [
+      1418.0,
+      1339.0,
+      954.0,
+      949.0
+    ],
+    "oversizedScore": 0.9,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 23,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_1_sub2",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        951.0,
+        107.0
+      ],
+      [
+        1722.0,
+        107.0
+      ],
+      [
+        1722.0,
+        905.0
+      ],
+      [
+        951.0,
+        905.0
+      ]
+    ],
+    "areaPx": 615258.0,
+    "bbox": [
+      951.0,
+      107.0,
+      771.0,
+      798.0
+    ],
+    "oversizedScore": 0.9,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 41,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_1",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        180.0,
+        905.0
+      ],
+      [
+        682.0,
+        905.0
+      ],
+      [
+        682.0,
+        548.0
+      ],
+      [
+        535.0,
+        479.0
+      ],
+      [
+        1722.0,
+        431.0
+      ],
+      [
+        1722.0,
+        107.0
+      ],
+      [
+        180.0,
+        107.0
+      ]
+    ],
+    "areaPx": 753916.5,
+    "bbox": [
+      180.0,
+      107.0,
+      1542.0,
+      798.0
+    ],
+    "oversizedScore": 0.9108,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.2162,
+    "splitCandidateCount": 7,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_14",
+    "imageId": "Floorplan-House.png",
+    "polygon": [
+      [
+        1405.0,
+        1219.0
+      ],
+      [
+        1405.0,
+        1325.0
+      ],
+      [
+        1696.0,
+        1327.0
+      ],
+      [
+        1696.0,
+        1217.0
+      ]
+    ],
+    "areaPx": 31428.0,
+    "bbox": [
+      1405.0,
+      1217.0,
+      291.0,
+      110.0
+    ],
+    "oversizedScore": 0.0286,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.5727,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_4",
+    "imageId": "Lantai 1.jpg",
+    "polygon": [
+      [
+        203.0,
+        69.0
+      ],
+      [
+        203.0,
+        134.0
+      ],
+      [
+        498.0,
+        134.0
+      ],
+      [
+        498.0,
+        69.0
+      ]
+    ],
+    "areaPx": 19175.0,
+    "bbox": [
+      203.0,
+      69.0,
+      295.0,
+      65.0
+    ],
+    "oversizedScore": 0.05,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_5",
+    "imageId": "Lantai 1.jpg",
+    "polygon": [
+      [
+        203.0,
+        144.0
+      ],
+      [
+        203.0,
+        210.0
+      ],
+      [
+        498.0,
+        210.0
+      ],
+      [
+        498.0,
+        144.0
+      ],
+      [
+        403.0,
+        144.0
+      ],
+      [
+        399.0,
+        154.0
+      ]
+    ],
+    "areaPx": 18470.0,
+    "bbox": [
+      203.0,
+      144.0,
+      295.0,
+      66.0
+    ],
+    "oversizedScore": 0.051,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0029,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_3",
+    "imageId": "Lantai 1.jpg",
+    "polygon": [
+      [
+        938.0,
+        22.0
+      ],
+      [
+        938.0,
+        134.0
+      ],
+      [
+        1116.0,
+        140.0
+      ],
+      [
+        938.0,
+        144.0
+      ],
+      [
+        936.0,
+        273.0
+      ],
+      [
+        1152.0,
+        273.0
+      ],
+      [
+        1155.0,
+        214.0
+      ],
+      [
+        1257.0,
+        214.0
+      ],
+      [
+        1257.0,
+        22.0
+      ]
+    ],
+    "areaPx": 73201.5,
+    "bbox": [
+      936.0,
+      22.0,
+      321.0,
+      251.0
+    ],
+    "oversizedScore": 0.8651,
+    "areaEvidence": 0.6513,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 5,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_2",
+    "imageId": "Lantai 1.jpg",
+    "polygon": [
+      [
+        509.0,
+        22.0
+      ],
+      [
+        508.0,
+        134.0
+      ],
+      [
+        685.0,
+        134.0
+      ],
+      [
+        690.0,
+        86.0
+      ],
+      [
+        748.0,
+        89.0
+      ],
+      [
+        753.0,
+        134.0
+      ],
+      [
+        930.0,
+        134.0
+      ],
+      [
+        930.0,
+        22.0
+      ]
+    ],
+    "areaPx": 44278.5,
+    "bbox": [
+      508.0,
+      22.0,
+      422.0,
+      112.0
+    ],
+    "oversizedScore": 0.5707,
+    "areaEvidence": 0.2359,
+    "wallEvidence": 0.6254,
+    "partitionEvidence": 0.8462,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.3333,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 2,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_6",
+    "imageId": "Lantai 1.jpg",
+    "polygon": [
+      [
+        508.0,
+        144.0
+      ],
+      [
+        508.0,
+        210.0
+      ],
+      [
+        930.0,
+        210.0
+      ],
+      [
+        930.0,
+        144.0
+      ]
+    ],
+    "areaPx": 27852.0,
+    "bbox": [
+      508.0,
+      144.0,
+      422.0,
+      66.0
+    ],
+    "oversizedScore": 0.05,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_1",
+    "imageId": "Lantai 2.jpg",
+    "polygon": [
+      [
+        644.0,
+        29.0
+      ],
+      [
+        643.0,
+        274.0
+      ],
+      [
+        1015.0,
+        274.0
+      ],
+      [
+        1015.0,
+        29.0
+      ]
+    ],
+    "areaPx": 91017.5,
+    "bbox": [
+      643.0,
+      29.0,
+      372.0,
+      245.0
+    ],
+    "oversizedScore": 0.5312,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.8021,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0092,
+    "splitCandidateCount": 1,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_face_face_2",
+    "imageId": "library-floor-plan.png",
+    "polygon": [
+      [
+        17.0,
+        17.0
+      ],
+      [
+        17.0,
+        105.0
+      ],
+      [
+        187.0,
+        109.0
+      ],
+      [
+        17.0,
+        115.0
+      ],
+      [
+        187.0,
+        123.0
+      ],
+      [
+        17.0,
+        129.0
+      ],
+      [
+        187.0,
+        135.0
+      ],
+      [
+        17.0,
+        141.0
+      ],
+      [
+        17.0,
+        441.0
+      ],
+      [
+        486.0,
+        444.0
+      ],
+      [
+        492.0,
+        334.0
+      ],
+      [
+        505.0,
+        444.0
+      ],
+      [
+        898.0,
+        444.0
+      ],
+      [
+        898.0,
+        46.0
+      ],
+      [
+        836.0,
+        42.0
+      ],
+      [
+        898.0,
+        17.0
+      ],
+      [
+        501.0,
+        17.0
+      ],
+      [
+        497.0,
+        271.0
+      ],
+      [
+        491.0,
+        17.0
+      ],
+      [
+        392.0,
+        17.0
+      ],
+      [
+        388.0,
+        120.0
+      ],
+      [
+        382.0,
+        17.0
+      ]
+    ],
+    "areaPx": 368694.5,
+    "bbox": [
+      17.0,
+      17.0,
+      881.0,
+      427.0
+    ],
+    "oversizedScore": 0.2729,
+    "areaEvidence": 0.994,
+    "wallEvidence": 0.2559,
+    "partitionEvidence": 0.2792,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.2816,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_1",
+    "imageId": "library-floor-plan.png",
+    "polygon": [
+      [
+        846.0,
+        14.0
+      ],
+      [
+        846.0,
+        38.0
+      ],
+      [
+        895.0,
+        38.0
+      ],
+      [
+        895.0,
+        14.0
+      ]
+    ],
+    "areaPx": 1176.0,
+    "bbox": [
+      846.0,
+      14.0,
+      49.0,
+      24.0
+    ],
+    "oversizedScore": 0.0135,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.2708,
+    "splitCandidateCount": 0,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_face_face_1",
+    "imageId": "library-floor-plan.png",
+    "polygon": [
+      [
+        17.0,
+        454.0
+      ],
+      [
+        784.0,
+        485.0
+      ],
+      [
+        55.0,
+        491.0
+      ],
+      [
+        17.0,
+        593.0
+      ],
+      [
+        898.0,
+        600.0
+      ],
+      [
+        850.0,
+        494.0
+      ],
+      [
+        898.0,
+        454.0
+      ]
+    ],
+    "areaPx": 105797.0,
+    "bbox": [
+      17.0,
+      454.0,
+      881.0,
+      146.0
+    ],
+    "oversizedScore": 0.3894,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.481,
+    "partitionEvidence": 0.6841,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_9",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1455.0,
+        1156.0
+      ],
+      [
+        1603.0,
+        1158.0
+      ],
+      [
+        1605.0,
+        1051.0
+      ],
+      [
+        1749.0,
+        1051.0
+      ],
+      [
+        1749.0,
+        939.0
+      ],
+      [
+        1533.0,
+        939.0
+      ],
+      [
+        1541.0,
+        1050.0
+      ],
+      [
+        1455.0,
+        1051.0
+      ]
+    ],
+    "areaPx": 39578.0,
+    "bbox": [
+      1455.0,
+      939.0,
+      294.0,
+      219.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 6,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_4",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1774.0,
+        698.0
+      ],
+      [
+        1765.0,
+        703.0
+      ],
+      [
+        1765.0,
+        922.0
+      ],
+      [
+        1886.0,
+        922.0
+      ],
+      [
+        1884.0,
+        703.0
+      ]
+    ],
+    "areaPx": 26577.5,
+    "bbox": [
+      1765.0,
+      698.0,
+      121.0,
+      224.0
+    ],
+    "oversizedScore": 0.8088,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.1756,
+    "splitCandidateCount": 6,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_12",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1749.0,
+        1176.0
+      ],
+      [
+        1633.0,
+        1175.0
+      ],
+      [
+        1632.0,
+        1243.0
+      ],
+      [
+        1462.0,
+        1257.0
+      ],
+      [
+        1462.0,
+        1399.0
+      ],
+      [
+        1749.0,
+        1399.0
+      ]
+    ],
+    "areaPx": 51446.0,
+    "bbox": [
+      1462.0,
+      1175.0,
+      287.0,
+      224.0
+    ],
+    "oversizedScore": 0.7336,
+    "areaEvidence": 0.0029,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.6667,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 3,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_2",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1462.0,
+        509.0
+      ],
+      [
+        1462.0,
+        683.0
+      ],
+      [
+        1753.0,
+        686.0
+      ],
+      [
+        1753.0,
+        509.0
+      ]
+    ],
+    "areaPx": 51070.5,
+    "bbox": [
+      1462.0,
+      509.0,
+      291.0,
+      177.0
+    ],
+    "oversizedScore": 0.1369,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.6667,
+    "repetitionEvidence": 0.072,
+    "splitCandidateCount": 3,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_10",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        177.0,
+        1175.0
+      ],
+      [
+        177.0,
+        1398.0
+      ],
+      [
+        542.0,
+        1398.0
+      ],
+      [
+        542.0,
+        1175.0
+      ],
+      [
+        387.0,
+        1175.0
+      ],
+      [
+        384.0,
+        1262.0
+      ],
+      [
+        259.0,
+        1262.0
+      ],
+      [
+        258.0,
+        1175.0
+      ]
+    ],
+    "areaPx": 70346.0,
+    "bbox": [
+      177.0,
+      1175.0,
+      365.0,
+      223.0
+    ],
+    "oversizedScore": 0.8185,
+    "areaEvidence": 0.151,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0684,
+    "splitCandidateCount": 8,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_face_face_16",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1451.0,
+        318.0
+      ],
+      [
+        1451.0,
+        491.0
+      ],
+      [
+        1752.0,
+        491.0
+      ],
+      [
+        1752.0,
+        318.0
+      ]
+    ],
+    "areaPx": 52073.0,
+    "bbox": [
+      1451.0,
+      318.0,
+      301.0,
+      173.0
+    ],
+    "oversizedScore": 0.0068,
+    "areaEvidence": 0.0079,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.1199,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_7",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1278.0,
+        822.0
+      ],
+      [
+        1278.0,
+        919.0
+      ],
+      [
+        1374.0,
+        920.0
+      ],
+      [
+        1374.0,
+        822.0
+      ]
+    ],
+    "areaPx": 9360.0,
+    "bbox": [
+      1278.0,
+      822.0,
+      96.0,
+      98.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 4,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_11",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1462.0,
+        1175.0
+      ],
+      [
+        1462.0,
+        1234.0
+      ],
+      [
+        1586.0,
+        1234.0
+      ],
+      [
+        1586.0,
+        1175.0
+      ]
+    ],
+    "areaPx": 7316.0,
+    "bbox": [
+      1462.0,
+      1175.0,
+      124.0,
+      59.0
+    ],
+    "oversizedScore": 0.7484,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.6667,
+    "repetitionEvidence": 0.3008,
+    "splitCandidateCount": 3,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_face_face_15",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1762.0,
+        318.0
+      ],
+      [
+        1762.0,
+        491.0
+      ],
+      [
+        1883.0,
+        491.0
+      ],
+      [
+        1883.0,
+        318.0
+      ]
+    ],
+    "areaPx": 20933.0,
+    "bbox": [
+      1762.0,
+      318.0,
+      121.0,
+      173.0
+    ],
+    "oversizedScore": 0.0,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_1_sub2",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        925.0,
+        131.0
+      ],
+      [
+        1445.0,
+        131.0
+      ],
+      [
+        1445.0,
+        1160.0
+      ],
+      [
+        925.0,
+        1160.0
+      ]
+    ],
+    "areaPx": 535080.0,
+    "bbox": [
+      925.0,
+      131.0,
+      520.0,
+      1029.0
+    ],
+    "oversizedScore": 0.912,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.2394,
+    "splitCandidateCount": 35,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_3",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1761.0,
+        509.0
+      ],
+      [
+        1761.0,
+        686.0
+      ],
+      [
+        1903.0,
+        671.0
+      ],
+      [
+        1903.0,
+        774.0
+      ],
+      [
+        1998.0,
+        787.0
+      ],
+      [
+        1995.0,
+        922.0
+      ],
+      [
+        2390.0,
+        922.0
+      ],
+      [
+        2342.0,
+        509.0
+      ]
+    ],
+    "areaPx": 202048.0,
+    "bbox": [
+      1761.0,
+      509.0,
+      629.0,
+      413.0
+    ],
+    "oversizedScore": 0.8339,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.6667,
+    "repetitionEvidence": 0.0115,
+    "splitCandidateCount": 3,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_13",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1278.0,
+        1177.0
+      ],
+      [
+        1278.0,
+        1322.0
+      ],
+      [
+        1444.0,
+        1322.0
+      ],
+      [
+        1444.0,
+        1176.0
+      ]
+    ],
+    "areaPx": 24153.0,
+    "bbox": [
+      1278.0,
+      1176.0,
+      166.0,
+      146.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 8,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_8",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        357.0,
+        876.0
+      ],
+      [
+        178.0,
+        877.0
+      ],
+      [
+        174.0,
+        1047.0
+      ],
+      [
+        191.0,
+        1069.0
+      ],
+      [
+        191.0,
+        1157.0
+      ],
+      [
+        372.0,
+        1157.0
+      ]
+    ],
+    "areaPx": 51414.0,
+    "bbox": [
+      174.0,
+      876.0,
+      198.0,
+      281.0
+    ],
+    "oversizedScore": 0.0047,
+    "areaEvidence": 0.0027,
+    "wallEvidence": 0.0126,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_6",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        1563.0,
+        759.0
+      ],
+      [
+        1563.0,
+        922.0
+      ],
+      [
+        1747.0,
+        921.0
+      ],
+      [
+        1749.0,
+        758.0
+      ]
+    ],
+    "areaPx": 30154.0,
+    "bbox": [
+      1563.0,
+      758.0,
+      186.0,
+      164.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 9,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_1",
+    "imageId": "sample-floorplan-house2.png",
+    "polygon": [
+      [
+        558.0,
+        131.0
+      ],
+      [
+        558.0,
+        926.0
+      ],
+      [
+        430.0,
+        876.0
+      ],
+      [
+        405.0,
+        1158.0
+      ],
+      [
+        542.0,
+        1158.0
+      ],
+      [
+        549.0,
+        1072.0
+      ],
+      [
+        558.0,
+        1160.0
+      ],
+      [
+        1338.0,
+        1156.0
+      ],
+      [
+        1261.0,
+        687.0
+      ],
+      [
+        1445.0,
+        686.0
+      ],
+      [
+        1445.0,
+        136.0
+      ]
+    ],
+    "areaPx": 875928.0,
+    "bbox": [
+      405.0,
+      131.0,
+      1040.0,
+      1029.0
+    ],
+    "oversizedScore": 0.9,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 12,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_7",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        1300.0,
+        1418.0
+      ],
+      [
+        814.0,
+        1424.0
+      ],
+      [
+        814.0,
+        1762.0
+      ],
+      [
+        1008.0,
+        1764.0
+      ],
+      [
+        1048.0,
+        1918.0
+      ],
+      [
+        1300.0,
+        1922.0
+      ],
+      [
+        1300.0,
+        1843.0
+      ],
+      [
+        1206.0,
+        1776.0
+      ],
+      [
+        1166.0,
+        1668.0
+      ],
+      [
+        1300.0,
+        1660.0
+      ]
+    ],
+    "areaPx": 192899.0,
+    "bbox": [
+      814.0,
+      1418.0,
+      486.0,
+      504.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 18,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_9",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        1394.0,
+        1553.0
+      ],
+      [
+        1362.0,
+        1672.0
+      ],
+      [
+        1393.0,
+        2109.0
+      ],
+      [
+        1754.0,
+        2128.0
+      ],
+      [
+        1754.0,
+        2001.0
+      ],
+      [
+        1659.0,
+        1929.0
+      ],
+      [
+        1913.0,
+        1914.0
+      ],
+      [
+        1913.0,
+        1552.0
+      ]
+    ],
+    "areaPx": 267422.5,
+    "bbox": [
+      1362.0,
+      1552.0,
+      551.0,
+      576.0
+    ],
+    "oversizedScore": 0.8024,
+    "areaEvidence": 0.0237,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 25,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_11",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        338.0,
+        2111.0
+      ],
+      [
+        338.0,
+        2775.0
+      ],
+      [
+        497.0,
+        2775.0
+      ],
+      [
+        497.0,
+        2460.0
+      ],
+      [
+        452.0,
+        2455.0
+      ],
+      [
+        438.0,
+        2265.0
+      ],
+      [
+        497.0,
+        2207.0
+      ],
+      [
+        497.0,
+        2111.0
+      ]
+    ],
+    "areaPx": 93872.5,
+    "bbox": [
+      338.0,
+      2111.0,
+      159.0,
+      664.0
+    ],
+    "oversizedScore": 0.2805,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.5887,
+    "partitionEvidence": 0.0979,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 0,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_16",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        4570.0,
+        3119.0
+      ],
+      [
+        4570.0,
+        3568.0
+      ],
+      [
+        4800.0,
+        3568.0
+      ],
+      [
+        4801.0,
+        3119.0
+      ]
+    ],
+    "areaPx": 103494.5,
+    "bbox": [
+      4570.0,
+      3119.0,
+      231.0,
+      449.0
+    ],
+    "oversizedScore": 0.8111,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.2219,
+    "splitCandidateCount": 34,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_3",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        3207.0,
+        891.0
+      ],
+      [
+        2985.0,
+        859.0
+      ],
+      [
+        2960.0,
+        891.0
+      ],
+      [
+        2599.0,
+        894.0
+      ],
+      [
+        2599.0,
+        1402.0
+      ],
+      [
+        3209.0,
+        1402.0
+      ]
+    ],
+    "areaPx": 314609.5,
+    "bbox": [
+      2599.0,
+      859.0,
+      610.0,
+      543.0
+    ],
+    "oversizedScore": 0.7432,
+    "areaEvidence": 0.0985,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.6667,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 3,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_3_hyp_face_face_6",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        1390,
+        859.0
+      ],
+      [
+        3901,
+        859.0
+      ],
+      [
+        3901,
+        1402.0
+      ],
+      [
+        1390,
+        1402.0
+      ]
+    ],
+    "areaPx": 1363473.0,
+    "bbox": [
+      1390.0,
+      859.0,
+      2511.0,
+      543.0
+    ],
+    "oversizedScore": 0.95,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 34,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_18",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        2995.0,
+        3769.0
+      ],
+      [
+        2995.0,
+        4135.0
+      ],
+      [
+        3245.0,
+        4135.0
+      ],
+      [
+        3245.0,
+        3895.0
+      ],
+      [
+        3218.0,
+        3851.0
+      ],
+      [
+        3115.0,
+        3795.0
+      ],
+      [
+        3113.0,
+        3769.0
+      ]
+    ],
+    "areaPx": 83104.0,
+    "bbox": [
+      2995.0,
+      3769.0,
+      250.0,
+      366.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 4,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_6",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        143.0,
+        1304.0
+      ],
+      [
+        143.0,
+        2775.0
+      ],
+      [
+        279.0,
+        2775.0
+      ],
+      [
+        276.0,
+        1304.0
+      ]
+    ],
+    "areaPx": 197849.5,
+    "bbox": [
+      143.0,
+      1304.0,
+      136.0,
+      1471.0
+    ],
+    "oversizedScore": 0.5511,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.433,
+    "partitionEvidence": 0.5981,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 9,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_8",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        497.0,
+        1517.0
+      ],
+      [
+        338.0,
+        1519.0
+      ],
+      [
+        338.0,
+        1998.0
+      ],
+      [
+        439.0,
+        1998.0
+      ],
+      [
+        446.0,
+        1925.0
+      ],
+      [
+        497.0,
+        1921.0
+      ]
+    ],
+    "areaPx": 72239.5,
+    "bbox": [
+      338.0,
+      1517.0,
+      159.0,
+      481.0
+    ],
+    "oversizedScore": 0.8381,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.7626,
+    "splitCandidateCount": 8,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_17",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        4570.0,
+        3613.0
+      ],
+      [
+        4543.0,
+        4157.0
+      ],
+      [
+        4600.0,
+        4250.0
+      ],
+      [
+        4800.0,
+        4250.0
+      ],
+      [
+        4800.0,
+        3636.0
+      ]
+    ],
+    "areaPx": 151069.5,
+    "bbox": [
+      4543.0,
+      3613.0,
+      257.0,
+      637.0
+    ],
+    "oversizedScore": 0.8245,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.4893,
+    "splitCandidateCount": 33,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_12",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        4107.0,
+        2524.0
+      ],
+      [
+        4107.0,
+        2629.0
+      ],
+      [
+        4521.0,
+        2615.0
+      ],
+      [
+        4521.0,
+        2432.0
+      ],
+      [
+        4397.0,
+        2431.0
+      ],
+      [
+        4389.0,
+        2314.0
+      ],
+      [
+        4246.0,
+        2314.0
+      ],
+      [
+        4237.0,
+        2512.0
+      ]
+    ],
+    "areaPx": 85063.0,
+    "bbox": [
+      4107.0,
+      2314.0,
+      414.0,
+      315.0
+    ],
+    "oversizedScore": 0.8,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 11,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_2_sub1",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        3554.0,
+        308.0
+      ],
+      [
+        4971.5,
+        308.0
+      ],
+      [
+        4971.5,
+        4950.0
+      ],
+      [
+        3554.0,
+        4950.0
+      ]
+    ],
+    "areaPx": 6580035.0,
+    "bbox": [
+      3554.0,
+      308.0,
+      1417.5,
+      4642.0
+    ],
+    "oversizedScore": 0.9444,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.8874,
+    "splitCandidateCount": 1457,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_14",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        143.0,
+        2836.0
+      ],
+      [
+        143.0,
+        4577.0
+      ],
+      [
+        279.0,
+        4587.0
+      ],
+      [
+        279.0,
+        2836.0
+      ]
+    ],
+    "areaPx": 237456.0,
+    "bbox": [
+      143.0,
+      2836.0,
+      136.0,
+      1751.0
+    ],
+    "oversizedScore": 0.0654,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.044,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_15_sub2",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        1313.0,
+        3114.0
+      ],
+      [
+        2288.0,
+        3114.0
+      ],
+      [
+        2288.0,
+        4587.0
+      ],
+      [
+        1313.0,
+        4587.0
+      ]
+    ],
+    "areaPx": 1436175.0,
+    "bbox": [
+      1313.0,
+      3114.0,
+      975.0,
+      1473.0
+    ],
+    "oversizedScore": 0.9003,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0054,
+    "splitCandidateCount": 8,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "merged_hyp_cavity_1_hyp_cavity_2",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        2599.0,
+        267.0
+      ],
+      [
+        6389.0,
+        267.0
+      ],
+      [
+        6389.0,
+        4950.0
+      ],
+      [
+        2599.0,
+        4950.0
+      ]
+    ],
+    "areaPx": 17748570.0,
+    "bbox": [
+      2599.0,
+      267.0,
+      3790.0,
+      4683.0
+    ],
+    "oversizedScore": 0.9,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 2783,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_15_sub1",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        338.0,
+        3114.0
+      ],
+      [
+        1313.0,
+        3114.0
+      ],
+      [
+        1313.0,
+        4587.0
+      ],
+      [
+        338.0,
+        4587.0
+      ]
+    ],
+    "areaPx": 1436175.0,
+    "bbox": [
+      338.0,
+      3114.0,
+      975.0,
+      1473.0
+    ],
+    "oversizedScore": 0.9003,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0054,
+    "splitCandidateCount": 8,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_4_sub2",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        826.5,
+        878.0
+      ],
+      [
+        1335.0,
+        878.0
+      ],
+      [
+        1335.0,
+        1249.0
+      ],
+      [
+        826.5,
+        1249.0
+      ]
+    ],
+    "areaPx": 188653.5,
+    "bbox": [
+      826.5,
+      878.0,
+      508.5,
+      371.0
+    ],
+    "oversizedScore": 0.6667,
+    "areaEvidence": 0.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.3333,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 2,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_15",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        338.0,
+        3232.0
+      ],
+      [
+        338.0,
+        4587.0
+      ],
+      [
+        1917.0,
+        4587.0
+      ],
+      [
+        2098.0,
+        4409.0
+      ],
+      [
+        2288.0,
+        4586.0
+      ],
+      [
+        2156.0,
+        3868.0
+      ],
+      [
+        1148.0,
+        3887.0
+      ],
+      [
+        2155.0,
+        3758.0
+      ],
+      [
+        2287.0,
+        3335.0
+      ],
+      [
+        1671.0,
+        3271.0
+      ],
+      [
+        1624.0,
+        3114.0
+      ]
+    ],
+    "areaPx": 2497274.0,
+    "bbox": [
+      338.0,
+      3114.0,
+      1950.0,
+      1473.0
+    ],
+    "oversizedScore": 0.9,
+    "areaEvidence": 1.0,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 5,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_face_face_13",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        1362.0,
+        116.0
+      ],
+      [
+        1362.0,
+        250.0
+      ],
+      [
+        5589.0,
+        250.0
+      ],
+      [
+        5593.0,
+        117.0
+      ],
+      [
+        5604.0,
+        250.0
+      ],
+      [
+        5604.0,
+        116.0
+      ]
+    ],
+    "areaPx": 567430.5,
+    "bbox": [
+      1362.0,
+      116.0,
+      4242.0,
+      134.0
+    ],
+    "oversizedScore": 0.1021,
+    "areaEvidence": 0.4991,
+    "wallEvidence": 0.0063,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 1.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_4",
+    "imageId": "sample-floorplan-house3.png",
+    "polygon": [
+      [
+        318.0,
+        878.0
+      ],
+      [
+        318.0,
+        1249.0
+      ],
+      [
+        1335.0,
+        1245.0
+      ],
+      [
+        1335.0,
+        878.0
+      ]
+    ],
+    "areaPx": 375273.0,
+    "bbox": [
+      318.0,
+      878.0,
+      1017.0,
+      371.0
+    ],
+    "oversizedScore": 0.8505,
+    "areaEvidence": 0.1946,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.6206,
+    "splitCandidateCount": 5,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_8",
+    "imageId": "sample-floorplan.png",
+    "polygon": [
+      [
+        245.0,
+        265.0
+      ],
+      [
+        245.0,
+        418.0
+      ],
+      [
+        398.0,
+        418.0
+      ],
+      [
+        396.0,
+        289.0
+      ],
+      [
+        386.0,
+        288.0
+      ],
+      [
+        386.0,
+        266.0
+      ],
+      [
+        323.0,
+        266.0
+      ],
+      [
+        318.0,
+        277.0
+      ],
+      [
+        317.0,
+        266.0
+      ],
+      [
+        292.0,
+        259.0
+      ]
+    ],
+    "areaPx": 23098.5,
+    "bbox": [
+      245.0,
+      259.0,
+      153.0,
+      159.0
+    ],
+    "oversizedScore": 0.337,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.4672,
+    "partitionEvidence": 0.6942,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_7",
+    "imageId": "sample-floorplan.png",
+    "polygon": [
+      [
+        13.0,
+        230.0
+      ],
+      [
+        13.0,
+        418.0
+      ],
+      [
+        111.0,
+        418.0
+      ],
+      [
+        111.0,
+        334.0
+      ],
+      [
+        129.0,
+        331.0
+      ],
+      [
+        134.0,
+        301.0
+      ],
+      [
+        129.0,
+        230.0
+      ]
+    ],
+    "areaPx": 20521.5,
+    "bbox": [
+      13.0,
+      230.0,
+      121.0,
+      188.0
+    ],
+    "oversizedScore": 0.3327,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.458,
+    "partitionEvidence": 0.6841,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0269,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_5",
+    "imageId": "sample-floorplan.png",
+    "polygon": [
+      [
+        245.0,
+        58.0
+      ],
+      [
+        245.0,
+        251.0
+      ],
+      [
+        400.0,
+        249.0
+      ],
+      [
+        400.0,
+        58.0
+      ]
+    ],
+    "areaPx": 29760.0,
+    "bbox": [
+      245.0,
+      58.0,
+      155.0,
+      193.0
+    ],
+    "oversizedScore": 0.6717,
+    "areaEvidence": 0.0504,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.3333,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 2,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_9",
+    "imageId": "sample-floorplan.png",
+    "polygon": [
+      [
+        412.0,
+        265.0
+      ],
+      [
+        412.0,
+        351.0
+      ],
+      [
+        424.0,
+        352.0
+      ],
+      [
+        412.0,
+        362.0
+      ],
+      [
+        412.0,
+        418.0
+      ],
+      [
+        610.0,
+        418.0
+      ],
+      [
+        610.0,
+        265.0
+      ]
+    ],
+    "areaPx": 30228.0,
+    "bbox": [
+      412.0,
+      265.0,
+      198.0,
+      153.0
+    ],
+    "oversizedScore": 0.0057,
+    "areaEvidence": 0.0575,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_4",
+    "imageId": "sample-floorplan.png",
+    "polygon": [
+      [
+        23.0,
+        58.0
+      ],
+      [
+        13.0,
+        216.0
+      ],
+      [
+        231.0,
+        217.0
+      ],
+      [
+        231.0,
+        58.0
+      ]
+    ],
+    "areaPx": 33763.0,
+    "bbox": [
+      13.0,
+      58.0,
+      218.0,
+      159.0
+    ],
+    "oversizedScore": 0.2118,
+    "areaEvidence": 0.111,
+    "wallEvidence": 0.002,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 1.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 4,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_10",
+    "imageId": "sample-floorplan.png",
+    "polygon": [
+      [
+        125.0,
+        349.0
+      ],
+      [
+        125.0,
+        403.0
+      ],
+      [
+        137.0,
+        403.0
+      ],
+      [
+        140.0,
+        417.0
+      ],
+      [
+        231.0,
+        417.0
+      ],
+      [
+        231.0,
+        347.0
+      ],
+      [
+        151.0,
+        344.0
+      ]
+    ],
+    "areaPx": 7364.0,
+    "bbox": [
+      125.0,
+      344.0,
+      106.0,
+      73.0
+    ],
+    "oversizedScore": 0.5033,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.7236,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_6",
+    "imageId": "sample-floorplan.png",
+    "polygon": [
+      [
+        143.0,
+        230.0
+      ],
+      [
+        143.0,
+        333.0
+      ],
+      [
+        151.0,
+        340.0
+      ],
+      [
+        231.0,
+        333.0
+      ],
+      [
+        231.0,
+        231.0
+      ],
+      [
+        208.0,
+        231.0
+      ],
+      [
+        207.0,
+        223.0
+      ]
+    ],
+    "areaPx": 9576.0,
+    "bbox": [
+      143.0,
+      223.0,
+      88.0,
+      117.0
+    ],
+    "oversizedScore": 0.0,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_3",
+    "imageId": "sample-floorplan.png",
+    "polygon": [
+      [
+        414.0,
+        26.0
+      ],
+      [
+        410.0,
+        249.0
+      ],
+      [
+        610.0,
+        251.0
+      ],
+      [
+        610.0,
+        26.0
+      ]
+    ],
+    "areaPx": 44354.0,
+    "bbox": [
+      410.0,
+      26.0,
+      200.0,
+      225.0
+    ],
+    "oversizedScore": 0.0271,
+    "areaEvidence": 0.2713,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  },
+  {
+    "cavityId": "hyp_cavity_1",
+    "imageId": "simple-apartment-floor-plan.png",
+    "polygon": [
+      [
+        13.0,
+        12.0
+      ],
+      [
+        15.0,
+        392.0
+      ],
+      [
+        140.0,
+        397.0
+      ],
+      [
+        15.0,
+        406.0
+      ],
+      [
+        15.0,
+        838.0
+      ],
+      [
+        361.0,
+        838.0
+      ],
+      [
+        375.0,
+        838.0
+      ],
+      [
+        1086.0,
+        837.0
+      ],
+      [
+        1086.0,
+        404.0
+      ],
+      [
+        525.0,
+        405.0
+      ],
+      [
+        767.0,
+        391.0
+      ],
+      [
+        768.0,
+        12.0
+      ],
+      [
+        322.0,
+        12.0
+      ],
+      [
+        322.0,
+        392.0
+      ],
+      [
+        451.0,
+        400.0
+      ],
+      [
+        315.0,
+        407.0
+      ],
+      [
+        212.0,
+        400.0
+      ],
+      [
+        308.0,
+        392.0
+      ],
+      [
+        308.0,
+        12.0
+      ]
+    ],
+    "areaPx": 750036.0,
+    "bbox": [
+      13.0,
+      12.0,
+      1073.0,
+      826.0
+    ],
+    "oversizedScore": 0.6967,
+    "areaEvidence": 0.3008,
+    "wallEvidence": 1.0,
+    "partitionEvidence": 1.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.3333,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 2,
+    "shouldSplit": true,
+    "splitReason": "internal_walls_and_proposals"
+  },
+  {
+    "cavityId": "hyp_cavity_2",
+    "imageId": "simple-apartment-floor-plan.png",
+    "polygon": [
+      [
+        782.0,
+        66.0
+      ],
+      [
+        782.0,
+        391.0
+      ],
+      [
+        1087.0,
+        392.0
+      ],
+      [
+        1087.0,
+        12.0
+      ],
+      [
+        927.0,
+        12.0
+      ],
+      [
+        927.0,
+        52.0
+      ],
+      [
+        885.0,
+        54.0
+      ],
+      [
+        885.0,
+        178.0
+      ],
+      [
+        988.0,
+        192.0
+      ],
+      [
+        876.0,
+        194.0
+      ],
+      [
+        871.0,
+        66.0
+      ]
+    ],
+    "areaPx": 106176.5,
+    "bbox": [
+      782.0,
+      12.0,
+      305.0,
+      380.0
+    ],
+    "oversizedScore": 0.0,
+    "areaEvidence": 0.0,
+    "wallEvidence": 0.0,
+    "partitionEvidence": 0.0,
+    "doorwayEvidence": 0.0,
+    "topologyEvidence": 0.0,
+    "proposalEvidence": 0.0,
+    "repetitionEvidence": 0.0,
+    "splitCandidateCount": 1,
+    "shouldSplit": false,
+    "splitReason": "protected_single_room"
+  }
+]

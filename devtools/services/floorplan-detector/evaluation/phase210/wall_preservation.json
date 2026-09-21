@@ -1,0 +1,102 @@
+{
+  "total_unprotected_pixel_loss": 1071888,
+  "total_protected_pixel_loss": 0,
+  "per_image": {
+    "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+      "unprotected_loss_pixels": 300,
+      "unprotected_loss_ratio": 0.0003,
+      "unprotected_is_safe": true,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+      "unprotected_loss_pixels": 0,
+      "unprotected_loss_ratio": 0.0,
+      "unprotected_is_safe": true,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+      "unprotected_loss_pixels": 0,
+      "unprotected_loss_ratio": 0.0,
+      "unprotected_is_safe": true,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "Floorplan-House.png": {
+      "unprotected_loss_pixels": 158431,
+      "unprotected_loss_ratio": 0.18448,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "Lantai 1.jpg": {
+      "unprotected_loss_pixels": 8278,
+      "unprotected_loss_ratio": 0.0626,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "Lantai 2.jpg": {
+      "unprotected_loss_pixels": 4451,
+      "unprotected_loss_ratio": 0.04812,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+      "unprotected_loss_pixels": 130811,
+      "unprotected_loss_ratio": 0.13351,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "library-floor-plan.png": {
+      "unprotected_loss_pixels": 6778,
+      "unprotected_loss_ratio": 0.10829,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "sample-floorplan-house2.png": {
+      "unprotected_loss_pixels": 38098,
+      "unprotected_loss_ratio": 0.1401,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "sample-floorplan-house3.png": {
+      "unprotected_loss_pixels": 720736,
+      "unprotected_loss_ratio": 0.09262,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "sample-floorplan.png": {
+      "unprotected_loss_pixels": 1233,
+      "unprotected_loss_ratio": 0.02503,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    },
+    "simple-apartment-floor-plan.png": {
+      "unprotected_loss_pixels": 2772,
+      "unprotected_loss_ratio": 0.03463,
+      "unprotected_is_safe": false,
+      "protected_loss_pixels": 0,
+      "protected_loss_ratio": 0.0,
+      "protected_is_safe": true
+    }
+  }
+}

@@ -1,0 +1,142 @@
+[
+  {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_009",
+    "baseline_candidate_id": "rec_wall_enc_341",
+    "colliding_oversized_cavity": "hyp_cavity_11",
+    "baseline_candidate_iou": 0.2778,
+    "new_proposal_iou": 0.2778,
+    "new_proposal_id": "Floorplan-House.png__prop_wnf_morph_341",
+    "proposal_improves_boundary": false
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_017",
+    "baseline_candidate_id": "rec_rep_1516_490",
+    "colliding_oversized_cavity": "hyp_cavity_1_sub2",
+    "baseline_candidate_iou": 0.2944,
+    "new_proposal_iou": 0.3288,
+    "new_proposal_id": "Floorplan-House.png__prop_rep_hyp_cavity_5_37",
+    "proposal_improves_boundary": true
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "gt_id": "gt_009",
+    "baseline_candidate_id": "rec_rep_1002_1167.0",
+    "colliding_oversized_cavity": "hyp_cavity_11",
+    "baseline_candidate_iou": 0.263,
+    "new_proposal_iou": 0.2778,
+    "new_proposal_id": "Floorplan-House.png__prop_wnf_morph_341",
+    "proposal_improves_boundary": true
+  },
+  {
+    "image_id": "Lantai 1.jpg",
+    "gt_id": "gt_001",
+    "baseline_candidate_id": "rec_rep_86_22.0",
+    "colliding_oversized_cavity": "hyp_cavity_4",
+    "baseline_candidate_iou": 0.2571,
+    "new_proposal_iou": 0.9055,
+    "new_proposal_id": "Lantai 1.jpg__prop_comb_9",
+    "proposal_improves_boundary": true
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_019",
+    "baseline_candidate_id": "rec_wall_enc_6",
+    "colliding_oversized_cavity": null,
+    "baseline_candidate_iou": 0.4888,
+    "new_proposal_iou": 0.5016,
+    "new_proposal_id": "sample-floorplan-house2.png__prop_wnf_topo_7",
+    "proposal_improves_boundary": true
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "gt_id": "gt_004",
+    "baseline_candidate_id": "rec_rep_1377_758.0",
+    "colliding_oversized_cavity": "hyp_cavity_1_sub2",
+    "baseline_candidate_iou": 0.4485,
+    "new_proposal_iou": 0.6456,
+    "new_proposal_id": "sample-floorplan-house2.png__prop_comb_190",
+    "proposal_improves_boundary": true
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_011",
+    "baseline_candidate_id": "rec_rep_3209_859.0",
+    "colliding_oversized_cavity": "merged_hyp_cavity_1_hyp_cavity_2",
+    "baseline_candidate_iou": 0.4048,
+    "new_proposal_iou": 0.4048,
+    "new_proposal_id": "sample-floorplan-house3.png__prop_comb_2560",
+    "proposal_improves_boundary": false
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_015",
+    "baseline_candidate_id": "rec_rep_3819_859.0",
+    "colliding_oversized_cavity": "hyp_cavity_2_sub1",
+    "baseline_candidate_iou": 0.2935,
+    "new_proposal_iou": 0.3288,
+    "new_proposal_id": "sample-floorplan-house3.png__prop_comb_2832",
+    "proposal_improves_boundary": true
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_015",
+    "baseline_candidate_id": "rec_rep_3901_859.0",
+    "colliding_oversized_cavity": "merged_hyp_cavity_1_hyp_cavity_2",
+    "baseline_candidate_iou": 0.3288,
+    "new_proposal_iou": 0.3288,
+    "new_proposal_id": "sample-floorplan-house3.png__prop_comb_2832",
+    "proposal_improves_boundary": false
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_008",
+    "baseline_candidate_id": "rec_rep_2288_3114.0",
+    "colliding_oversized_cavity": "merged_hyp_cavity_1_hyp_cavity_2",
+    "baseline_candidate_iou": 0.4813,
+    "new_proposal_iou": 0.4813,
+    "new_proposal_id": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub2_east",
+    "proposal_improves_boundary": false
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_019",
+    "baseline_candidate_id": "rec_rep_3263_3114.0",
+    "colliding_oversized_cavity": "merged_hyp_cavity_1_hyp_cavity_2",
+    "baseline_candidate_iou": 0.2542,
+    "new_proposal_iou": 0.2357,
+    "new_proposal_id": "sample-floorplan-house3.png__prop_comb_2528",
+    "proposal_improves_boundary": false
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "gt_id": "gt_008",
+    "baseline_candidate_id": "rec_rep_2288_3114.0",
+    "colliding_oversized_cavity": "merged_hyp_cavity_1_hyp_cavity_2",
+    "baseline_candidate_iou": 0.4813,
+    "new_proposal_iou": 0.4813,
+    "new_proposal_id": "sample-floorplan-house3.png__prop_nbr_hyp_cavity_15_sub2_east",
+    "proposal_improves_boundary": false
+  },
+  {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_005",
+    "baseline_candidate_id": "rec_wall_enc_2",
+    "colliding_oversized_cavity": "hyp_cavity_1",
+    "baseline_candidate_iou": 0.9634,
+    "new_proposal_iou": 0.9634,
+    "new_proposal_id": "simple-apartment-floor-plan.png__prop_wnf_morph_2",
+    "proposal_improves_boundary": false
+  },
+  {
+    "image_id": "simple-apartment-floor-plan.png",
+    "gt_id": "gt_002",
+    "baseline_candidate_id": "rec_wall_enc_5",
+    "colliding_oversized_cavity": "hyp_cavity_2",
+    "baseline_candidate_iou": 0.3024,
+    "new_proposal_iou": 0.3024,
+    "new_proposal_id": "simple-apartment-floor-plan.png__prop_wnf_morph_5",
+    "proposal_improves_boundary": false
+  }
+]
