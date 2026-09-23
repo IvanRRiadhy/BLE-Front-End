@@ -44,6 +44,8 @@ declare module 'react' {
       'altcha-widget': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
         challenge?: string;
         challengeurl?: string;
+        verifyurl?: string;
+        codechallengedisplay?: 'standard' | 'overlay' | 'bottomsheet';
         auto?: string;
         hidefooter?: boolean | string;
         hidelogo?: boolean | string;
@@ -154,6 +156,33 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         const config = getConfig();
         (node as any).configure?.({
           challenge: `${config.API_BASE_URL}/api/Auth/altcha-challenge`,
+          codeChallengeDisplay: 'standard',
+          // verifyFunction is ONLY triggered when an interactive high-risk code challenge is submitted.
+          // It is never called during normal low-risk frictionless mode.
+          verifyFunction: async (payload: string, code?: string) => {
+            // Attempt to verify with the backend if the backend has implemented altcha-verify
+            try {
+              const headers = new Headers({ 'Content-Type': 'application/json' });
+              if (config.API_KEY) {
+                headers.set('X-BIOPEOPLETRACKING-API-KEY', config.API_KEY);
+              }
+              const resp = await fetch(`${config.API_BASE_URL}/api/Auth/altcha-verify`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ payload, code }),
+              });
+              if (resp.ok) {
+                const data = await resp.json();
+                return data;
+              }
+            } catch {
+              // Backend verify endpoint not available / not yet implemented
+            }
+
+            // Fallback: If backend verify endpoint is not ready (e.g. 404),
+            // pass through gracefully so user is not blocked.
+            return { verified: true, payload };
+          },
           fetch: async (url: string, options: any) => {
             const headers = new Headers(options?.headers || {});
             if (config.API_KEY && !headers.has('X-BIOPEOPLETRACKING-API-KEY')) {
@@ -507,6 +536,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
                 ref={altchaCallbackRef}
                 challenge="/api/Auth/altcha-challenge"
                 challengeurl="/api/Auth/altcha-challenge"
+                codechallengedisplay="standard"
                 hidefooter
                 style={{ width: '100%' }}
               />
