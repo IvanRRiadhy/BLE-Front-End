@@ -1,0 +1,92 @@
+{
+  "A_raw_proposals": {
+    "config": "A_raw_proposals",
+    "proposal_count": 9235,
+    "compression_pct": 0.0,
+    "recall_25": 0.5608,
+    "recall_50": 0.3041,
+    "mean_best_iou": 0.3623,
+    "median_best_iou": 0.2914
+  },
+  "B_geom_validation_only": {
+    "config": "B_geom_validation_only",
+    "proposal_count": 870,
+    "compression_pct": 90.58,
+    "recall_25": 0.473,
+    "recall_50": 0.2365,
+    "mean_best_iou": 0.2937,
+    "median_best_iou": 0.213
+  },
+  "C_geom_plus_dedup": {
+    "config": "C_geom_plus_dedup",
+    "proposal_count": 630,
+    "compression_pct": 93.18,
+    "recall_25": 0.473,
+    "recall_50": 0.2297,
+    "mean_best_iou": 0.2919,
+    "median_best_iou": 0.213
+  },
+  "D_geom_dedup_clust": {
+    "config": "D_geom_dedup_clust",
+    "proposal_count": 630,
+    "compression_pct": 93.18,
+    "recall_25": 0.473,
+    "recall_50": 0.2297,
+    "mean_best_iou": 0.2919,
+    "median_best_iou": 0.213
+  },
+  "E_geom_dedup_grouping": {
+    "config": "E_geom_dedup_grouping",
+    "proposal_count": 630,
+    "compression_pct": 93.18,
+    "recall_25": 0.473,
+    "recall_50": 0.2297,
+    "mean_best_iou": 0.2919,
+    "median_best_iou": 0.213
+  },
+  "F_geom_dedup_boundary_opt": {
+    "config": "F_geom_dedup_boundary_opt",
+    "proposal_count": 630,
+    "compression_pct": 93.18,
+    "recall_25": 0.4797,
+    "recall_50": 0.2297,
+    "mean_best_iou": 0.2922,
+    "median_best_iou": 0.2134
+  },
+  "G_full_fusion_no_selection": {
+    "config": "G_full_fusion_no_selection",
+    "proposal_count": 630,
+    "compression_pct": 93.18,
+    "recall_25": 0.4797,
+    "recall_50": 0.2297,
+    "mean_best_iou": 0.2922,
+    "median_best_iou": 0.2134
+  },
+  "H_full_fusion_naive_selection": {
+    "config": "H_full_fusion_naive_selection",
+    "proposal_count": 467,
+    "compression_pct": 94.94,
+    "recall_25": 0.4662,
+    "recall_50": 0.2095,
+    "mean_best_iou": 0.2804,
+    "median_best_iou": 0.2009
+  },
+  "I_full_fusion_diversity_selection": {
+    "config": "I_full_fusion_diversity_selection",
+    "proposal_count": 467,
+    "compression_pct": 94.94,
+    "recall_25": 0.4595,
+    "recall_50": 0.2095,
+    "mean_best_iou": 0.2789,
+    "median_best_iou": 0.1837
+  },
+  "J_budget_75_pipeline": {
+    "config": "J_budget_75_pipeline",
+    "proposal_count": 302,
+    "compression_pct": 96.73,
+    "recall_25": 0.4054,
+    "recall_50": 0.1757,
+    "mean_best_iou": 0.253,
+    "median_best_iou": 0.1604
+  }
+}

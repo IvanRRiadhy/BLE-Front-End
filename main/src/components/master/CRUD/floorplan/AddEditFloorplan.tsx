@@ -1,4 +1,5 @@
 import { BASE_URL } from 'src/utils/axios';
+import { getConfig } from 'src/config';
 import {
   Button,
   Dialog,
@@ -55,13 +56,20 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
   const addMutation = useAddFloorplan();
   const editMutation = useEditFloorplan();
-  const uploadMutation = useUploadCDN();
+  const uploadMutation = useUploadCDN({ category: 'floorplan' });
 
   const getCdnUrl = (url?: string | null) => {
     if (!url) return '';
-    // console.log("URL: ", url)
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return `https://ble-cdn.tunnel.piranticerdasindonesia.com/${url}`;
+    let cdnBase = '';
+    try {
+      cdnBase = getConfig()?.CDN_URL || '';
+    } catch {
+      cdnBase = '';
+    }
+    const cleanBase = cdnBase.replace(/\/+$/, '');
+    const cleanPath = url.replace(/^\/+/, '');
+    return cleanBase ? `${cleanBase}/${cleanPath}` : url;
   };
 
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
@@ -171,12 +179,15 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
       uploadData.append('file', image);
 
       try {
-        const uploadRes = await uploadMutation.mutateAsync(uploadData);
+        const uploadRes = await uploadMutation.mutateAsync({
+          formData: uploadData,
+          params: { category: 'floorplan' },
+        });
         const uploaded = uploadRes?.collection?.data?.[0];
-        if (!uploaded || !uploaded.fileUrl) {
+        if (!uploaded || !uploaded.relativePath) {
           throw new Error('Invalid response from CDN upload');
         }
-        finalImageUrl = uploaded.fileUrl;
+        finalImageUrl = uploaded.relativePath;
       } catch (err) {
         console.error('CDN upload failed:', err);
         toast.error('Failed to uploading image.');

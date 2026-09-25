@@ -48,41 +48,61 @@ export type GetMemberResponse = {
 
 export interface memberType {
     id: string,
-    personId: string,
-    organizationId: string,
-    departmentId: string,
-    districtId: string,
-    organization?: OrganizationType,
-    department?: DepartmentType,
-    district?: DistrictType,
-    identityId: string,
-    cardNumber: string,
-    bleCardNumber: string,
-    name: string,
-    phone: string,
-    email: string,
-    gender: string,
-    address: string,
-    faceImage: string,
+    generate:number, //nanti dihapus
+    personId: string | null,
+    organizationId: string | null,
+    departmentId: string | null,
+    
+    districtId: string | null,
+    organization?: OrganizationType | null,
+    department?: DepartmentType | null,
+    district?: DistrictType | null,
+    identityId: string | null,
+    cardNumber: string | null,
+    bleCardNumber: string | null,
+    name: string | null,
+    phone: string | null,
+    email: string | null,
+    gender: string | null,
+    address: string | null,
+    faceImage: string | null,
     uploadFr: number,
-    uploadFrError: string ,
-    birthDate: string,
-    joinDate: string,
-    exitDate: string,
-    isHead?: boolean,
-    headMember1: string,
-    headMember2: string,
-    applicationId: string,
-    statusEmployee: string,
-    cardId: string,
+    uploadFrError: string | null,
+    birthDate: string | null,
+    joinDate: string | null,
+    exitDate: string | null,
+    isHead?: boolean | null,
+    memberHead1?: string | null,
+    memberHead2?: string | null,
+    memberHead1Id?: string | null,
+    memberHead2Id?: string | null,
+    headMember1?: string | null,
+    headMember2?: string | null,
+    applicationId: string | null,
+    statusEmployee: string | null,
+    cardId: string | null,
     isBlacklist: boolean,
-    blacklistAt: string,
-    blacklistReason: string,
-    createdBy: string,
-    createdAt: string,
-    updatedBy: string,
-    updatedAt: string
+    blacklistAt: string | null,
+    blacklistReason: string | null,
+    createdBy: string | null,
+    createdAt: string | null,
+    updatedBy: string | null,
+    updatedAt: string | null
 }
+
+export type HeadSecurityType = {
+    id: string;
+    name: string;
+    personId: string;
+};
+
+export type securityType = Omit<memberType, 'headMember1' | 'headMember2' | 'memberHead1' | 'memberHead2' | 'memberHead1Id' | 'memberHead2Id'> & {
+    securityHead1Id?: string | null;
+    securityHead2Id?: string | null;
+    securityHead1?: HeadSecurityType | string | null;
+    securityHead2?: HeadSecurityType | string | null;
+    
+};
 
 interface StateType {
     members: memberType[];

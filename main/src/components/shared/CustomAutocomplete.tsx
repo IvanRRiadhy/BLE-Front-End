@@ -30,6 +30,7 @@ export type CustomAutocompleteProps<T> = {
   renderOption?: any;
   sx?: SxProps<Theme>;
   filterSelectedOptions?: boolean;
+  ListboxProps?: React.HTMLAttributes<HTMLElement>;
 } & (SingleSelectProps<T> | MultiSelectProps<T>);
 
 export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>) {
@@ -47,6 +48,7 @@ export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>)
     renderOption,
     sx,
     filterSelectedOptions,
+    ListboxProps,
   } = props;
   return (
     <Autocomplete
@@ -89,9 +91,11 @@ export default function CustomAutocomplete<T>(props: CustomAutocompleteProps<T>)
         },
       }}
       ListboxProps={{
+        ...ListboxProps,
         style: {
           maxHeight: 220,
           overflowY: 'auto',
+          ...ListboxProps?.style,
         },
       }}
       renderInput={(params) => (

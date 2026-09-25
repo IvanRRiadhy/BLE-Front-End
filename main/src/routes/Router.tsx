@@ -3,6 +3,7 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import { jwtDecode } from 'jwt-decode';
+import { getAccessToken } from 'src/utils/axios';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import VisitorCard from 'src/views/master/tag/VisitorCard';
 import AlarmList from 'src/views/Reports/AlarmList';
@@ -168,11 +169,11 @@ const roleAccessRules: Record<string, string[]> = {
   UserCreated: ['/my-visit/', '/about'],
 };
 
-const withAuth = (element: JSX.Element, path: string): JSX.Element => {
+const AuthGuard = ({ children, path }: { children: JSX.Element; path: string }) => {
   // 🔹 Read levelPriority from localStorage, fallback to decoding from JWT if missing
   let userRole = localStorage.getItem('levelPriority');
   if (!userRole) {
-    const token = localStorage.getItem('token');
+    const token = getAccessToken();
     if (token) {
       try {
         const decoded: any = jwtDecode(token);
@@ -209,17 +210,21 @@ const withAuth = (element: JSX.Element, path: string): JSX.Element => {
       console.warn(`[AuthGuard] ${userRole} denied path: ${path}`);
       return <Navigate to="/dashboards/newmainmenu" replace />;
     }
-    return element;
+    return children;
   }
 
   // ✅ Handle restricted roles
   const allowed = rules.some((r) => normalize(path).startsWith(normalize(r)));
   if (allowed) {
-    return element;
+    return children;
   }
 
   console.warn(`[AuthGuard] ${userRole} not allowed to access ${path}`);
   return <Navigate to="/dashboards/newmainmenu" replace />;
+};
+
+const withAuth = (element: JSX.Element, path: string): JSX.Element => {
+  return <AuthGuard path={path}>{element}</AuthGuard>;
 };
 
 const Router = [

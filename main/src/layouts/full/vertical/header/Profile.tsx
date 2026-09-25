@@ -8,9 +8,22 @@ import { Box, Menu, Avatar, Typography, Divider, Button, IconButton, Stack } fro
 import { IconMail } from '@tabler/icons-react';
 
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
+import { useProfile } from 'src/hooks/useProfile';
+import { BASE_URL, CDN_URL, logoutUser } from 'src/utils/axios';
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
+  const { data: profile } = useProfile();
+
+  const fullName = profile?.fullName || localStorage.getItem('fullName') || profile?.username || localStorage.getItem('username') || 'User';
+  const groupName = profile?.groupName || localStorage.getItem('groupName') || profile?.groupLevel || localStorage.getItem('levelPriority') || '';
+  const email = profile?.email || localStorage.getItem('email') || '';
+  const avatarSrc = profile?.profilePicture
+    ? (profile.profilePicture.startsWith('http')
+        ? profile.profilePicture
+        : `${BASE_URL.replace(/\/+$/, '')}/${profile.profilePicture.replace(/^\/+/, '')}`)
+    : ProfileImg;
+
   const handleClick2 = (event: any) => {
     setAnchorEl2(event.currentTarget);
   };
@@ -34,8 +47,8 @@ const Profile = () => {
         onClick={handleClick2}
       >
         <Avatar
-          src={ProfileImg}
-          alt={ProfileImg}
+          src={avatarSrc}
+          alt={fullName}
           sx={{
             width: 35,
             height: 35,
@@ -62,24 +75,28 @@ const Profile = () => {
       >
         <Typography variant="h5">User Profile</Typography>
         <Stack direction="row" py={3} spacing={2} alignItems="center">
-          <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
+          <Avatar src={avatarSrc} alt={fullName} sx={{ width: 95, height: 95 }} />
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-              {localStorage.getItem('fullName')}
+              {fullName}
             </Typography>
-            <Typography variant="subtitle2" color="textSecondary">
-              {localStorage.getItem('groupName')}
-            </Typography>
-            <Typography
-              variant="subtitle2"
-              color="textSecondary"
-              display="flex"
-              alignItems="center"
-              gap={1}
-            >
-              <IconMail width={15} height={15} />
-              {localStorage.getItem('email')}
-            </Typography>
+            {groupName && (
+              <Typography variant="subtitle2" color="textSecondary">
+                {groupName}
+              </Typography>
+            )}
+            {email && (
+              <Typography
+                variant="subtitle2"
+                color="textSecondary"
+                display="flex"
+                alignItems="center"
+                gap={1}
+              >
+                <IconMail width={15} height={15} />
+                {email}
+              </Typography>
+            )}
           </Box>
         </Stack>
         <Divider />
@@ -106,24 +123,7 @@ const Profile = () => {
           <Button
             variant="outlined"
             color="primary"
-            //component={Link}
-            onClick={() => {
-              // 🧹 Targeted logout: Clear session data but preserve "Remember this Device"
-              const itemsToKeep = [
-                'rememberedAdminUsername',
-                'rememberedVisitorUsername',
-                'rememberMePreference',
-                'rememberedLoginMode',
-              ];
-
-              Object.keys(localStorage).forEach((key) => {
-                if (!itemsToKeep.includes(key)) {
-                  localStorage.removeItem(key);
-                }
-              });
-
-              window.location.href = '/auth/login'; // Redirect to the login page
-            }}
+            onClick={logoutUser}
             fullWidth
           >
             Logout

@@ -1,4 +1,4 @@
-import axiosServices, { BASE_URL } from "../../../utils/axios";
+import axiosServices, { BASE_URL, getAccessToken } from "../../../utils/axios";
 import { createSlice } from "@reduxjs/toolkit";
 import { AppDispatch, dispatch } from "src/store/Store";
 import type { PayloadAction } from "@reduxjs/toolkit";
@@ -542,7 +542,7 @@ export const ExportMaskedArea = createAsyncThunk(
     "maskedAreas/exportMaskedArea",
     async (filter: "pdf" | "excel", { rejectWithValue }) => {
     const url = `${BASE_URL}${API_URL}export/${filter}`;
-    const accessToken = localStorage.getItem('token');
+    const accessToken = getAccessToken() || localStorage.getItem('token');
     try {
       const response = await fetch(url, {
         method: 'GET',

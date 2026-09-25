@@ -1,4 +1,3 @@
-import { BASE_URL } from 'src/utils/axios';
 import {
   Button,
   Dialog,
@@ -19,24 +18,26 @@ import {
   StepLabel,
 } from '@mui/material';
 import { IconPencil, IconPlus, IconPhoto, IconUpload, IconX } from '@tabler/icons-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import { getConfig } from 'src/config';
 import { dispatch, RootState, useSelector } from 'src/store/Store';
-import { addMember, editMember, memberType } from 'src/store/apps/crud/member';
+import { addMember, editMember, memberType, securityType } from 'src/store/apps/crud/member';
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
 import { CardType, fetchCard } from 'src/store/apps/crud/card';
 import { gender, statusEmployee } from 'src/types/crud/input';
 import toast from 'react-hot-toast';
-import { defaultMemberForm } from 'src/store/apps/defaultForm';
+import { defaultMemberForm, defaultSecurityForm } from 'src/store/apps/defaultForm';
 import AddEditDistrict from '../../CRUD/district/AddEditDistrict';
 import AddEditDepartment from '../../CRUD/department/AddEditDepartment';
 import AddEditOrganization from '../../CRUD/organization/AddEditOrganizationList';
 import { useQueryClient } from '@tanstack/react-query';
 import { PaginatedResponse, useMemberList } from 'src/hooks/useMember';
+import { useUploadCDN } from 'src/hooks/usePatrolCase';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
@@ -46,7 +47,7 @@ import { useAddSecurity, useEditSecurity, useSecurityList } from 'src/hooks/useS
 
 interface FormType {
   type?: string;
-  member?: memberType;
+  member?: securityType;
 }
 
 const AddEditSecurityGuard = ({ type, member }: FormType) => {
@@ -56,9 +57,17 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
   const [isSaving, setIsSaving] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
-  const [formData, setFormData] = React.useState<memberType>({
-    ...defaultMemberForm,
+  const [formData, setFormData] = React.useState<securityType>({
+    ...defaultSecurityForm,
     ...member,
+    securityHead1Id:
+      member?.securityHead1Id ||
+      (typeof member?.securityHead1 === 'object' ? member?.securityHead1?.id : member?.securityHead1) ||
+      '',
+    securityHead2Id:
+      member?.securityHead2Id ||
+      (typeof member?.securityHead2 === 'object' ? member?.securityHead2?.id : member?.securityHead2) ||
+      '',
   });
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = ['Security Details', 'Security Photo'];
@@ -104,20 +113,35 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
     label: m.name,
     personId: m.personId,
   }));
-  const filteredHead1Options = headOptions.filter((opt) => opt.id !== formData.headMember2);
+  const currentHead1Id = formData.securityHead1Id || '';
+  const currentHead2Id = formData.securityHead2Id || '';
 
-  const filteredHead2Options = headOptions.filter((opt) => opt.id !== formData.headMember1);
+  const filteredHead1Options = headOptions.filter((opt) => opt.id !== currentHead2Id);
+  const filteredHead2Options = headOptions.filter((opt) => opt.id !== currentHead1Id);
 
   const handleClickOpen = () => {
     setLoading(true);
     setFormErrors({});
-    setFormData({ ...defaultMemberForm, ...member });
+    const initialHead1Id =
+      member?.securityHead1Id ||
+      (typeof member?.securityHead1 === 'object' ? member?.securityHead1?.id : member?.securityHead1) ||
+      '';
+    const initialHead2Id =
+      member?.securityHead2Id ||
+      (typeof member?.securityHead2 === 'object' ? member?.securityHead2?.id : member?.securityHead2) ||
+      '';
+    setFormData({
+      ...defaultSecurityForm,
+      ...member,
+      securityHead1Id: initialHead1Id,
+      securityHead2Id: initialHead2Id,
+    });
     setActiveStep(0);
 
     // Set image preview properly - check if member exists and has faceImage
     if (member?.faceImage) {
-      // Create the full URL for preview
-      const fullImageUrl = `${BASE_URL}${member.faceImage}`;
+      // Create the CDN URL for preview
+      const fullImageUrl = getCdnUrl(member.faceImage);
       setPreview(fullImageUrl);
       console.log('Setting preview to:', fullImageUrl);
     } else {
@@ -138,7 +162,7 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
 
     // Reset preview to the original member image if it exists
     if (member?.faceImage) {
-      setPreview(`${BASE_URL}${member.faceImage}`);
+      setPreview(getCdnUrl(member.faceImage));
     } else {
       setPreview(null);
     }
@@ -148,6 +172,21 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
 
   const addMemberMutation = useAddSecurity();
   const editMemberMutation = useEditSecurity();
+  const uploadMutation = useUploadCDN({ category: 'member' });
+
+  const getCdnUrl = (url?: string | null) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    let cdnBase = '';
+    try {
+      cdnBase = getConfig()?.CDN_URL || '';
+    } catch {
+      cdnBase = '';
+    }
+    const cleanBase = cdnBase.replace(/\/+$/, '');
+    const cleanPath = url.replace(/^\/+/, '');
+    return cleanBase ? `${cleanBase}/${cleanPath}` : url;
+  };
 
   const validateStep = (step: number): boolean => {
     const errors: Record<string, string> = {};
@@ -162,17 +201,12 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
       if (!!formData.email?.trim() && !formData.email.includes('@'))
         errors.email = 'Valid Email required';
     } else if (step === 1) {
-      if (!image && type === 'add' && !preview) errors.faceImage = 'Face Image is required';
+      if (!image && type === 'add' && !preview && !formData.faceImage) {
+        errors.faceImage = 'Face Image is required';
+      }
     }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  };
-
-  const logFormData = (formData: any) => {
-    console.log('FormData contents:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
   };
 
   const handleSave = async () => {
@@ -183,21 +217,76 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
 
     setIsSaving(true);
 
-    try {
-      const data = new FormData();
+    let finalImageUrl = formData.faceImage;
 
-      Object.entries(formData).forEach(([key, value]) => {
-        if (!['faceImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
-          data.append(key, value?.toString() ?? '');
+    // If there is a new image selected, upload to CDN first
+    if (image) {
+      const uploadData = new FormData();
+      uploadData.append('file', image);
+
+      try {
+        const uploadRes = await uploadMutation.mutateAsync({
+          formData: uploadData,
+          params: { category: 'member' },
+        });
+        const uploaded = uploadRes?.collection?.data?.[0];
+        if (!uploaded || !uploaded.relativePath) {
+          throw new Error('Invalid response from CDN upload');
         }
-      });
+        finalImageUrl = uploaded.relativePath;
+      } catch (err) {
+        console.error('CDN upload failed:', err);
+        toast.error('Failed to uploading image.');
+        setIsSaving(false);
+        return; // Aborts saving, keeps dialog open
+      }
+    }
 
-      if (image) data.append('faceImage', image);
+    const {
+      createdBy,
+      createdAt,
+      updatedBy,
+      updatedAt,
+      organization,
+      department,
+      district,
+      cardNumber,
+      bleCardNumber,
+      exitDate,
+      applicationId,
+      isBlacklist,
+      blacklistAt,
+      blacklistReason,
+      uploadFr,
+      uploadFrError,
+      securityHead1,
+      securityHead2,
+      isHead,
+      generate,
+      ...cleanData
+    } = formData;
 
+    const payload: Partial<securityType> = {
+      ...cleanData,
+      faceImage: finalImageUrl || null,
+    };
+
+    Object.keys(payload).forEach((key) => {
+      const val = (payload as any)[key];
+      if (typeof val === 'string' && val.trim() === '') {
+        (payload as any)[key] = null;
+      }
+    });
+
+    if (type !== 'edit') {
+      delete payload.id;
+    }
+
+    try {
       if (type === 'edit') {
-        await editMemberMutation.mutateAsync(data);
+        await editMemberMutation.mutateAsync(payload);
       } else {
-        await addMemberMutation.mutateAsync(data);
+        await addMemberMutation.mutateAsync(payload);
       }
 
       toast.success('Data saved successfully!');
@@ -587,6 +676,21 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
                       </CustomSelect>
                     </Grid>
                     <Grid size={6}>
+                      <CustomFormLabel htmlFor="birthDate">Birth Date</CustomFormLabel>
+                      <CustomTextField
+                        id="birthDate"
+                        name="birthDate"
+                        type="date"
+                        value={formData.birthDate ? formData.birthDate.split('T')[0] : ''}
+                        onChange={handleInputChange}
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    </Grid>
+                    <Grid size={6}>
                       <CustomFormLabel htmlFor="status-employee">Status</CustomFormLabel>
                       <CustomSelect
                         name="statusEmployee"
@@ -606,6 +710,21 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
                         ))}
                       </CustomSelect>
                     </Grid>
+                    <Grid size={6}>
+                      <CustomFormLabel htmlFor="joinDate">Join Date</CustomFormLabel>
+                      <CustomTextField
+                        id="joinDate"
+                        name="joinDate"
+                        type="date"
+                        value={formData.joinDate ? formData.joinDate.split('T')[0] : ''}
+                        onChange={handleInputChange}
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    </Grid>
                     <Grid size={12}>
                       <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
                       <CustomTextField
@@ -624,11 +743,11 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
                         label="Head Security 1"
                         options={filteredHead1Options}
                         value={
-                          filteredHead1Options.find((h) => h.id === formData.headMember1) || null
+                          filteredHead1Options.find((h) => h.id === formData.securityHead1Id) || null
                         }
                         onChange={(val) => {
                           const id = val?.id ?? '';
-                          setFormData((prev) => ({ ...prev, headMember1: id }));
+                          setFormData((prev) => ({ ...prev, securityHead1Id: id }));
                         }}
                         getOptionLabel={(opt) => opt.label}
                         isOptionEqualToValue={(a, b) => a.id === b.id}
@@ -651,11 +770,11 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
                         label="Head Security 2"
                         options={filteredHead2Options}
                         value={
-                          filteredHead2Options.find((h) => h.id === formData.headMember2) || null
+                          filteredHead2Options.find((h) => h.id === formData.securityHead2Id) || null
                         }
                         onChange={(val) => {
                           const id = val?.id ?? '';
-                          setFormData((prev) => ({ ...prev, headMember2: id }));
+                          setFormData((prev) => ({ ...prev, securityHead2Id: id }));
                         }}
                         getOptionLabel={(opt) => opt.label}
                         isOptionEqualToValue={(a, b) => a.id === b.id}

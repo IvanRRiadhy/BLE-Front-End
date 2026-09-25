@@ -122,7 +122,7 @@ const NewAreaDistribution: React.FC = () => {
     const floorIds = normalizeIds(dashboardFilter.FloorId);
     const floorplanIds = normalizeIds(dashboardFilter.FloorplanId);
     const areaIds = normalizeIds(dashboardFilter.FloorplanMaskedAreaId);
-    console.log("Area Dist 2", countingData, buildingIds, floorIds, floorplanIds, areaIds)
+    // console.log("Area Dist 2", countingData, buildingIds, floorIds, floorplanIds, areaIds)
     const filterRecord = (source?: Record<string, CountingEntity>, allowedIds?: string[]) => {
       if (!source) return source;
       if (!allowedIds || allowedIds.length === 0) return source;
@@ -161,7 +161,7 @@ const NewAreaDistribution: React.FC = () => {
   /* ---------------- Chart Options ---------------- */
 
   const chartData = useMemo<AreaCountState>(() => {
-    console.log("Area Dist 1 ", filteredCountingData, "Level", level);
+    // console.log("Area Dist 1 ", filteredCountingData, "Level", level);
     const source = filteredCountingData?.[level];
 
     if (!source) {

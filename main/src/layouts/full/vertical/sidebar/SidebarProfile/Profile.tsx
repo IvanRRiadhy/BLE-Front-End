@@ -5,13 +5,26 @@ import { IconMail, IconPower } from '@tabler/icons-react';
 import { RootState } from 'src/store/Store';
 import { Link, useNavigate } from 'react-router';
 import React, { useState } from 'react';
+import { useProfile } from 'src/hooks/useProfile';
+import { BASE_URL, CDN_URL, logoutUser } from 'src/utils/axios';
 
 export const Profile = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const hideMenu = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  const { data: profile } = useProfile();
+
+  const fullName = profile?.fullName || localStorage.getItem('fullName') || profile?.username || localStorage.getItem('username') || 'Guest';
+  const groupName = profile?.groupName || localStorage.getItem('groupName') || profile?.groupLevel || localStorage.getItem('levelPriority') || 'User';
+  const email = profile?.email || localStorage.getItem('email') || '';
+  const avatarSrc = profile?.profilePicture
+    ? (profile.profilePicture.startsWith('http')
+        ? profile.profilePicture
+        : `${BASE_URL.replace(/\/+$/, '')}/${profile.profilePicture.replace(/^\/+/, '')}`)
+    : img1;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -25,22 +38,7 @@ export const Profile = () => {
   };
 
   const handleLogout = () => {
-    // 🧹 Targeted logout: Clear session data but preserve "Remember this Device"
-    const itemsToKeep = [
-      'rememberedAdminUsername',
-      'rememberedVisitorUsername',
-      'rememberMePreference',
-      'rememberedLoginMode',
-    ];
-
-    Object.keys(localStorage).forEach((key) => {
-      if (!itemsToKeep.includes(key)) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    sessionStorage.clear();
-    window.location.href = '/auth/login';
+    logoutUser();
   };
 
   return (
@@ -61,14 +59,14 @@ export const Profile = () => {
       sx={{ m: 3, p: 2, bgcolor: `${'secondary.light'}` }}
     > */}
       <Avatar 
-        alt="Remy Sharp" 
-        src={img1} 
+        alt={fullName} 
+        src={avatarSrc} 
         onClick={handleClick}
         sx={{ cursor: 'pointer' }}
       />
       <Box>
-        <Typography variant="h6">{localStorage.getItem('username') || 'Guest'}</Typography>
-        <Typography variant="caption">{localStorage.getItem('levelPriority') || 'User'}</Typography>
+        <Typography variant="h6">{fullName}</Typography>
+        <Typography variant="caption">{groupName}</Typography>
       </Box>
 
       <Box sx={{ ml: 'auto' }}>
@@ -96,13 +94,13 @@ export const Profile = () => {
       >
         <Typography variant="h5">User Profile</Typography>
         <Stack direction="row" py={3} spacing={2} alignItems="center">
-          <Avatar src={img1} alt="Profile" sx={{ width: 95, height: 95 }} />
+          <Avatar src={avatarSrc} alt={fullName} sx={{ width: 95, height: 95 }} />
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-              {localStorage.getItem('fullName') || localStorage.getItem('username')}
+              {fullName}
             </Typography>
             <Typography variant="subtitle2" color="textSecondary">
-              {localStorage.getItem('groupName') || localStorage.getItem('levelPriority')}
+              {groupName}
             </Typography>
             <Typography
               variant="subtitle2"
@@ -112,7 +110,7 @@ export const Profile = () => {
               gap={1}
             >
               <IconMail width={15} height={15} />
-              {localStorage.getItem('email') || 'No email'}
+              {email}
             </Typography>
           </Box>
         </Stack>

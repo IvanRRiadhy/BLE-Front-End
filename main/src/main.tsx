@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { loadRuntimeConfig } from './config';
-import { initializeAxiosBaseURL } from './utils/axios';
+import { initializeAxiosBaseURL, refreshAccessToken, clearSession } from './utils/axios';
 
 import App from './App';
 import Spinner from './views/spinner/Spinner';
@@ -42,6 +42,17 @@ async function startApp() {
   updateMQTTBrokerURL();
   initializeEngineConfig();
   initializeNTFYConfig();
+
+  // 🔄 Silent refresh on reload if user previously logged in
+  if (localStorage.getItem('levelPriority')) {
+    try {
+      await refreshAccessToken();
+    } catch (e) {
+      console.warn('Initial session refresh failed on page reload:', e);
+      clearSession();
+    }
+  }
+
   // 🟩 3. THEN render the app
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider store={store}>

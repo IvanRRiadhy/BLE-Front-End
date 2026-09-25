@@ -39,7 +39,7 @@ const DashboardFilter = () => {
   });
 
   const handleClickOpen = () => {
-    console.log('DashboardFilter: Opening and syncing from Redux:', dashboardFilter);
+    // console.log('DashboardFilter: Opening and syncing from Redux:', dashboardFilter);
     setAppliedFilter({
       BuildingId: dashboardFilter?.BuildingId ?? [],
       FloorId: dashboardFilter?.FloorId ?? [],
@@ -54,9 +54,9 @@ const DashboardFilter = () => {
   const floorplanList = useAllFloorplans().data || [];
   const maskedAreaList = useAllMaskedAreas().data || [];
 
-  useEffect(() => {
-    console.log('Building List:', buildingList);
-  }, [buildingList]);
+  // useEffect(() => {
+  //   console.log('Building List:', buildingList);
+  // }, [buildingList]);
 
   const handleApplyFilter = () => {
     const finalFloorIds = appliedFilter.FloorId;
@@ -73,12 +73,12 @@ const DashboardFilter = () => {
       }),
     );
 
-    console.log('Dashboard Filter Set:', {
-      BuildingId: appliedFilter.BuildingId,
-      FloorId: finalFloorIds,
-      FloorplanId: finalFloorplanIds,
-      FloorplanMaskedAreaId: appliedFilter.MaskedAreaId,
-    });
+    // console.log('Dashboard Filter Set:', {
+    //   BuildingId: appliedFilter.BuildingId,
+    //   FloorId: finalFloorIds,
+    //   FloorplanId: finalFloorplanIds,
+    //   FloorplanMaskedAreaId: appliedFilter.MaskedAreaId,
+    // });
 
     setOpen(false);
   };

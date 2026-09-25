@@ -1,6 +1,21 @@
 {
   "total_hybrid_proposals": 4664,
-  "false_split_count": 4478,
-  "false_split_rate": 0.9601,
-  "protected_valid_rooms": 20
+  "proposal_taxonomic_breakdown": {
+    "VALID_ROOM_PROPOSALS": 20,
+    "PARTIAL_PROPOSALS": 30,
+    "OVERLAPPING_PROPOSALS": 95,
+    "DUPLICATE_PROPOSALS": 1556,
+    "LOW_QUALITY_SLIVERS": 1501,
+    "REDUNDANT_PROPOSALS": 1462
+  },
+  "protected_valid_rooms": 20,
+  "false_architectural_split_analysis": {
+    "true_false_splits": "Cannot be reliably calculated from the current proposal inventory without final candidate selection",
+    "true_false_split_status": "UNMEASURABLE_AT_PROPOSAL_STAGE",
+    "explanation": "At the proposal generation stage, redundant or low-IoU candidate polygons do not represent true false splits (i.e. splitting a single logical room into multiple final detected rooms). The 4,478 unselected proposals consist of duplicates (1,556), low-quality/sliver geometry (1,501), and redundant hypotheses (1,462)."
+  },
+  "rates": {
+    "proposal_rejection_rate": 0.9601,
+    "useful_proposal_rate": 0.0399
+  }
 }

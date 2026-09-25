@@ -1,0 +1,5 @@
+{
+  "mean_max_pairwise_iou": 0.0,
+  "max_pairwise_iou_across_all": 0.0,
+  "pairwise_iou_under_10_percent_guarantee": true
+}

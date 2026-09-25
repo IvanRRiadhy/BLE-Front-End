@@ -101,17 +101,28 @@ const TrackingReport: React.FC = () => {
     selectedMemberIds: [],
   });
 
+  // Applied Time Filter state (only updated on Apply / Reset)
+  const [appliedTimeFilter, setAppliedTimeFilter] = useState<{
+    timeRange: string;
+    fromDate: string | null;
+    toDate: string | null;
+  }>({
+    timeRange: 'daily',
+    fromDate: null,
+    toDate: null,
+  });
+
   // Formatted Visitor / Member Autocomplete Options
   const visitorOptions = useMemo(() => {
     return visitorList.map((v: any) => ({
-      id: v.id || v.visitorId,
+      id: v.id,
       name: v.name || v.visitorName || 'Unknown Visitor',
     }));
   }, [visitorList]);
 
   const memberOptions = useMemo(() => {
     return memberList.map((m: any) => ({
-      id: m.id || m.memberId,
+      id: m.id,
       name: m.name || m.memberName || 'Unknown Member',
     }));
   }, [memberList]);
@@ -282,6 +293,11 @@ const TrackingReport: React.FC = () => {
       selectedVisitorIds,
       selectedMemberIds,
     });
+    setAppliedTimeFilter({
+      timeRange,
+      fromDate,
+      toDate,
+    });
     setLastUpdatedTime(dayjs().format('DD MMM YYYY HH:mm:ss'));
     triggerApiFetch();
   };
@@ -303,6 +319,11 @@ const TrackingReport: React.FC = () => {
       personType: 'all',
       selectedVisitorIds: [],
       selectedMemberIds: [],
+    });
+    setAppliedTimeFilter({
+      timeRange: 'daily',
+      fromDate: null,
+      toDate: null,
     });
     setLastUpdatedTime(dayjs().format('DD MMM YYYY HH:mm:ss'));
 
@@ -675,7 +696,13 @@ const TrackingReport: React.FC = () => {
                 {/* Row 2: Charts (Peak Hour, By Area, By People) */}
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, lg: 5 }}>
-                    <TrackingReportPeakHour data={sessionData} isLoading={isLoading} />
+                    <TrackingReportPeakHour
+                      data={sessionData}
+                      isLoading={isLoading}
+                      timeRange={appliedTimeFilter.timeRange}
+                      fromDate={appliedTimeFilter.fromDate}
+                      toDate={appliedTimeFilter.toDate}
+                    />
                   </Grid>
                   <Grid size={{ xs: 12, md: 6, lg: 3.5 }}>
                     <TrackingReportByArea data={sessionData} isLoading={isLoading} />

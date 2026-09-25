@@ -174,9 +174,9 @@ const MemberList = () => {
                           {index + 1}
                         </TableCell>
                         <TableCell>{member.personId}</TableCell>
-                        <TableCell>{getOrganizationName(member.organizationId)}</TableCell>
-                        <TableCell>{getDepartmentName(member.departmentId)}</TableCell>
-                        <TableCell>{getDistrictName(member.districtId)}</TableCell>
+                        <TableCell>{member.organization?.name}</TableCell>
+                        <TableCell>{member.department?.name}</TableCell>
+                        <TableCell>{member.district?.name}</TableCell>
                         <TableCell>{member.identityId}</TableCell>
                         <TableCell>{member.cardNumber}</TableCell>
                         <TableCell>{member.bleCardNumber}</TableCell>
@@ -186,11 +186,19 @@ const MemberList = () => {
                         <TableCell>{member.gender}</TableCell>
                         <TableCell>{member.address}</TableCell>
                         <TableCell>{member.faceImage}</TableCell>
-                        <TableCell>{formatDate(member.birthDate)}</TableCell>
-                        <TableCell>{formatDate(member.joinDate)}</TableCell>
-                        <TableCell>{formatDate(member.exitDate)}</TableCell>
-                        <TableCell>{member.headMember1}</TableCell>
-                        <TableCell>{member.headMember2}</TableCell>
+                        <TableCell>{formatDate(member.birthDate!)}</TableCell>
+                        <TableCell>{formatDate(member.joinDate!)}</TableCell>
+                        <TableCell>{formatDate(member.exitDate!)}</TableCell>
+                        <TableCell>
+                          {typeof (member.memberHead1 || member.headMember1) === 'object'
+                            ? (member.memberHead1 || member.headMember1)?.name || '-'
+                            : member.memberHead1 || member.headMember1 || '-'}
+                        </TableCell>
+                        <TableCell>
+                          {typeof (member.memberHead2 || member.headMember2) === 'object'
+                            ? (member.memberHead2 || member.headMember2)?.name || '-'
+                            : member.memberHead2 || member.headMember2 || '-'}
+                        </TableCell>
                         <TableCell>{member.statusEmployee}</TableCell>
                         <TableCell
                           sx={{

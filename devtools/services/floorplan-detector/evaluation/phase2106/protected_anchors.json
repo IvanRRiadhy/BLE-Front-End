@@ -1,0 +1,90 @@
+[
+  {
+    "anchor_id": "sample-floorplan.png",
+    "gt_rooms": 8,
+    "raw_proposals": 27,
+    "selected_proposals": 16,
+    "raw_recall_25": 0.875,
+    "selected_recall_25": 0.875,
+    "recall_preserved": true,
+    "raw_mean_iou": 0.7329,
+    "selected_mean_iou": 0.7286
+  },
+  {
+    "anchor_id": "Lantai 1.jpg",
+    "gt_rooms": 5,
+    "raw_proposals": 35,
+    "selected_proposals": 20,
+    "raw_recall_25": 0.8,
+    "selected_recall_25": 0.8,
+    "recall_preserved": true,
+    "raw_mean_iou": 0.4875,
+    "selected_mean_iou": 0.4761
+  },
+  {
+    "anchor_id": "Lantai 2.jpg",
+    "gt_rooms": 5,
+    "raw_proposals": 14,
+    "selected_proposals": 4,
+    "raw_recall_25": 0.6,
+    "selected_recall_25": 0.6,
+    "recall_preserved": true,
+    "raw_mean_iou": 0.5843,
+    "selected_mean_iou": 0.568
+  },
+  {
+    "anchor_id": "sample-floorplan-house2.png",
+    "gt_rooms": 17,
+    "raw_proposals": 306,
+    "selected_proposals": 150,
+    "raw_recall_25": 0.8824,
+    "selected_recall_25": 0.8235,
+    "recall_preserved": false,
+    "raw_mean_iou": 0.5979,
+    "selected_mean_iou": 0.558
+  },
+  {
+    "anchor_id": "Floorplan-House.png",
+    "gt_rooms": 16,
+    "raw_proposals": 782,
+    "selected_proposals": 150,
+    "raw_recall_25": 0.8125,
+    "selected_recall_25": 0.3125,
+    "recall_preserved": false,
+    "raw_mean_iou": 0.4845,
+    "selected_mean_iou": 0.2686
+  },
+  {
+    "anchor_id": "sample-floorplan-house3.png",
+    "gt_rooms": 21,
+    "raw_proposals": 7980,
+    "selected_proposals": 150,
+    "raw_recall_25": 0.381,
+    "selected_recall_25": 0.0,
+    "recall_preserved": false,
+    "raw_mean_iou": 0.284,
+    "selected_mean_iou": 0.0271
+  },
+  {
+    "anchor_id": "library-floor-plan.png",
+    "gt_rooms": 5,
+    "raw_proposals": 2,
+    "selected_proposals": 2,
+    "raw_recall_25": 0.0,
+    "selected_recall_25": 0.0,
+    "recall_preserved": true,
+    "raw_mean_iou": 0.1462,
+    "selected_mean_iou": 0.1457
+  },
+  {
+    "anchor_id": "simple-apartment-floor-plan.png",
+    "gt_rooms": 7,
+    "raw_proposals": 9,
+    "selected_proposals": 4,
+    "raw_recall_25": 0.5714,
+    "selected_recall_25": 0.5714,
+    "recall_preserved": true,
+    "raw_mean_iou": 0.3766,
+    "selected_mean_iou": 0.3775
+  }
+]

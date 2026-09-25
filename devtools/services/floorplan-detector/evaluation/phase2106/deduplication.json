@@ -1,0 +1,34 @@
+[
+  {
+    "iou_threshold": 0.8,
+    "kept_proposals": 629,
+    "reduction_pct": 93.19,
+    "recall_25": 0.473,
+    "recall_50": 0.2297,
+    "mean_best_iou": 0.2919
+  },
+  {
+    "iou_threshold": 0.85,
+    "kept_proposals": 630,
+    "reduction_pct": 93.18,
+    "recall_25": 0.473,
+    "recall_50": 0.2297,
+    "mean_best_iou": 0.2919
+  },
+  {
+    "iou_threshold": 0.9,
+    "kept_proposals": 632,
+    "reduction_pct": 93.16,
+    "recall_25": 0.473,
+    "recall_50": 0.2365,
+    "mean_best_iou": 0.2923
+  },
+  {
+    "iou_threshold": 0.95,
+    "kept_proposals": 632,
+    "reduction_pct": 93.16,
+    "recall_25": 0.473,
+    "recall_50": 0.2365,
+    "mean_best_iou": 0.2923
+  }
+]

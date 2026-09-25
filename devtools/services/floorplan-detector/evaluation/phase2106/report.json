@@ -1,0 +1,17 @@
+{
+  "phase": "2.10.6",
+  "description": "Proposal Fusion, Deduplication, Boundary Optimization & Controlled Selection",
+  "authoritative_gt_count": 148,
+  "total_raw_proposals": 9235,
+  "final_selected_proposals": 534,
+  "compression_pct": 94.22,
+  "baseline_recall_25": 0.5608,
+  "final_recall_25": 0.4865,
+  "baseline_recall_50": 0.3041,
+  "final_recall_50": 0.2432,
+  "baseline_mean_iou": 0.3623,
+  "final_mean_iou": 0.2991,
+  "p50_latency_ms": 22.57,
+  "p95_latency_ms": 58252.1,
+  "ready_for_phase_2_10_7": true
+}

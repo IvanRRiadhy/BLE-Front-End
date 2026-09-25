@@ -15,14 +15,14 @@ import {
   ThemeProvider,
   createTheme,
 } from '@mui/material';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { AnimatePresence, motion, MotionProps } from 'framer-motion';
 import { jwtDecode } from 'jwt-decode';
 import { loginType } from 'src/types/auth/auth';
 import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheckbox';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
-import axiosServices from 'src/utils/axios';
+import axiosServices, { setAccessToken, setAuthResponse } from 'src/utils/axios';
 import { getConfig } from 'src/config';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import _ from 'lodash';
@@ -104,6 +104,7 @@ const loginTheme = createTheme(_.merge({}, baseMode, baselightTheme));
 loginTheme.components = components(loginTheme);
 
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>('admin');
   const [direction, setDirection] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -154,8 +155,9 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 
       try {
         const config = getConfig();
+        const base = (config.API_BASE_URL || '').replace(/\/+$/, '');
         (node as any).configure?.({
-          challenge: `${config.API_BASE_URL}/api/Auth/altcha-challenge`,
+          challenge: `${base}/api/Auth/altcha-challenge`,
           codeChallengeDisplay: 'standard',
           // verifyFunction is ONLY triggered when an interactive high-risk code challenge is submitted.
           // It is never called during normal low-risk frictionless mode.
@@ -166,7 +168,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
               if (config.API_KEY) {
                 headers.set('X-BIOPEOPLETRACKING-API-KEY', config.API_KEY);
               }
-              const resp = await fetch(`${config.API_BASE_URL}/api/Auth/altcha-verify`, {
+              const resp = await fetch(`${base}/api/Auth/altcha-verify`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({ payload, code }),
@@ -316,7 +318,8 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         return;
       }
 
-      localStorage.setItem('token', data.token);
+      // 🧠 Simpan AccessToken hanya di RAM (variabel memori)
+      setAccessToken(data.token);
 
       // ✅ decode JWT
       const decoded = jwtDecode<JwtPayload>(data.token);
@@ -364,11 +367,15 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         localStorage.setItem('rememberMePreference', 'false');
       }
 
+      // Simpan refreshToken jika ada (atau hapus jika backend mengandalkan HttpOnly cookie)
       if (data?.refreshToken) {
         localStorage.setItem('refreshToken', data.refreshToken);
+      } else {
+        localStorage.removeItem('refreshToken');
       }
 
-      localStorage.setItem('response', JSON.stringify(data));
+      // Simpan data response lengkap di memory variabel
+      setAuthResponse(data);
       localStorage.setItem('welcomePopupShown', 'false');
 
       // ❗ IMPORTANT: use decoded role instead of data.levelPriority
@@ -383,12 +390,13 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
       }
 
       setTimeout(() => {
-        window.location.href = isAdmin
+        const targetUrl = isAdmin
           ? '/dashboards/newmainmenu'
           : role === 'Primary'
             ? '/security-view/dashboard'
             : '/my-visit';
 
+        navigate(targetUrl);
         console.log('decoded', decoded);
       }, 300);
     } catch (err: any) {

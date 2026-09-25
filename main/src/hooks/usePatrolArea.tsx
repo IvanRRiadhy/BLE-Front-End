@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import axiosServices from 'src/utils/axios';
+import axiosServices, { getAccessToken } from 'src/utils/axios';
 import { PatrolAreaType, GetFilter } from 'src/store/apps/crud/patrolArea';
 import { RootState, useSelector } from 'src/store/Store';
 import { safeParseAreaShape } from 'src/utils/isJsonObject';
@@ -199,7 +199,7 @@ export function useExportPatrolArea() {
   return useMutation({
     mutationFn: async (format: 'pdf' | 'excel') => {
       const url = `${API_URL}export/${format}`;
-      const accessToken = localStorage.getItem('token');
+      const accessToken = getAccessToken() || localStorage.getItem('token');
 
       const response = await fetch(url, {
         method: 'GET',

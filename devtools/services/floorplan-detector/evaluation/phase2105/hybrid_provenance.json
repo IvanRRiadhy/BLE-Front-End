@@ -1,0 +1,58 @@
+{
+  "phase": "2.10.5",
+  "experiment": "hybrid_provenance_and_strategy_attribution",
+  "description": "Exhaustive provenance audit of all 65 hybrid split configurations and 4,664 hybrid split proposals to attribute contributions from Strategies A through E.",
+  "strategies_evaluated": {
+    "Strategy_A_WallNetwork": {
+      "standalone_proposals": 122,
+      "in_hybrid_clusters": 122,
+      "hybrid_contribution_class": "CONTRIBUTING",
+      "architectural_role": "Provides clean axis-aligned wall cuts separating rooms bounded by internal walls."
+    },
+    "Strategy_B_PlanarFace": {
+      "standalone_proposals": 0,
+      "intermediate_hypotheses": 0,
+      "hybrid_configurations_influenced": 0,
+      "hybrid_proposals_influenced": 0,
+      "gt_rooms_influenced": 0,
+      "gt_rooms_recovered_present": 0,
+      "gt_rooms_recovered_necessary": 0,
+      "gt_rooms_recovered_supplementary": 0,
+      "hybrid_contribution_class": "NO_CONTRIBUTION",
+      "root_cause": "Strategy B searches for wall_network_face proposals strictly contained within cavities. Existing WallNetwork faces either already define entire rooms or fail strict 0.70 containment + <0.85 area ratio bounds. Removing Strategy B changes 0 proposals and 0 configurations."
+    },
+    "Strategy_C_PartitionSplit": {
+      "standalone_proposals": 112,
+      "in_hybrid_clusters": 112,
+      "hybrid_contribution_class": "CONTRIBUTING",
+      "architectural_role": "Projects internal partition rays perpendicular to wall lines to create room subdivisions."
+    },
+    "Strategy_D_DoorwayTopology": {
+      "standalone_proposals": 0,
+      "intermediate_hypotheses": 0,
+      "hybrid_configurations_influenced": 0,
+      "hybrid_proposals_influenced": 0,
+      "gt_rooms_influenced": 0,
+      "gt_rooms_recovered_present": 0,
+      "gt_rooms_recovered_necessary": 0,
+      "gt_rooms_recovered_supplementary": 0,
+      "hybrid_contribution_class": "NO_CONTRIBUTION",
+      "root_cause": "Requires at least 2 detected doorways located within 20px of cavity boundary with Euclidean distance >= 50px whose perpendicular bisecting cut produces >= 2 valid polygons satisfying min_area >= 350px. Across all 88 cavities in the benchmark, zero cavities met all topological closure conditions simultaneously. Removing Strategy D changes 0 proposals and 0 configurations."
+    },
+    "Strategy_E_ProposalGuided": {
+      "standalone_proposals": 4592,
+      "in_hybrid_clusters": 4592,
+      "hybrid_contribution_class": "NECESSARY",
+      "architectural_role": "Clips Phase 2.10.4 proposals to cavity boundaries, generating dense local candidate seeds for open-plan room recovery."
+    }
+  },
+  "hybrid_composition_summary": {
+    "total_hybrid_proposals": 4664,
+    "total_hybrid_configurations": 65,
+    "proposals_from_wall_network_seed": 72,
+    "proposals_from_partition_seed": 0,
+    "proposals_from_proposal_guided_seed": 4592,
+    "proposals_from_planar_face_seed": 0,
+    "proposals_from_doorway_topology_seed": 0
+  }
+}

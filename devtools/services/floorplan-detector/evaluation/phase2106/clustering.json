@@ -1,0 +1,18 @@
+{
+  "total_clusters": 111,
+  "mean_clusters_per_image": 9.25,
+  "clusters_per_image": {
+    "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": 4,
+    "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": 10,
+    "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": 2,
+    "Floorplan-House.png": 19,
+    "Lantai 1.jpg": 6,
+    "Lantai 2.jpg": 3,
+    "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": 13,
+    "library-floor-plan.png": 2,
+    "sample-floorplan-house2.png": 14,
+    "sample-floorplan-house3.png": 21,
+    "sample-floorplan.png": 13,
+    "simple-apartment-floor-plan.png": 4
+  }
+}

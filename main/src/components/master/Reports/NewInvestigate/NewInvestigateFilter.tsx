@@ -42,7 +42,8 @@ interface NewInvestigateFilterProps {
 const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, isLoading }) => {
   const { data: members = [] } = useAllMembers();
   const { data: visitors = [] } = useAllVisitor();
-
+  // console.log("Members: ", members.length);
+  // console.log("Visitors: ", visitors.length);
   // Combine members and visitors into autocomplete options
   const personOptions = useMemo<PersonOption[]>(() => {
     const memberOpts: PersonOption[] = members.map((m: any) => ({
@@ -62,21 +63,15 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
     }));
 
     const combined = [...memberOpts, ...visitorOpts];
-
+    // console.log("Combined: ", combined);
     // Fallback default options if API is empty/loading
     if (combined.length === 0) {
       return [
         {
           id: '75a72602-fa2a-4073-856b-3657dcb9287a',
-          name: 'Dion',
+          name: 'Person A',
           identityId: '12312312',
           type: 'Member',
-        },
-        {
-          id: 'v-12345',
-          name: 'Weldon Levitt',
-          identityId: 'wlevitt',
-          type: 'Visitor',
         },
       ];
     }
@@ -155,9 +150,9 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
                   .join('')
                   .substring(0, 2)
                   .toUpperCase();
-
+                // console.log("Option: ", option, key);
                 return (
-                  <Box component="li" key={key || option.id} {...otherProps}>
+                  <Box component="li" key={option.id || key} {...otherProps}>
                     <Stack direction="row" spacing={1.5} alignItems="center">
                       <Avatar
                         src={option.avatarUrl}

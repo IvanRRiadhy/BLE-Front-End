@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import { RootState, useSelector } from 'src/store/Store';
-import { memberType, GetFilter } from 'src/store/apps/crud/member';
+import { memberType, securityType, GetFilter } from 'src/store/apps/crud/member';
 
 // -----------------------------------------------------------------------------
 // ✅ API URLs
@@ -28,11 +28,11 @@ export function useSecurityList(filter: GetFilter) {
       const col = res.data.collection;
       console.log('Security Guard List fetched: ', col);
       return {
-        data: col.data as memberType[],
+        data: col.data as securityType[],
         draw: col.draw,
         recordsTotal: col.recordsTotal,
         recordsFiltered: col.recordsFiltered,
-      } satisfies PaginatedResponse<memberType>;
+      } satisfies PaginatedResponse<securityType>;
     },
     placeholderData: keepPreviousData,
     staleTime: 5_000, // data dianggap fresh 1 menit
@@ -54,11 +54,11 @@ export function useInfiniteSecurityList(filter: GetFilter, pageSize = 50) {
       });
       const col = res.data.collection;
       return {
-        data: col.data as memberType[],
+        data: col.data as securityType[],
         draw: col.draw,
         recordsTotal: col.recordsTotal,
         recordsFiltered: col.recordsFiltered,
-      } satisfies PaginatedResponse<memberType>;
+      } satisfies PaginatedResponse<securityType>;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -81,7 +81,7 @@ export function useAllSecuritys() {
     queryKey: ['security-all'],
     queryFn: async () => {
       const res = await axiosServices.get(API_URL);
-      return res.data.collection.data as memberType[];
+      return res.data.collection.data as securityType[];
     },
     placeholderData: [],
   });
@@ -94,7 +94,7 @@ export function useAllSecurityLookup() {
     queryKey: ['security-lookup'],
     queryFn: async () => {
       const res = await axiosServices.get(`${API_URL}lookup`);
-      return res.data.collection.data as memberType[];
+      return res.data.collection.data as securityType[];
     },
     placeholderData: [],
   });
@@ -107,28 +107,34 @@ export const securityByIdQuery = (id: string) => ({
   queryFn: async () => {
     const res = await axiosServices.get(`${API_URL}${id}`);
     console.log('Response Security: ', res, 'With Id: ', id);
-    return res.data.collection.data as memberType;
+    return res.data.collection.data as securityType;
   },
 });
 export function useSecurityByID(id: string) {
   return useQuery({
     ...securityByIdQuery(id),
     enabled: !!id,
-    placeholderData: {} as memberType,
+    placeholderData: {} as securityType,
   });
 }
 // -----------------------------------------------------------------------------
-// ✅ ADD Security (POST with FormData)
+// ✅ ADD Security (POST with FormData or JSON)
 // -----------------------------------------------------------------------------
 export function useAddSecurity() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: FormData) => {
-      formData.delete('id');
-      const res = await axiosServices.post(API_URL, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+    mutationFn: async (payload: Partial<securityType> | FormData) => {
+      let res;
+      if (payload instanceof FormData) {
+        payload.delete('id');
+        res = await axiosServices.post(API_URL, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        const { id, ...filteredPayload } = payload;
+        res = await axiosServices.post(API_URL, filteredPayload);
+      }
       return res.data;
     },
     onSuccess: () => {
@@ -140,21 +146,28 @@ export function useAddSecurity() {
 }
 
 // -----------------------------------------------------------------------------
-// ✅ EDIT Security (PUT with FormData)
+// ✅ EDIT Security (PUT with FormData or JSON)
 // -----------------------------------------------------------------------------
 export function useEditSecurity() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: FormData) => {
-      const id = formData.get('id');
-      formData.delete('id');
-      formData.delete('organization');
-      formData.delete('department');
-      formData.delete('district');
-      const res = await axiosServices.put(`${API_URL}${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+    mutationFn: async (payload: Partial<securityType> | FormData) => {
+      let res;
+      if (payload instanceof FormData) {
+        const id = payload.get('id');
+        payload.delete('id');
+        payload.delete('organization');
+        payload.delete('department');
+        payload.delete('district');
+        res = await axiosServices.put(`${API_URL}${id}`, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        const { id, ...filteredPayload } = payload;
+        if (!id) throw new Error('Missing security id');
+        res = await axiosServices.put(`${API_URL}${id}`, filteredPayload);
+      }
       return res.data;
     },
     onSuccess: () => {

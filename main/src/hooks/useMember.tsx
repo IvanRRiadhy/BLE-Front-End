@@ -106,17 +106,62 @@ export function useMemberByID(id: string) {
 }
 
 // -----------------------------------------------------------------------------
+// ✅ FETCH Head MEMBERS (for dropdowns, etc.)
+// -----------------------------------------------------------------------------
+export function useHeadMember(pageSize = 20) {
+  return useInfiniteQuery({
+    queryKey: ['member-head-infinite', pageSize],
+    queryFn: async ({ pageParam = 0 }) => {
+      const res = await axiosServices.post(API_DT_URL, {
+        Draw: 1,
+        Start: pageParam,
+        Length: pageSize,
+        SortColumn: 'Name',
+        SortDir: 'asc',
+        SearchValue: '',
+        filters: {
+          isHead: true,
+        },
+      });
+      const col = res.data.collection;
+      return {
+        data: col.data as memberType[],
+        draw: col.draw,
+        recordsTotal: col.recordsTotal,
+        recordsFiltered: col.recordsFiltered,
+      } satisfies PaginatedResponse<memberType>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedCount = allPages.flatMap((page) => page.data).length;
+      if (loadedCount < lastPage.recordsFiltered) {
+        return loadedCount;
+      }
+      return undefined;
+    },
+    staleTime: 5_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
+// -----------------------------------------------------------------------------
 // ✅ ADD MEMBER (POST with FormData)
 // -----------------------------------------------------------------------------
 export function useAddMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: FormData) => {
-      formData.delete('id');
-      const res = await axiosServices.post(API_URL, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+    mutationFn: async (payload: Partial<memberType> | FormData) => {
+      let res;
+      if (payload instanceof FormData) {
+        payload.delete('id');
+        res = await axiosServices.post(API_URL, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        const { id, ...filteredPayload } = payload;
+        res = await axiosServices.post(API_URL, filteredPayload);
+      }
       return res.data;
     },
     onSuccess: () => {
@@ -131,18 +176,25 @@ export function useAddMember() {
 }
 
 // -----------------------------------------------------------------------------
-// ✅ EDIT MEMBER (PUT with FormData)
+// ✅ EDIT MEMBER (PUT with JSON or FormData)
 // -----------------------------------------------------------------------------
 export function useEditMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: FormData) => {
-      const id = formData.get('id');
-      formData.delete('id');
-      const res = await axiosServices.put(`${API_URL}${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+    mutationFn: async (payload: Partial<memberType> | FormData) => {
+      let res;
+      if (payload instanceof FormData) {
+        const id = payload.get('id');
+        payload.delete('id');
+        res = await axiosServices.put(`${API_URL}${id}`, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        const { id, ...filteredPayload } = payload;
+        if (!id) throw new Error('Missing member id');
+        res = await axiosServices.put(`${API_URL}${id}`, filteredPayload);
+      }
       return res.data;
     },
     onSuccess: () => {

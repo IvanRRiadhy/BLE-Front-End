@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Grid2 as Grid, Box, Card, CardContent, Typography, List, ListItem, ListItemText, Chip, Divider, CircularProgress, ListItemButton, Switch, Tooltip, styled, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Collapse, Alert, AlertTitle } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import { useLicenseInfo, toggleFeatures, getMachineId, activateLicense } from 'src/hooks/useInfo';
-import axiosServices from 'src/utils/axios';
+import axiosServices, { logoutUser } from 'src/utils/axios';
 import { IconCpu, IconUpload, IconCheck, IconSettings, IconChevronDown } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import { useSelector, useDispatch } from 'src/store/Store';
@@ -434,22 +434,7 @@ const AboutPage = ({ isLicenseLocked = false }: AboutPageProps) => {
         )
       );
       toast.success('Module changes applied successfully.');
-
-      // 🧹 Targeted logout: Clear session data but preserve "Remember this Device"
-      const itemsToKeep = [
-        'rememberedAdminUsername',
-        'rememberedVisitorUsername',
-        'rememberMePreference',
-        'rememberedLoginMode',
-      ];
-
-      Object.keys(localStorage).forEach((key) => {
-        if (!itemsToKeep.includes(key)) {
-          localStorage.removeItem(key);
-        }
-      });
-
-      window.location.href = '/auth/login'; // Redirect to the login page
+      logoutUser();
     } catch (error) {
       console.error(error);
       toast.error('Failed to apply module changes.');

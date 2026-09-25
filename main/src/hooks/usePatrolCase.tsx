@@ -80,15 +80,28 @@ export function useEditPatrolCase() {
   });
 }
 
-export function useUploadCDN() {
+export function useUploadCDN(defaultParams?: Record<string, any>) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (formData: FormData) => {
+    mutationFn: async (
+      payload: FormData | { formData: FormData; params?: Record<string, any> },
+    ) => {
+      let formData: FormData;
+      let params = defaultParams;
+
+      if (payload instanceof FormData) {
+        formData = payload;
+      } else {
+        formData = payload.formData;
+        params = { ...defaultParams, ...payload.params };
+      }
+
       for (const [key, value] of formData.entries()) {
         console.log(key, value);
       }
       const response = await axiosCdn.post(API_CDN, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        params,
       });
       console.log('File uploaded successfully: ', response.data);
       return response.data;

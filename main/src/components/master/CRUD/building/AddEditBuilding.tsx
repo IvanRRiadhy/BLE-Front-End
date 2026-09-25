@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+
 import {
   Button,
   Dialog,
@@ -22,14 +22,13 @@ import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
 import {
-  addBuilding,
   BuildingType,
-  editBuilding,
   fetchBuildingDT,
-  fetchBuildings,
 } from 'src/store/apps/crud/building';
+import { getConfig } from 'src/config';
 import { defaultBuildingForm } from 'src/store/apps/defaultForm';
 import { useAddBuilding, useEditBuilding } from 'src/hooks/useBuilding';
+import { useUploadCDN } from 'src/hooks/usePatrolCase';
 
 interface FormType {
   type?: string;
@@ -49,10 +48,24 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     ...building,
   });
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-      const addMutation = useAddBuilding();
-    const editMutation = useEditBuilding();
+  const [isSaving, setIsSaving] = React.useState(false);
+  const addMutation = useAddBuilding();
+  const editMutation = useEditBuilding();
+  const uploadMutation = useUploadCDN({ category: 'building' });
 
-    const isSaving = addMutation.isPending || editMutation.isPending;
+  const getCdnUrl = (url?: string | null) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    let cdnBase = '';
+    try {
+      cdnBase = getConfig()?.CDN_URL || '';
+    } catch {
+      cdnBase = '';
+    }
+    const cleanBase = cdnBase.replace(/\/+$/, '');
+    const cleanPath = url.replace(/^\/+/, '');
+    return cleanBase ? `${cleanBase}/${cleanPath}` : url;
+  };
 
   const buildingFilter = useSelector((state: RootState) => state.buildingReducer.buildingFilter);
   const dispatch: AppDispatch = useDispatch();
@@ -65,7 +78,6 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         await dispatch(fetchBuildingDT(buildingFilter));
       }
       setFormData({ ...defaultBuildingForm, ...building });
-      
       setPreview(building?.image || null);
     } else {
       setFormData({ ...defaultBuildingForm });
@@ -81,31 +93,10 @@ const AddEditBuilding = ({ type, building }: FormType) => {
 
   const handleClose = () => {
     setOpen(false);
+    setImage(null);
     setPreview(building?.image || null);
     setFromLocal(false);
   };
-  useEffect(() => {
-    // Only run for edit mode and if floorImage is a string path
-    if (type === 'edit' && open && building?.image && typeof building.image === 'string') {
-      // Fetch the image from the server
-      fetch(`${BASE_URL}${building.image}`)
-        .then((res) => res.blob())
-        .then((blob) => {
-          // Create a File object from the Blob
-          const file = new File([blob], building.image.split('/').pop() || 'floorplan.jpg', {
-            type: blob.type,
-          });
-          setImage(file);
-          // Optionally set preview as well
-          setPreview(URL.createObjectURL(file));
-        })
-        .catch((err) => {
-          console.error('Failed to fetch floor image:', err);
-        });
-      // console.log('Image URL:', preview);
-    }
-    // eslint-disable-next-line
-  }, [open]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>,
@@ -124,12 +115,9 @@ const AddEditBuilding = ({ type, building }: FormType) => {
         toast.error('File size exceeds 10MB. Please upload a smaller file.');
         return;
       } else if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
-        console.log(file);
         setImage(file);
-        // console.log('Selected file:', file);
         setPreview(URL.createObjectURL(file)); // Preview selected image
         setFromLocal(true);
-        // console.log(preview);
       } else {
         alert('Please select a valid image file (PNG, JPG, JPEG)');
       }
@@ -140,38 +128,70 @@ const AddEditBuilding = ({ type, building }: FormType) => {
     const errors: Record<string, string> = {};
 
     if (!formData.name?.trim()) errors.name = 'Building name is required';
-    if (!image) errors.image = 'Building Image is required';
+    if (!image && !formData.image) errors.image = 'Building Image is required';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-const handleSave = async () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       toast.error('Please fill in all required fields.');
       return;
     }
 
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (!['image', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
-        data.append(key, value?.toString() ?? '');
+    setIsSaving(true);
+
+    let finalImageUrl = formData.image;
+
+    // If there is a new image selected, upload to CDN first
+    if (image) {
+      const uploadData = new FormData();
+      uploadData.append('file', image);
+
+      try {
+        const uploadRes = await uploadMutation.mutateAsync({
+          formData: uploadData,
+          params: { category: 'building' },
+        });
+        const uploaded = uploadRes?.collection?.data?.[0];
+        if (!uploaded || !uploaded.relativePath) {
+          throw new Error('Invalid response from CDN upload');
+        }
+        finalImageUrl = uploaded.relativePath;
+      } catch (err) {
+        console.error('CDN upload failed:', err);
+        toast.error('Failed to uploading image.');
+        setIsSaving(false);
+        return; // Aborts saving, keeps dialog open
       }
-    });
-    if (image) data.append('image', image);
+    }
+
+    const payload: Partial<BuildingType> = {
+      name: formData.name,
+      tag: formData.tag,
+      image: finalImageUrl || '',
+      // applicationId: formData.applicationId,
+    };
+
+    if (type === 'edit') {
+      payload.id = formData.id;
+    }
 
     try {
       if (type === 'add') {
-        await addMutation.mutateAsync(data);
+        await addMutation.mutateAsync(payload);
         toast.success('Building added successfully!');
       } else {
-        await editMutation.mutateAsync(data);
+        await editMutation.mutateAsync(payload);
         toast.success('Building updated successfully!');
       }
       handleClose();
     } catch (error) {
       console.error('Error saving building:', error);
       toast.error('Failed to save building.');
+    } finally {
+      setIsSaving(false);
     }
   };
   return (
@@ -258,8 +278,7 @@ const handleSave = async () => {
                 {formErrors.image && <FormHelperText error>{formErrors.image}</FormHelperText>}
                 {preview && (
                   <img
-                    // src={fromLocal ? `${preview}` : image ? `${BASE_URL}${building?.image}` : `${BASE_URL}/${preview}`}
-                    src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
+                    src={preview?.startsWith('blob:') ? preview : getCdnUrl(preview)}
                     alt="Building Preview"
                     style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                   />

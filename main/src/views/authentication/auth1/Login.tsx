@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router';
+import { getAccessToken, refreshAccessToken, clearSession } from 'src/utils/axios';
 import { Box, CircularProgress, Paper, Typography, ThemeProvider, createTheme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import { getConfig } from 'src/config';
@@ -28,6 +30,7 @@ const loginTheme = createTheme(_.merge({}, baseMode, baselightTheme));
 loginTheme.components = components(loginTheme);
 
 const Login = () => {
+  const navigate = useNavigate();
   const logo = getConfig().LOGO_URL || '/Logo_Bionics.png';
   const gedung = getConfig().GEDUNG_IMG_URL || '/gedung-utama.jpg';
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -52,50 +55,50 @@ const Login = () => {
   }, []);
 
   const checkExistingLogin = async () => {
-    const token = localStorage.getItem('token');
+    let token = getAccessToken();
+    const hasSession = !!localStorage.getItem('levelPriority');
 
-    if (!token) {
+    if (!token && !hasSession) {
       setCheckingAuth(false);
       return;
     }
 
+    if (!token && hasSession) {
+      try {
+        token = await refreshAccessToken();
+      } catch {
+        clearSession();
+        setCheckingAuth(false);
+        return;
+      }
+    }
+
     // 🔹 Read levelPriority from localStorage, fallback to JWT decode if missing
     let levelPriority = localStorage.getItem('levelPriority');
-    if (!levelPriority) {
+    if (!levelPriority && token) {
       try {
         const decoded: any = jwtDecode(token);
         const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
         levelPriority = role ? role.trim() : null;
         if (levelPriority) localStorage.setItem('levelPriority', levelPriority);
       } catch {
-        // invalid token → let user log in fresh
-        localStorage.removeItem('token');
+        clearSession();
         setCheckingAuth(false);
         return;
       }
     }
 
-    window.location.href =
-      levelPriority === 'Primary' ? '/security-view/dashboard' : '/dashboards/newmainmenu';
-    // setCheckingAuth(false);
-    // try {
-    //   const res = await axiosServices.get('/api/Auth/me', {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //   });
+    if (levelPriority) {
+      navigate(
+        levelPriority === 'Primary' ? '/security-view/dashboard' : '/dashboards/newmainmenu',
+        { replace: true }
+      );
+      return;
+    }
 
-    //   const data = res?.data?.collection?.data ?? res?.data;
-    //   // console.log
-    //   if (data) {
-
-    //   }
-    // } catch (err) {
-    //   // token invalid → clear
-    //   localStorage.removeItem('token');
-    //   localStorage.removeItem('refreshToken');
-    // }
+    setCheckingAuth(false);
   };
+
   useEffect(() => {
     checkExistingLogin();
   }, []);

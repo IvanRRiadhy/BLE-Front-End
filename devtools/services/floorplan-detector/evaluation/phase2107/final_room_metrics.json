@@ -1,0 +1,785 @@
+{
+  "gt_count": 148,
+  "total_predicted_rooms": 367,
+  "iou_050": {
+    "tp": 19,
+    "fp": 348,
+    "fn": 129,
+    "precision": 0.0518,
+    "recall": 0.1284,
+    "f1": 0.0738
+  },
+  "iou_025": {
+    "tp": 28,
+    "fp": 339,
+    "fn": 120,
+    "precision": 0.0763,
+    "recall": 0.1892,
+    "f1": 0.1087
+  },
+  "structural_errors": {
+    "merge_errors": 7,
+    "split_errors": 39
+  },
+  "per_image": {
+    "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+      "tp_050": 0,
+      "fp_050": 4,
+      "fn_050": 3,
+      "precision_050": 0.0,
+      "recall_050": 0.0,
+      "f1_050": 0.0,
+      "tp_025": 0,
+      "fp_025": 4,
+      "fn_025": 3,
+      "precision_025": 0.0,
+      "recall_025": 0.0,
+      "f1_025": 0.0,
+      "merge_errors": 0,
+      "split_errors": 1,
+      "count_error": 1,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_001": {
+          "matched": false,
+          "best_pred_id": "room_001",
+          "best_iou": 0.0
+        },
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_000",
+          "best_iou": 0.2013794390001383
+        },
+        "gt_003": {
+          "matched": false,
+          "best_pred_id": "room_002",
+          "best_iou": 0.21214009092439803
+        }
+      }
+    },
+    "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+      "tp_050": 0,
+      "fp_050": 11,
+      "fn_050": 5,
+      "precision_050": 0.0,
+      "recall_050": 0.0,
+      "f1_050": 0.0,
+      "tp_025": 0,
+      "fp_025": 11,
+      "fn_025": 5,
+      "precision_025": 0.0,
+      "recall_025": 0.0,
+      "f1_025": 0.0,
+      "merge_errors": 0,
+      "split_errors": 1,
+      "count_error": 6,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_001": {
+          "matched": false,
+          "best_pred_id": "room_000",
+          "best_iou": 0.0
+        },
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_001",
+          "best_iou": 0.0
+        },
+        "gt_003": {
+          "matched": false,
+          "best_pred_id": "room_004",
+          "best_iou": 0.0
+        },
+        "gt_004": {
+          "matched": false,
+          "best_pred_id": "room_003",
+          "best_iou": 0.0
+        },
+        "gt_005": {
+          "matched": false,
+          "best_pred_id": "room_002",
+          "best_iou": 0.052546148291431845
+        }
+      }
+    },
+    "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+      "tp_050": 0,
+      "fp_050": 3,
+      "fn_050": 5,
+      "precision_050": 0.0,
+      "recall_050": 0.0,
+      "f1_050": 0.0,
+      "tp_025": 1,
+      "fp_025": 2,
+      "fn_025": 4,
+      "precision_025": 0.3333333333333333,
+      "recall_025": 0.2,
+      "f1_025": 0.25,
+      "merge_errors": 2,
+      "split_errors": 1,
+      "count_error": 2,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_001": {
+          "matched": false,
+          "best_pred_id": "room_000",
+          "best_iou": 0.0
+        },
+        "gt_003": {
+          "matched": false,
+          "best_pred_id": "room_001",
+          "best_iou": 0.16526249920647154
+        },
+        "gt_004": {
+          "matched": false,
+          "best_pred_id": "room_002",
+          "best_iou": 0.26943744554504767
+        }
+      }
+    },
+    "Floorplan-House.png": {
+      "tp_050": 3,
+      "fp_050": 125,
+      "fn_050": 13,
+      "precision_050": 0.0234375,
+      "recall_050": 0.1875,
+      "f1_050": 0.041666666666666664,
+      "tp_025": 4,
+      "fp_025": 124,
+      "fn_025": 12,
+      "precision_025": 0.03125,
+      "recall_025": 0.25,
+      "f1_025": 0.05555555555555555,
+      "merge_errors": 1,
+      "split_errors": 10,
+      "count_error": 112,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_043",
+          "best_iou": 0.0407555356633392
+        },
+        "gt_005": {
+          "matched": true,
+          "pred_id": "room_001",
+          "hypothesis_id": "Floorplan-House.png__prop_comb_274",
+          "iou": 0.7975042787940538
+        },
+        "gt_006": {
+          "matched": false,
+          "best_pred_id": "room_039",
+          "best_iou": 0.011207943109701617
+        },
+        "gt_007": {
+          "matched": true,
+          "pred_id": "room_010",
+          "hypothesis_id": "Floorplan-House.png__prop_comb_220",
+          "iou": 0.5060767498318545
+        },
+        "gt_008": {
+          "matched": false,
+          "best_pred_id": "room_012",
+          "best_iou": 0.40503026842295003
+        },
+        "gt_009": {
+          "matched": false,
+          "best_pred_id": "room_019",
+          "best_iou": 0.03838950523938403
+        },
+        "gt_011": {
+          "matched": true,
+          "pred_id": "room_002",
+          "hypothesis_id": "hyp_cavity_15__split_hyb_4",
+          "iou": 0.7845565664651921
+        },
+        "gt_012": {
+          "matched": false,
+          "best_pred_id": "room_033",
+          "best_iou": 0.046033654856912194
+        },
+        "gt_013": {
+          "matched": false,
+          "best_pred_id": "room_024",
+          "best_iou": 0.030728828533493922
+        },
+        "gt_014": {
+          "matched": false,
+          "best_pred_id": "room_058",
+          "best_iou": 0.0005432138608431178
+        },
+        "gt_015": {
+          "matched": false,
+          "best_pred_id": "room_031",
+          "best_iou": 0.006254480822081491
+        },
+        "gt_016": {
+          "matched": false,
+          "best_pred_id": "room_009",
+          "best_iou": 0.20875261142281282
+        },
+        "gt_017": {
+          "matched": false,
+          "best_pred_id": "room_011",
+          "best_iou": 0.19143454732316
+        },
+        "gt_018": {
+          "matched": false,
+          "best_pred_id": "room_006",
+          "best_iou": 0.033677682374493735
+        },
+        "gt_019": {
+          "matched": false,
+          "best_pred_id": "room_000",
+          "best_iou": 0.03708518527491691
+        },
+        "gt_020": {
+          "matched": false,
+          "best_pred_id": "room_003",
+          "best_iou": 0.15503652562056966
+        }
+      }
+    },
+    "Lantai 1.jpg": {
+      "tp_050": 0,
+      "fp_050": 7,
+      "fn_050": 5,
+      "precision_050": 0.0,
+      "recall_050": 0.0,
+      "f1_050": 0.0,
+      "tp_025": 3,
+      "fp_025": 4,
+      "fn_025": 2,
+      "precision_025": 0.42857142857142855,
+      "recall_025": 0.6,
+      "f1_025": 0.5,
+      "merge_errors": 1,
+      "split_errors": 3,
+      "count_error": 2,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_001": {
+          "matched": false,
+          "best_pred_id": "room_003",
+          "best_iou": 0.0958896561442822
+        },
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_004",
+          "best_iou": 0.39568687120433393
+        },
+        "gt_003": {
+          "matched": false,
+          "best_pred_id": "room_001",
+          "best_iou": 0.35660131281972324
+        },
+        "gt_004": {
+          "matched": false,
+          "best_pred_id": "room_002",
+          "best_iou": 0.0
+        },
+        "gt_005": {
+          "matched": false,
+          "best_pred_id": "room_005",
+          "best_iou": 0.3646286490588039
+        }
+      }
+    },
+    "Lantai 2.jpg": {
+      "tp_050": 3,
+      "fp_050": 0,
+      "fn_050": 2,
+      "precision_050": 1.0,
+      "recall_050": 0.6,
+      "f1_050": 0.7499999999999999,
+      "tp_025": 3,
+      "fp_025": 0,
+      "fn_025": 2,
+      "precision_025": 1.0,
+      "recall_025": 0.6,
+      "f1_025": 0.7499999999999999,
+      "merge_errors": 0,
+      "split_errors": 0,
+      "count_error": 2,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_003": {
+          "matched": true,
+          "pred_id": "room_001",
+          "hypothesis_id": "Lantai 2.jpg__prop_comb_12",
+          "iou": 0.8489651195631323
+        },
+        "gt_004": {
+          "matched": true,
+          "pred_id": "room_002",
+          "hypothesis_id": "Lantai 2.jpg__prop_comb_14",
+          "iou": 0.8442566205049065
+        },
+        "gt_005": {
+          "matched": true,
+          "pred_id": "room_000",
+          "hypothesis_id": "Lantai 2.jpg__prop_comb_13",
+          "iou": 0.9622353903527595
+        }
+      }
+    },
+    "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+      "tp_050": 0,
+      "fp_050": 13,
+      "fn_050": 51,
+      "precision_050": 0.0,
+      "recall_050": 0.0,
+      "f1_050": 0.0,
+      "tp_025": 0,
+      "fp_025": 13,
+      "fn_025": 51,
+      "precision_025": 0.0,
+      "recall_025": 0.0,
+      "f1_025": 0.0,
+      "merge_errors": 0,
+      "split_errors": 1,
+      "count_error": 38,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_003",
+          "best_iou": 0.007344182216577219
+        },
+        "gt_003": {
+          "matched": false,
+          "best_pred_id": "room_011",
+          "best_iou": 0.0
+        },
+        "gt_004": {
+          "matched": false,
+          "best_pred_id": "room_012",
+          "best_iou": 0.0
+        },
+        "gt_011": {
+          "matched": false,
+          "best_pred_id": "room_005",
+          "best_iou": 0.01865280124655442
+        },
+        "gt_015": {
+          "matched": false,
+          "best_pred_id": "room_007",
+          "best_iou": 0.0028005441460814584
+        },
+        "gt_016": {
+          "matched": false,
+          "best_pred_id": "room_002",
+          "best_iou": 0.019213454881454237
+        },
+        "gt_017": {
+          "matched": false,
+          "best_pred_id": "room_010",
+          "best_iou": 0.009728892843705211
+        },
+        "gt_035": {
+          "matched": false,
+          "best_pred_id": "room_008",
+          "best_iou": 0.004484762320673474
+        },
+        "gt_036": {
+          "matched": false,
+          "best_pred_id": "room_001",
+          "best_iou": 0.04246613486016668
+        },
+        "gt_037": {
+          "matched": false,
+          "best_pred_id": "room_006",
+          "best_iou": 0.008695382827364748
+        },
+        "gt_044": {
+          "matched": false,
+          "best_pred_id": "room_009",
+          "best_iou": 0.024463206896474264
+        },
+        "gt_045": {
+          "matched": false,
+          "best_pred_id": "room_004",
+          "best_iou": 0.08779172767814061
+        },
+        "gt_051": {
+          "matched": false,
+          "best_pred_id": "room_000",
+          "best_iou": 0.01869888898894873
+        }
+      }
+    },
+    "library-floor-plan.png": {
+      "tp_050": 0,
+      "fp_050": 2,
+      "fn_050": 5,
+      "precision_050": 0.0,
+      "recall_050": 0.0,
+      "f1_050": 0.0,
+      "tp_025": 0,
+      "fp_025": 2,
+      "fn_025": 5,
+      "precision_025": 0.0,
+      "recall_025": 0.0,
+      "f1_025": 0.0,
+      "merge_errors": 1,
+      "split_errors": 1,
+      "count_error": 3,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_000",
+          "best_iou": 0.21911765422347812
+        },
+        "gt_005": {
+          "matched": false,
+          "best_pred_id": "room_001",
+          "best_iou": 0.21406725234988344
+        }
+      }
+    },
+    "sample-floorplan-house2.png": {
+      "tp_050": 4,
+      "fp_050": 42,
+      "fn_050": 13,
+      "precision_050": 0.08695652173913043,
+      "recall_050": 0.23529411764705882,
+      "f1_050": 0.12698412698412698,
+      "tp_025": 7,
+      "fp_025": 39,
+      "fn_025": 10,
+      "precision_025": 0.15217391304347827,
+      "recall_025": 0.4117647058823529,
+      "f1_025": 0.2222222222222222,
+      "merge_errors": 1,
+      "split_errors": 11,
+      "count_error": 29,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_001": {
+          "matched": true,
+          "pred_id": "room_001",
+          "hypothesis_id": "sample-floorplan-house2.png__prop_comb_54",
+          "iou": 0.6547663832668723
+        },
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_000",
+          "best_iou": 0.0
+        },
+        "gt_004": {
+          "matched": false,
+          "best_pred_id": "room_003",
+          "best_iou": 0.07176276203008504
+        },
+        "gt_005": {
+          "matched": false,
+          "best_pred_id": "room_016",
+          "best_iou": 0.4701116901847391
+        },
+        "gt_006": {
+          "matched": true,
+          "pred_id": "room_019",
+          "hypothesis_id": "sample-floorplan-house2.png__prop_comb_7",
+          "iou": 0.6760899768097924
+        },
+        "gt_007": {
+          "matched": false,
+          "best_pred_id": "room_039",
+          "best_iou": 0.049524667444667325
+        },
+        "gt_009": {
+          "matched": false,
+          "best_pred_id": "room_028",
+          "best_iou": 0.18538872916273533
+        },
+        "gt_010": {
+          "matched": false,
+          "best_pred_id": "room_026",
+          "best_iou": 0.398246355147034
+        },
+        "gt_011": {
+          "matched": false,
+          "best_pred_id": "room_034",
+          "best_iou": 0.0721536712248038
+        },
+        "gt_014": {
+          "matched": false,
+          "best_pred_id": "room_002",
+          "best_iou": 0.0
+        },
+        "gt_015": {
+          "matched": false,
+          "best_pred_id": "room_045",
+          "best_iou": 0.0325259029570967
+        },
+        "gt_016": {
+          "matched": false,
+          "best_pred_id": "room_042",
+          "best_iou": 0.3649993468763758
+        },
+        "gt_017": {
+          "matched": false,
+          "best_pred_id": "room_032",
+          "best_iou": 0.19358091759455026
+        },
+        "gt_018": {
+          "matched": true,
+          "pred_id": "room_017",
+          "hypothesis_id": "hyp_cavity_4__split_hyb_4",
+          "iou": 0.528789264553388
+        },
+        "gt_019": {
+          "matched": true,
+          "pred_id": "room_006",
+          "hypothesis_id": "sample-floorplan-house2.png__prop_comb_81",
+          "iou": 0.5015962438578834
+        },
+        "gt_020": {
+          "matched": false,
+          "best_pred_id": "room_033",
+          "best_iou": 0.10287894091757069
+        },
+        "gt_021": {
+          "matched": false,
+          "best_pred_id": "room_004",
+          "best_iou": 0.0
+        }
+      }
+    },
+    "sample-floorplan-house3.png": {
+      "tp_050": 0,
+      "fp_050": 134,
+      "fn_050": 21,
+      "precision_050": 0.0,
+      "recall_050": 0.0,
+      "f1_050": 0.0,
+      "tp_025": 0,
+      "fp_025": 134,
+      "fn_025": 21,
+      "precision_025": 0.0,
+      "recall_025": 0.0,
+      "f1_025": 0.0,
+      "merge_errors": 0,
+      "split_errors": 7,
+      "count_error": 113,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_001": {
+          "matched": false,
+          "best_pred_id": "room_000",
+          "best_iou": 0.0
+        },
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_007",
+          "best_iou": 0.051273251984510035
+        },
+        "gt_003": {
+          "matched": false,
+          "best_pred_id": "room_001",
+          "best_iou": 0.0
+        },
+        "gt_004": {
+          "matched": false,
+          "best_pred_id": "room_002",
+          "best_iou": 0.0
+        },
+        "gt_005": {
+          "matched": false,
+          "best_pred_id": "room_003",
+          "best_iou": 0.0
+        },
+        "gt_006": {
+          "matched": false,
+          "best_pred_id": "room_004",
+          "best_iou": 0.0
+        },
+        "gt_007": {
+          "matched": false,
+          "best_pred_id": "room_132",
+          "best_iou": 0.0001474831398799113
+        },
+        "gt_008": {
+          "matched": false,
+          "best_pred_id": "room_014",
+          "best_iou": 0.12023565633065945
+        },
+        "gt_009": {
+          "matched": false,
+          "best_pred_id": "room_013",
+          "best_iou": 0.200592345622421
+        },
+        "gt_010": {
+          "matched": false,
+          "best_pred_id": "room_005",
+          "best_iou": 0.0
+        },
+        "gt_011": {
+          "matched": false,
+          "best_pred_id": "room_006",
+          "best_iou": 0.0
+        },
+        "gt_012": {
+          "matched": false,
+          "best_pred_id": "room_126",
+          "best_iou": 0.0018629949249448596
+        },
+        "gt_013": {
+          "matched": false,
+          "best_pred_id": "room_008",
+          "best_iou": 0.0
+        },
+        "gt_014": {
+          "matched": false,
+          "best_pred_id": "room_017",
+          "best_iou": 0.00610191948953085
+        },
+        "gt_015": {
+          "matched": false,
+          "best_pred_id": "room_016",
+          "best_iou": 0.002906730625274106
+        },
+        "gt_016": {
+          "matched": false,
+          "best_pred_id": "room_084",
+          "best_iou": 0.0009892594686263425
+        },
+        "gt_017": {
+          "matched": false,
+          "best_pred_id": "room_023",
+          "best_iou": 0.003888229572852439
+        },
+        "gt_018": {
+          "matched": false,
+          "best_pred_id": "room_009",
+          "best_iou": 0.0
+        },
+        "gt_019": {
+          "matched": false,
+          "best_pred_id": "room_029",
+          "best_iou": 0.0022766386312268612
+        },
+        "gt_020": {
+          "matched": false,
+          "best_pred_id": "room_131",
+          "best_iou": 0.0007150140252751111
+        },
+        "gt_021": {
+          "matched": false,
+          "best_pred_id": "room_035",
+          "best_iou": 0.0003465869511722772
+        }
+      }
+    },
+    "sample-floorplan.png": {
+      "tp_050": 6,
+      "fp_050": 6,
+      "fn_050": 2,
+      "precision_050": 0.5,
+      "recall_050": 0.75,
+      "f1_050": 0.6,
+      "tp_025": 7,
+      "fp_025": 5,
+      "fn_025": 1,
+      "precision_025": 0.5833333333333334,
+      "recall_025": 0.875,
+      "f1_025": 0.7000000000000001,
+      "merge_errors": 0,
+      "split_errors": 3,
+      "count_error": 4,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_001": {
+          "matched": false,
+          "best_pred_id": "room_002",
+          "best_iou": 0.2814289509830066
+        },
+        "gt_002": {
+          "matched": false,
+          "best_pred_id": "room_004",
+          "best_iou": 0.0
+        },
+        "gt_003": {
+          "matched": true,
+          "pred_id": "room_000",
+          "hypothesis_id": "sample-floorplan.png__prop_comb_4",
+          "iou": 0.5664633341206134
+        },
+        "gt_004": {
+          "matched": true,
+          "pred_id": "room_003",
+          "hypothesis_id": "sample-floorplan.png__prop_comb_1",
+          "iou": 0.8909995870373187
+        },
+        "gt_005": {
+          "matched": true,
+          "pred_id": "room_005",
+          "hypothesis_id": "sample-floorplan.png__prop_comb_18",
+          "iou": 0.9474811986357057
+        },
+        "gt_006": {
+          "matched": true,
+          "pred_id": "room_006",
+          "hypothesis_id": "sample-floorplan.png__prop_comb_8",
+          "iou": 0.8004672925691648
+        },
+        "gt_007": {
+          "matched": true,
+          "pred_id": "room_007",
+          "hypothesis_id": "sample-floorplan.png__prop_comb_11",
+          "iou": 0.8249018962346439
+        },
+        "gt_008": {
+          "matched": true,
+          "pred_id": "room_001",
+          "hypothesis_id": "sample-floorplan.png__prop_comb_7",
+          "iou": 0.866739521397825
+        }
+      }
+    },
+    "simple-apartment-floor-plan.png": {
+      "tp_050": 3,
+      "fp_050": 1,
+      "fn_050": 4,
+      "precision_050": 0.75,
+      "recall_050": 0.42857142857142855,
+      "f1_050": 0.5454545454545454,
+      "tp_025": 3,
+      "fp_025": 1,
+      "fn_025": 4,
+      "precision_025": 0.75,
+      "recall_025": 0.42857142857142855,
+      "f1_025": 0.5454545454545454,
+      "merge_errors": 1,
+      "split_errors": 0,
+      "count_error": 3,
+      "max_overlap_iou": 0.0,
+      "gt_matches": {
+        "gt_001": {
+          "matched": false,
+          "best_pred_id": "room_003",
+          "best_iou": 0.20113921323086242
+        },
+        "gt_003": {
+          "matched": true,
+          "pred_id": "room_002",
+          "hypothesis_id": "simple-apartment-floor-plan.png__prop_comb_5",
+          "iou": 0.5424421711832478
+        },
+        "gt_004": {
+          "matched": true,
+          "pred_id": "room_001",
+          "hypothesis_id": "hyp_cavity_1__split_hyb_2",
+          "iou": 0.6334127538557088
+        },
+        "gt_005": {
+          "matched": true,
+          "pred_id": "room_000",
+          "hypothesis_id": "hyp_cavity_1__split_hyb_1",
+          "iou": 0.9633630355023581
+        }
+      }
+    }
+  }
+}

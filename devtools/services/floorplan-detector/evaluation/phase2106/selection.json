@@ -1,0 +1,12 @@
+{
+  "gt_count": 148,
+  "proposal_count": 534,
+  "recall_10": 0.6216,
+  "recall_25": 0.4865,
+  "recall_50": 0.2432,
+  "recall_75": 0.1216,
+  "mean_best_iou": 0.2991,
+  "median_best_iou": 0.2009,
+  "p10_best_iou": 0.0031,
+  "p90_best_iou": 0.8057
+}

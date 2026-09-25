@@ -28,7 +28,7 @@ if %errorlevel% neq 0 (
     echo [INFO] IIS is not installed. Enabling IIS and Static Content features via DISM...
     echo (This may take 1-3 minutes. Please wait...)
     dism /online /enable-feature /featurename:IIS-WebServerRole /featurename:IIS-WebServer /featurename:IIS-CommonHttpFeatures /featurename:IIS-StaticContent /featurename:IIS-DefaultDocument /featurename:IIS-DirectoryBrowsing /featurename:IIS-HttpErrors /featurename:IIS-HttpRedirect /featurename:IIS-ManagementConsole /all /norestart
-    if !errorlevel! neq 0 (
+    if !errorlevel! neq 0 if !errorlevel! neq 3010 (
         echo [ERROR] Failed to enable IIS features via DISM.
         pause
         exit /b 1

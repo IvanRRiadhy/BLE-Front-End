@@ -19,7 +19,7 @@ export default defineConfig({
     proxy: {
       // Proxy all /api requests to the backend (needed for ALTCHA's internal fetch too)
       '/api': {
-        target: 'https://ble-api.app.bio-experience.com',
+        target: 'http://192.168.1.96:5000',
         changeOrigin: true,
         secure: true,
         headers: {
@@ -28,7 +28,7 @@ export default defineConfig({
       },
       // Legacy backend proxy
       '/api-backend': {
-        target: 'https://ble-api.app.bio-experience.com',
+        target: 'http://192.168.1.96:5000',
         changeOrigin: true,
         secure: true,
         headers: {

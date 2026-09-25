@@ -48,12 +48,17 @@ export function useAllBuilding() {
 export function useAddBuilding(){
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (formData: FormData) => {
-            const response = await axiosServices.post(Building_API_URL, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            // console.log('Building added successfully: ', response.data);
-            return response.data;
+        mutationFn: async (payload: Partial<BuildingType> | FormData) => {
+            let res;
+            if (payload instanceof FormData) {
+                res = await axiosServices.post(Building_API_URL, payload, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+            } else {
+                const { id, ...filteredPayload } = payload;
+                res = await axiosServices.post(Building_API_URL, filteredPayload);
+            }
+            return res.data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['building-list']});
@@ -65,11 +70,18 @@ export function useAddBuilding(){
 export function useEditBuilding(){
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (formData: FormData) => {
-            const id = formData.get('id');
-            const res = await axiosServices.put(`${Building_API_URL}${id}`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
+        mutationFn: async (payload: Partial<BuildingType> | FormData) => {
+            let res;
+            if (payload instanceof FormData) {
+                const id = payload.get('id');
+                res = await axiosServices.put(`${Building_API_URL}${id}`, payload, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+            } else {
+                const { id, ...filteredPayload } = payload;
+                if (!id) throw new Error('Missing building id');
+                res = await axiosServices.put(`${Building_API_URL}${id}`, filteredPayload);
+            }
             return res.data;
         },
         onSuccess: () => {

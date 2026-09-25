@@ -1,6 +1,6 @@
 // src/hooks/useFloor.ts
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import axiosServices from 'src/utils/axios';
+import axiosServices, { getAccessToken } from 'src/utils/axios';
 import { floorType, GetFilter } from 'src/store/apps/crud/floor';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store/Store';
@@ -119,7 +119,7 @@ export function useImportFloor() {
 export function useExportFloor() {
   return useMutation({
     mutationFn: async (format: 'pdf' | 'excel') => {
-      const accessToken = localStorage.getItem('token');
+      const accessToken = getAccessToken() || localStorage.getItem('token');
       const url = `${window.location.origin}${FLOOR_API_URL}export/${format}`;
       const response = await fetch(url, {
         method: 'GET',

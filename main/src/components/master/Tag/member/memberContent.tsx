@@ -20,6 +20,7 @@ import {
   Backdrop,
   CircularProgress,
   TextField,
+  Chip,
 } from '@mui/material';
 import {
   memberType,
@@ -397,7 +398,7 @@ const MemberContent = () => {
                         variant='contained'
                         color='info'
                         onClick={() => {
-                          handleOpenReleasePopup(memberDetail.cardNumber)
+                          handleOpenReleasePopup(memberDetail.cardNumber!)
                         }}
                         sx={{
                           boxShadow: 2,
@@ -411,9 +412,19 @@ const MemberContent = () => {
                   }
                 </Stack>
               </Box>
-              <Typography variant="h4" fontWeight={800}>
-                {memberDetail.name}
-              </Typography>
+              <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
+                <Typography variant="h4" fontWeight={800}>
+                  {memberDetail.name}
+                </Typography>
+                {memberDetail.isHead && (
+                  <Chip
+                    label="Head Member"
+                    color="primary"
+                    size="small"
+                    sx={{ fontWeight: 600, fontSize: '0.75rem', height: 24 }}
+                  />
+                )}
+              </Box>
               {/* 🚨 WARNING BOX FOR BLACKLISTED MEMBER */}
               {memberDetail.isBlacklist && memberDetail.blacklistReason && (
                 <Box
@@ -445,11 +456,11 @@ const MemberContent = () => {
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
                 <Typography>{memberDetail.address}</Typography>
                 <CustomFormLabel htmlFor="birth-Date">Birth Date</CustomFormLabel>
-                <Typography>{formatDate(memberDetail.birthDate)}</Typography>
+                <Typography>{formatDate(memberDetail.birthDate!)}</Typography>
                 <CustomFormLabel htmlFor="join-Date">Join Date</CustomFormLabel>
-                <Typography>{formatDate(memberDetail.joinDate)}</Typography>
+                <Typography>{formatDate(memberDetail.joinDate!)}</Typography>
                 <CustomFormLabel htmlFor="exit-Date">Exit Date</CustomFormLabel>
-                <Typography>{formatDate(memberDetail.exitDate)}</Typography>
+                <Typography>{formatDate(memberDetail.exitDate!)}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
@@ -457,9 +468,21 @@ const MemberContent = () => {
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
                 <Typography>{memberDetail.gender}</Typography>
                 <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
-                <Typography>{memberDetail.headMember1}</Typography>
+                <Typography color={memberDetail.isHead ? 'text.secondary' : 'inherit'}>
+                  {memberDetail.isHead
+                    ? 'None (Head Member)'
+                    : typeof (memberDetail.memberHead1 || memberDetail.headMember1) === 'object'
+                    ? (memberDetail.memberHead1 || memberDetail.headMember1)?.name || '-'
+                    : memberDetail.memberHead1 || memberDetail.headMember1 || '-'}
+                </Typography>
                 <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
-                <Typography>{memberDetail.headMember2}</Typography>
+                <Typography color={memberDetail.isHead ? 'text.secondary' : 'inherit'}>
+                  {memberDetail.isHead
+                    ? 'None (Head Member)'
+                    : typeof (memberDetail.memberHead2 || memberDetail.headMember2) === 'object'
+                    ? (memberDetail.memberHead2 || memberDetail.headMember2)?.name || '-'
+                    : memberDetail.memberHead2 || memberDetail.headMember2 || '-'}
+                </Typography>
                 <CustomFormLabel htmlFor="status-employee">Status Employee</CustomFormLabel>
                 <Typography>{memberDetail.statusEmployee}</Typography>
               </Grid>

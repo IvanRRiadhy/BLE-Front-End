@@ -338,11 +338,27 @@ const BeaconDetailPopup = ({
                   </Typography>
                   <Box>
                     <Typography variant="body2" fontWeight={500} color="text.primary">
-                      1. {memberDetail?.headMember1 || securityDetail?.headMember1 || '-'}
+                      1.{' '}
+                      {(() => {
+                        const val =
+                          memberDetail?.memberHead1 ||
+                          memberDetail?.headMember1 ||
+                          securityDetail?.headMember1;
+                        return typeof val === 'object' ? (val as any)?.name || '-' : val || '-';
+                      })()}
                     </Typography>
-                    {(memberDetail?.headMember2 || securityDetail?.headMember2) && (
+                    {(memberDetail?.memberHead2 ||
+                      memberDetail?.headMember2 ||
+                      securityDetail?.headMember2) && (
                       <Typography variant="body2" fontWeight={500} color="text.primary">
-                        2. {memberDetail?.headMember2 || securityDetail?.headMember2}
+                        2.{' '}
+                        {(() => {
+                          const val =
+                            memberDetail?.memberHead2 ||
+                            memberDetail?.headMember2 ||
+                            securityDetail?.headMember2;
+                          return typeof val === 'object' ? (val as any)?.name || '-' : val || '-';
+                        })()}
                       </Typography>
                     )}
                   </Box>

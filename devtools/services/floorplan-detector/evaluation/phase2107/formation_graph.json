@@ -1,0 +1,64 @@
+{
+  "total_images": 12,
+  "total_nodes": 534,
+  "total_edges": 1972,
+  "edge_type_distribution": {
+    "parent_of": 457,
+    "child_of": 457,
+    "partition_of": 100,
+    "alternative_to": 11,
+    "neighbor_of": 698,
+    "overlaps": 249,
+    "disjoint": 0
+  },
+  "per_image": {
+    "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": {
+      "nodes": 5,
+      "edges": 7
+    },
+    "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": {
+      "nodes": 16,
+      "edges": 36
+    },
+    "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": {
+      "nodes": 4,
+      "edges": 4
+    },
+    "Floorplan-House.png": {
+      "nodes": 150,
+      "edges": 261
+    },
+    "Lantai 1.jpg": {
+      "nodes": 20,
+      "edges": 89
+    },
+    "Lantai 2.jpg": {
+      "nodes": 4,
+      "edges": 3
+    },
+    "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": {
+      "nodes": 13,
+      "edges": 12
+    },
+    "library-floor-plan.png": {
+      "nodes": 2,
+      "edges": 1
+    },
+    "sample-floorplan-house2.png": {
+      "nodes": 150,
+      "edges": 1391
+    },
+    "sample-floorplan-house3.png": {
+      "nodes": 150,
+      "edges": 138
+    },
+    "sample-floorplan.png": {
+      "nodes": 16,
+      "edges": 30
+    },
+    "simple-apartment-floor-plan.png": {
+      "nodes": 4,
+      "edges": 0
+    }
+  }
+}

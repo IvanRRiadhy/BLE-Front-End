@@ -14,7 +14,7 @@ import { FloorplanType, GetFilter as FloorplanFilter } from './crud/floorplan';
 import { GetFilter as FloorplanDeviceFilter } from './crud/floorplanDevice';
 import { IntegrationType, GetFilter as IntegrationFilter } from './crud/integration';
 import { GetFilter as MaskedAreaFilter } from './crud/maskedArea';
-import { memberType, GetFilter as MemberFilter } from './crud/member';
+import { memberType, securityType, GetFilter as MemberFilter } from './crud/member';
 import { OrganizationType, GetFilter as OrganizationFilter } from './crud/organization';
 import { GetFilter as TrackingTransFilter } from './crud/trackingTrans';
 import { VisitorType, GetFilter as VisitorFilter } from './crud/visitor';
@@ -416,13 +416,55 @@ export const defaultMemberForm: memberType = {
   gender: '',
   address: '',
   faceImage: '',
+  generate:0,
   uploadFr: 0,
   uploadFrError: '',
   birthDate: '',
   joinDate: '',
   exitDate: '',
-  headMember1: '',
-  headMember2: '',
+  isHead: false,
+  memberHead1: '',
+  memberHead2: '',
+  memberHead1Id: '',
+  memberHead2Id: '',
+  applicationId: localStorage.getItem('applicationId') || '',
+  statusEmployee: '',
+  isBlacklist: false,
+  blacklistAt: '',
+  blacklistReason: '',
+  createdBy: '',
+  createdAt: '',
+  updatedBy: '',
+  updatedAt: '',
+};
+
+export const defaultSecurityForm: securityType = {
+  id: '',
+  personId: '',
+  organizationId: '',
+  departmentId: '',
+  districtId: '',
+  identityId: '',
+  cardId: '',
+  cardNumber: '',
+  bleCardNumber: '',
+  name: '',
+  phone: '',
+  email: '',
+  gender: '',
+  address: '',
+  faceImage: '',
+  uploadFr: 0,
+  generate:0,
+  uploadFrError: '',
+  birthDate: '',
+  joinDate: '',
+  exitDate: '',
+  securityHead1Id: '',
+  securityHead2Id: '',
+  securityHead1: null,
+  securityHead2: null,
+  isHead: null,
   applicationId: localStorage.getItem('applicationId') || '',
   statusEmployee: '',
   isBlacklist: false,

@@ -1,0 +1,74 @@
+[
+  {
+    "budget": 25,
+    "total_selected_proposals": 159,
+    "recall_25": 0.3851,
+    "recall_50": 0.1689,
+    "mean_best_iou": 0.244,
+    "median_best_iou": 0.1442
+  },
+  {
+    "budget": 50,
+    "total_selected_proposals": 234,
+    "recall_25": 0.4122,
+    "recall_50": 0.1892,
+    "mean_best_iou": 0.2605,
+    "median_best_iou": 0.1533
+  },
+  {
+    "budget": 75,
+    "total_selected_proposals": 309,
+    "recall_25": 0.4392,
+    "recall_50": 0.2027,
+    "mean_best_iou": 0.2703,
+    "median_best_iou": 0.1626
+  },
+  {
+    "budget": 100,
+    "total_selected_proposals": 384,
+    "recall_25": 0.4595,
+    "recall_50": 0.2162,
+    "mean_best_iou": 0.2829,
+    "median_best_iou": 0.1712
+  },
+  {
+    "budget": 150,
+    "total_selected_proposals": 534,
+    "recall_25": 0.4865,
+    "recall_50": 0.2432,
+    "mean_best_iou": 0.2991,
+    "median_best_iou": 0.2009
+  },
+  {
+    "budget": 200,
+    "total_selected_proposals": 645,
+    "recall_25": 0.4932,
+    "recall_50": 0.2568,
+    "mean_best_iou": 0.3107,
+    "median_best_iou": 0.2139
+  },
+  {
+    "budget": 300,
+    "total_selected_proposals": 845,
+    "recall_25": 0.5135,
+    "recall_50": 0.2838,
+    "mean_best_iou": 0.324,
+    "median_best_iou": 0.2564
+  },
+  {
+    "budget": 500,
+    "total_selected_proposals": 1132,
+    "recall_25": 0.5135,
+    "recall_50": 0.2838,
+    "mean_best_iou": 0.3242,
+    "median_best_iou": 0.2564
+  },
+  {
+    "budget": 1000,
+    "total_selected_proposals": 1632,
+    "recall_25": 0.5135,
+    "recall_50": 0.2838,
+    "mean_best_iou": 0.3296,
+    "median_best_iou": 0.2564
+  }
+]

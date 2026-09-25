@@ -27,6 +27,7 @@ import { CaseUploadType, CheckpointType } from 'src/store/apps/crud/patrolCase';
 import toast from 'react-hot-toast';
 import { CaseType, ThreatLevel } from 'src/types/crud/input';
 import { useTranslation } from 'react-i18next';
+import { getConfig } from 'src/config';
 
 interface Props {
   type?: 'add' | 'edit';
@@ -196,8 +197,16 @@ const PatrolCaseDialog = ({
 
   const getCdnUrl = (url?: string) => {
     if (!url) return '';
-    if (url.startsWith('https://ble-cdn.app.bio-experience.com/')) return url;
-    return `https://ble-cdn.app.bio-experience.com/${url}`;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    let cdnBase = '';
+    try {
+      cdnBase = getConfig()?.CDN_URL || '';
+    } catch {
+      cdnBase = '';
+    }
+    const cleanBase = cdnBase.replace(/\/+$/, '');
+    const cleanPath = url.replace(/^\/+/, '');
+    return cleanBase ? `${cleanBase}/${cleanPath}` : url;
   };
   const isImage = (att: any) =>
     att?.mimeType?.startsWith('image') || /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');

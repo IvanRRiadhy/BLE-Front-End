@@ -93,7 +93,7 @@ export function useUpcomingVisitor(filter: any) {
     queryKey: ['upcoming-visitor', filter],
     queryFn: async () => {
       const res = await axiosServices.post('/api/TrxVisitor/filter', filter);
-      console.log('Upcoming Visitor Data fetched: ', res.data);
+      // console.log('Upcoming Visitor Data fetched: ', res.data);
       return res.data.collection.data;
     },
     refetchInterval: 15000,
@@ -175,7 +175,7 @@ export function useAlarmByArea(filter: newDashboardFilterType) {
     queryKey: ['alarm-by-area', filter],
     queryFn: async () => {
       const res = await axiosServices.post(`${API_ALARM}area`, filter);
-      console.log('Result area', res.data.collection.data, "Filter : ", filter);
+      // console.log('Result area', res.data.collection.data, "Filter : ", filter);
       return res.data.collection.data;
     },
     refetchInterval: 15000,
@@ -188,7 +188,7 @@ export function useAlarmStatisticHourly(filter: DashboardFilterType) {
     queryKey: ['alarm-hourly', filter],
     queryFn: async () => {
       const res = await axiosServices.post(`${API_ALARM}hourly`, filter);
-      console.log("Alarm hourly", res.data.collection.data, "Filter : ", filter);
+      // console.log("Alarm hourly", res.data.collection.data, "Filter : ", filter);
       return res.data.collection.data;
     },
     refetchInterval: 15000,

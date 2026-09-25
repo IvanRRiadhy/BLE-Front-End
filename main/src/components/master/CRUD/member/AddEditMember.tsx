@@ -17,14 +17,16 @@ import {
   Stepper,
   Step,
   StepLabel,
+  FormControlLabel,
 } from '@mui/material';
 import { IconPencil, IconPlus, IconPhoto, IconUpload, IconX } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
+import CustomSwitch from 'src/components/forms/theme-elements/CustomSwitch';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { dispatch, RootState, useSelector } from 'src/store/Store';
-import { addMember, editMember, memberType } from 'src/store/apps/crud/member';
+import { getConfig } from 'src/config';
+import { memberType } from 'src/store/apps/crud/member';
 import { fetchDistricts, DistrictType } from 'src/store/apps/crud/district';
 import { fetchDepartments, DepartmentType } from 'src/store/apps/crud/department';
 import { fetchOrganizations, OrganizationType } from 'src/store/apps/crud/organization';
@@ -35,13 +37,14 @@ import { defaultMemberForm } from 'src/store/apps/defaultForm';
 import AddEditDistrict from '../district/AddEditDistrict';
 import AddEditDepartment from '../department/AddEditDepartment';
 import AddEditOrganization from '../organization/AddEditOrganizationList';
-import { useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse, useAddMember, useEditMember, useMemberList } from 'src/hooks/useMember';
+import { useAddMember, useEditMember, useHeadMember } from 'src/hooks/useMember';
+import { useUploadCDN } from 'src/hooks/usePatrolCase';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
 import { useAllCard, useReleaseCard, useUnassignedCard } from 'src/hooks/useCard';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface FormType {
   type?: string;
@@ -55,15 +58,29 @@ const AddEditMember = ({ type, member }: FormType) => {
   const [isSaving, setIsSaving] = React.useState(false);
   const [image, setImage] = React.useState<File | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
-  const [formData, setFormData] = React.useState<memberType>({
-    ...defaultMemberForm,
-    ...member,
+  const [formData, setFormData] = React.useState<memberType>(() => {
+    const initHead1 =
+      member?.memberHead1Id ||
+      (typeof (member as any)?.memberHead1 === 'object' ? (member as any)?.memberHead1?.id : '') ||
+      (typeof (member as any)?.headMember1 === 'object' ? (member as any)?.headMember1?.id : '') ||
+      '';
+    const initHead2 =
+      member?.memberHead2Id ||
+      (typeof (member as any)?.memberHead2 === 'object' ? (member as any)?.memberHead2?.id : '') ||
+      (typeof (member as any)?.headMember2 === 'object' ? (member as any)?.headMember2?.id : '') ||
+      '';
+    return {
+      ...defaultMemberForm,
+      ...member,
+      isHead: member?.isHead ?? false,
+      memberHead1Id: initHead1,
+      memberHead2Id: initHead2,
+    };
   });
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = ['Member Details', 'Member Photo'];
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
   const [isDragging, setIsDragging] = React.useState(false);
-  const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const districtData = useAllDistricts().data || [];
   const departmentData = useAllDepartments().data || [];
   const organizationData = useAllOrganizations().data || [];
@@ -94,26 +111,81 @@ const AddEditMember = ({ type, member }: FormType) => {
     [cardOptions, formData.cardNumber],
   );
 
-  const headMemberData = useMemberList({ ...memberFilter, Length: 999 }).data?.data || [];
-  const headOptions = headMemberData.map((m: any) => ({
-    id: m.id,
-    label: m.name,
-    personId: m.personId,
-  }));
-  const filteredHead1Options = headOptions.filter((opt) => opt.id !== formData.headMember2);
+  const {
+    data: headMemberInfiniteData,
+    fetchNextPage: fetchNextHeadPage,
+    hasNextPage: hasNextHeadPage,
+    isFetchingNextPage: isFetchingNextHeadPage,
+    isLoading: isLoadingHeadMembers,
+  } = useHeadMember(50);
 
-  const filteredHead2Options = headOptions.filter((opt) => opt.id !== formData.headMember1);
+  const headMemberData = React.useMemo(() => {
+    return headMemberInfiniteData?.pages.flatMap((page) => page.data) || [];
+  }, [headMemberInfiniteData]);
+
+  const headOptions = React.useMemo(() => {
+    const list = headMemberData.map((m: any) => ({
+      id: m.id,
+      label: m.name,
+      personId: m.personId,
+    }));
+
+    // If an existing head member is selected but not yet in the loaded page(s), include it in options
+    const existingHead1 = typeof (member as any)?.memberHead1 === 'object' ? (member as any)?.memberHead1 : null;
+    if (existingHead1?.id && !list.find((h) => h.id === existingHead1.id)) {
+      list.push({ id: existingHead1.id, label: existingHead1.name, personId: existingHead1.personId });
+    }
+    const existingHead2 = typeof (member as any)?.memberHead2 === 'object' ? (member as any)?.memberHead2 : null;
+    if (existingHead2?.id && !list.find((h) => h.id === existingHead2.id)) {
+      list.push({ id: existingHead2.id, label: existingHead2.name, personId: existingHead2.personId });
+    }
+
+    return list;
+  }, [headMemberData, member]);
+
+  const currentHead1Id = formData.memberHead1Id || '';
+  const currentHead2Id = formData.memberHead2Id || '';
+
+  const filteredHead1Options = headOptions.filter((opt) => opt.id !== currentHead2Id);
+  const filteredHead2Options = headOptions.filter((opt) => opt.id !== currentHead1Id);
+
+  const handleHeadScroll = (event: React.SyntheticEvent) => {
+    const listboxNode = event.currentTarget;
+    if (
+      listboxNode.scrollTop + listboxNode.clientHeight >= listboxNode.scrollHeight - 20 &&
+      hasNextHeadPage &&
+      !isFetchingNextHeadPage
+    ) {
+      fetchNextHeadPage();
+    }
+  };
 
   const handleClickOpen = () => {
     setLoading(true);
     setFormErrors({});
-    setFormData({ ...defaultMemberForm, ...member });
+    const initialHead1Id =
+      member?.memberHead1Id ||
+      (typeof (member as any)?.memberHead1 === 'object' ? (member as any)?.memberHead1?.id : '') ||
+      (typeof (member as any)?.headMember1 === 'object' ? (member as any)?.headMember1?.id : '') ||
+      '';
+    const initialHead2Id =
+      member?.memberHead2Id ||
+      (typeof (member as any)?.memberHead2 === 'object' ? (member as any)?.memberHead2?.id : '') ||
+      (typeof (member as any)?.headMember2 === 'object' ? (member as any)?.headMember2?.id : '') ||
+      '';
+    setFormData({
+      ...defaultMemberForm,
+      ...member,
+      isHead: member?.isHead ?? false,
+      memberHead1Id: initialHead1Id,
+      memberHead2Id: initialHead2Id,
+    });
     setActiveStep(0);
 
     // Set image preview properly - check if member exists and has faceImage
     if (member?.faceImage) {
-      // Create the full URL for preview
-      const fullImageUrl = `${BASE_URL}${member.faceImage}`;
+      // Create the CDN URL for preview
+      const fullImageUrl = getCdnUrl(member.faceImage);
       setPreview(fullImageUrl);
       console.log('Setting preview to:', fullImageUrl);
     } else {
@@ -134,7 +206,7 @@ const AddEditMember = ({ type, member }: FormType) => {
 
     // Reset preview to the original member image if it exists
     if (member?.faceImage) {
-      setPreview(`${BASE_URL}${member.faceImage}`);
+      setPreview(getCdnUrl(member.faceImage));
     } else {
       setPreview(null);
     }
@@ -144,12 +216,27 @@ const AddEditMember = ({ type, member }: FormType) => {
 
   const addMemberMutation = useAddMember();
   const editMemberMutation = useEditMember();
+  const uploadMutation = useUploadCDN({ category: 'member' });
+
+  const getCdnUrl = (url?: string | null) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    let cdnBase = '';
+    try {
+      cdnBase = getConfig()?.CDN_URL || '';
+    } catch {
+      cdnBase = '';
+    }
+    const cleanBase = cdnBase.replace(/\/+$/, '');
+    const cleanPath = url.replace(/^\/+/, '');
+    return cleanBase ? `${cleanBase}/${cleanPath}` : url;
+  };
 
   const validateStep = (step: number): boolean => {
     const errors: Record<string, string> = {};
     if (step === 0) {
       if (!formData.name?.trim()) errors.name = "Member's name is required";
-      if (!formData.cardNumber?.trim()) errors.cardNumber = 'Card Number is required';
+      // if (!formData.cardNumber?.trim()) errors.cardNumber = 'Card Number is required';
       if (!formData.departmentId?.trim()) errors.departmentId = 'Department is required';
       if (!formData.organizationId?.trim()) errors.organizationId = 'Organization is required';
       if (!formData.districtId?.trim()) errors.districtId = 'District is required';
@@ -158,17 +245,12 @@ const AddEditMember = ({ type, member }: FormType) => {
       if (!!formData.email?.trim() && !formData.email.includes('@'))
         errors.email = 'Valid Email required';
     } else if (step === 1) {
-      if (!image && type === 'add' && !preview) errors.faceImage = 'Face Image is required';
+      if (!image && type === 'add' && !preview && !formData.faceImage) {
+        errors.faceImage = 'Face Image is required';
+      }
     }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  };
-
-  const logFormData = (formData: any) => {
-    console.log('FormData contents:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
   };
 
   const handleSave = async () => {
@@ -179,21 +261,78 @@ const AddEditMember = ({ type, member }: FormType) => {
 
     setIsSaving(true);
 
-    try {
-      const data = new FormData();
+    let finalImageUrl = formData.faceImage;
 
-      Object.entries(formData).forEach(([key, value]) => {
-        if (!['faceImage', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'].includes(key)) {
-          data.append(key, value?.toString() ?? '');
+    // If there is a new image selected, upload to CDN first
+    if (image) {
+      const uploadData = new FormData();
+      uploadData.append('file', image);
+
+      try {
+        const uploadRes = await uploadMutation.mutateAsync({
+          formData: uploadData,
+          params: { category: 'member' },
+        });
+        const uploaded = uploadRes?.collection?.data?.[0];
+        if (!uploaded || !uploaded.relativePath) {
+          throw new Error('Invalid response from CDN upload');
         }
-      });
+        finalImageUrl = uploaded.relativePath;
+      } catch (err) {
+        console.error('CDN upload failed:', err);
+        toast.error('Failed to uploading image.');
+        setIsSaving(false);
+        return; // Aborts saving, keeps dialog open
+      }
+    }
 
-      if (image) data.append('faceImage', image);
+    const {
+      createdBy,
+      createdAt,
+      updatedBy,
+      updatedAt,
+      organization,
+      department,
+      district,
+      cardNumber,
+      bleCardNumber,
+      exitDate,
+      applicationId,
+      isBlacklist,
+      blacklistAt,
+      blacklistReason,
+      uploadFr,
+      uploadFrError,
+      generate,
+      memberHead1,
+      memberHead2,
+      ...cleanData
+    } = formData;
 
+    const payload: Partial<memberType> = {
+      ...cleanData,
+      isHead: Boolean(formData.isHead),
+      memberHead1Id: formData.isHead ? null : cleanData.memberHead1Id || null,
+      memberHead2Id: formData.isHead ? null : cleanData.memberHead2Id || null,
+      faceImage: finalImageUrl || null,
+    };
+
+    Object.keys(payload).forEach((key) => {
+      const val = (payload as any)[key];
+      if (typeof val === 'string' && val.trim() === '') {
+        (payload as any)[key] = null;
+      }
+    });
+
+    if (type !== 'edit') {
+      delete payload.id;
+    }
+
+    try {
       if (type === 'edit') {
-        await editMemberMutation.mutateAsync(data);
+        await editMemberMutation.mutateAsync(payload);
       } else {
-        await addMemberMutation.mutateAsync(data);
+        await addMemberMutation.mutateAsync(payload);
       }
 
       toast.success('Data saved successfully!');
@@ -583,6 +722,21 @@ const AddEditMember = ({ type, member }: FormType) => {
                       </CustomSelect>
                     </Grid>
                     <Grid size={6}>
+                      <CustomFormLabel htmlFor="birthDate">Birth Date</CustomFormLabel>
+                      <CustomTextField
+                        id="birthDate"
+                        name="birthDate"
+                        type="date"
+                        value={formData.birthDate ? formData.birthDate.split('T')[0] : ''}
+                        onChange={handleInputChange}
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    </Grid>
+                    <Grid size={6}>
                       <CustomFormLabel htmlFor="status-employee">Status</CustomFormLabel>
                       <CustomSelect
                         name="statusEmployee"
@@ -602,6 +756,21 @@ const AddEditMember = ({ type, member }: FormType) => {
                         ))}
                       </CustomSelect>
                     </Grid>
+                    <Grid size={6}>
+                      <CustomFormLabel htmlFor="joinDate">Join Date</CustomFormLabel>
+                      <CustomTextField
+                        id="joinDate"
+                        name="joinDate"
+                        type="date"
+                        value={formData.joinDate ? formData.joinDate.split('T')[0] : ''}
+                        onChange={handleInputChange}
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    </Grid>
                     <Grid size={12}>
                       <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
                       <CustomTextField
@@ -614,62 +783,103 @@ const AddEditMember = ({ type, member }: FormType) => {
                         rows={1}
                       />
                     </Grid>
-                    <Grid container spacing={2} size={12}>
-                      <Grid size={6} >
-                      <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
-                      <CustomAutocomplete
-                        label="Head Member 1"
-                        options={filteredHead1Options}
-                        value={
-                          filteredHead1Options.find((h) => h.id === formData.headMember1) || null
+                    <Grid size={12} sx={{ mt: 1 }}>
+                      <FormControlLabel
+                        control={
+                          <CustomSwitch
+                            id="isHead"
+                            name="isHead"
+                            checked={Boolean(formData.isHead)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              const checked = e.target.checked;
+                              setFormData((prev) => ({
+                                ...prev,
+                                isHead: checked,
+                                ...(checked ? { memberHead1Id: null, memberHead2Id: null } : {}),
+                              }));
+                            }}
+                          />
                         }
-                        onChange={(val) => {
-                          const id = val?.id ?? '';
-                          setFormData((prev) => ({ ...prev, headMember1: id }));
-                        }}
-                        getOptionLabel={(opt) => opt.label}
-                        isOptionEqualToValue={(a, b) => a.id === b.id}
-                        renderOption={(props: any, option: (typeof headOptions)[number]) => (
-                          <li {...props} key={option.id}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <Typography variant="body1">{option.label}</Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {option.personId}
-                              </Typography>
-                            </div>
-                          </li>
-                        )}
-                        sx={{ flex: 1 }}
+                        label="Is Head Member (Team / Department Head)"
                       />
                     </Grid>
-                    <Grid size={6}>
-                      <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
-                      <CustomAutocomplete
-                        label="Head Member 2"
-                        options={filteredHead2Options}
-                        value={
-                          filteredHead2Options.find((h) => h.id === formData.headMember2) || null
-                        }
-                        onChange={(val) => {
-                          const id = val?.id ?? '';
-                          setFormData((prev) => ({ ...prev, headMember2: id }));
-                        }}
-                        getOptionLabel={(opt) => opt.label}
-                        isOptionEqualToValue={(a, b) => a.id === b.id}
-                        renderOption={(props: any, option: (typeof headOptions)[number]) => (
-                          <li {...props} key={option.id}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <Typography variant="body1">{option.label}</Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {option.personId}
-                              </Typography>
-                            </div>
-                          </li>
-                        )}
-                        sx={{ flex: 1 }}
-                      />
-                    </Grid>
-                    </Grid>
+
+                    {!formData.isHead && (
+                      <Grid container spacing={2} size={12}>
+                        <Grid size={6}>
+                          <CustomFormLabel htmlFor="head-Member-1">Head Member 1</CustomFormLabel>
+                          <CustomAutocomplete
+                            label="Head Member 1"
+                            options={filteredHead1Options}
+                            value={
+                              filteredHead1Options.find(
+                                (h) => h.id === formData.memberHead1Id,
+                              ) || null
+                            }
+                            onChange={(val) => {
+                              const id = val?.id ?? '';
+                              setFormData((prev) => ({
+                                ...prev,
+                                memberHead1Id: id,
+                              }));
+                            }}
+                            loading={isLoadingHeadMembers || isFetchingNextHeadPage}
+                            ListboxProps={{
+                              onScroll: handleHeadScroll,
+                            }}
+                            getOptionLabel={(opt) => opt.label}
+                            isOptionEqualToValue={(a, b) => a.id === b.id}
+                            renderOption={(props: any, option: (typeof headOptions)[number]) => (
+                              <li {...props} key={option.id}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <Typography variant="body1">{option.label}</Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {option.personId}
+                                  </Typography>
+                                </div>
+                              </li>
+                            )}
+                            sx={{ flex: 1 }}
+                          />
+                        </Grid>
+                        <Grid size={6}>
+                          <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
+                          <CustomAutocomplete
+                            label="Head Member 2"
+                            options={filteredHead2Options}
+                            value={
+                              filteredHead2Options.find(
+                                (h) => h.id === formData.memberHead2Id,
+                              ) || null
+                            }
+                            onChange={(val) => {
+                              const id = val?.id ?? '';
+                              setFormData((prev) => ({
+                                ...prev,
+                                memberHead2Id: id,
+                              }));
+                            }}
+                            loading={isLoadingHeadMembers || isFetchingNextHeadPage}
+                            ListboxProps={{
+                              onScroll: handleHeadScroll,
+                            }}
+                            getOptionLabel={(opt) => opt.label}
+                            isOptionEqualToValue={(a, b) => a.id === b.id}
+                            renderOption={(props: any, option: (typeof headOptions)[number]) => (
+                              <li {...props} key={option.id}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <Typography variant="body1">{option.label}</Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {option.personId}
+                                  </Typography>
+                                </div>
+                              </li>
+                            )}
+                            sx={{ flex: 1 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    )}
 
                   </Grid>
                 </Grid>

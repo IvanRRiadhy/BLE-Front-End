@@ -55,22 +55,40 @@ const NewInvestigate: React.FC = () => {
         const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
         const personType = (newFilter.person.type || 'Member').toLowerCase() as any;
 
-        const fromIso = newFilter.from ? dayjs(newFilter.from).toISOString() : null;
-        const toIso = newFilter.to ? dayjs(newFilter.to).toISOString() : null;
+        // Movement Replay is restricted to 1 day only:
+        // If range covers today or extends past today (tomorrow, next week, etc.), use today.
+        // Only if the range strictly ends before today or starts after today and does not contain today, pick the closest bound (or to).
+        const now = dayjs();
+        const startDay = newFilter.from ? dayjs(newFilter.from).startOf('day') : null;
+        const endDay = newFilter.to ? dayjs(newFilter.to).endOf('day') : null;
+
+        let targetDay = now;
+        if (startDay && endDay) {
+          if (now.isAfter(endDay)) {
+            // Whole range is in the past, pick the last day of the range
+            targetDay = dayjs(newFilter.to);
+          } else if (now.isBefore(startDay)) {
+            // Whole range is in the future, pick start of the range
+            targetDay = dayjs(newFilter.from);
+          } else {
+            // Range includes today (or extends into the future across today), so use today
+            targetDay = now;
+          }
+        } else if (endDay && now.isAfter(endDay)) {
+          targetDay = dayjs(newFilter.to);
+        } else {
+          targetDay = now;
+        }
+
+        const movementFromIso = targetDay.startOf('day').toISOString();
+        const movementToIso = targetDay.endOf('day').toISOString();
 
         const payload: GetFilter & { personId?: string } = {
-          timeRange: newFilter.timeRange || 'custom',
-          from: fromIso,
-          to: toIso,
+          timeRange: 'custom',
+          from: movementFromIso,
+          to: movementToIso,
           personType,
           identityId: newFilter.person.identityId || null,
-          // personId: newFilter.person.id,
-          // memberId: personType === 'member' ? newFilter.person.id : null,
-          // visitorId: personType === 'visitor' ? newFilter.person.id : null,
-          // buildingId: null,
-          // floorId: null,
-          // floorplanId: null,
-          // areaId: null,
           timezone: deviceTimezone,
         };
 

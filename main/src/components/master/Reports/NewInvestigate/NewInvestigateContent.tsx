@@ -17,6 +17,8 @@ import {
   TableCell,
   TableBody,
   TableContainer,
+  TablePagination,
+  TableSortLabel,
   LinearProgress,
   useTheme,
   Divider,
@@ -25,6 +27,7 @@ import {
   MenuItem,
   InputAdornment,
   Tooltip,
+  Alert,
   darken,
   lighten,
 } from '@mui/material';
@@ -54,8 +57,11 @@ import {
   IconRoute,
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
+import 'dayjs/locale/id';
+import { useTranslation } from 'react-i18next';
 import { PersonOverviewData } from 'src/hooks/useInvestigate';
 import { PersonOption } from './NewInvestigateFilter';
+import { actionStatus, extraActionStatus, actionStatusColormap } from 'src/types/crud/input';
 import { BASE_URL } from 'src/utils/axios';
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
 import InvestigateContent from 'src/components/master/Reports/Investigation/InvestigateContent';
@@ -256,6 +262,89 @@ function getPointsCenter(points: number[]): { x: number; y: number } | null {
   return bestPoint || { x: cx, y: cy };
 }
 
+const DEFAULT_CATEGORY_COLORS: Record<string, string> = {
+  stayonarea: '#00cfff',
+  boundary: '#5d3fd3',
+  overpopulating: '#d633ff',
+  cardaccess: '#b22222',
+  wrongzone: '#5d3fd3',
+  blacklist: '#ff7a00',
+  geofence: '#ffcc00',
+  help: '#e91e63',
+  panic: '#f44336',
+  tamper: '#9c27b0',
+  loitering: '#ff9800',
+  fall: '#e91e63',
+};
+
+const PALETTE_FALLBACK = [
+  '#b22222', '#ff7a00', '#ffcc00', '#00cfff', '#5d3fd3',
+  '#d633ff', '#00c853', '#1877f2', '#e91e63', '#9c27b0'
+];
+
+function getCategoryColor(category?: string, alarmColor?: string, index = 0): string {
+  if (alarmColor && alarmColor.startsWith('#')) return alarmColor;
+  const key = (category || '').toLowerCase().trim();
+  if (DEFAULT_CATEGORY_COLORS[key]) return DEFAULT_CATEGORY_COLORS[key];
+  return PALETTE_FALLBACK[index % PALETTE_FALLBACK.length];
+}
+
+// Map MUI color tokens from actionStatusColormap to specific chip color palettes
+const COLOR_TOKEN_MAP: Record<string, { bgcolor: string; color: string }> = {
+  'success.main': { bgcolor: '#E8F5E9', color: '#00C853' },
+  'warning.main': { bgcolor: '#FFF4E5', color: '#FF9800' },
+  'primary.main': { bgcolor: '#E8F2FE', color: '#1877F2' },
+  'error.main': { bgcolor: '#FFEBEE', color: '#D32F2F' },
+  'grey': { bgcolor: '#F1F5F9', color: '#64748B' },
+};
+
+function getStatusChipStyle(status?: string): { bgcolor: string; color: string; label: string } {
+  if (!status) {
+    return { bgcolor: '#FFEBEE', color: '#D32F2F', label: 'Active' };
+  }
+
+  const raw = status.trim();
+  const lower = raw.toLowerCase().replace(/[\s_-]+/g, '');
+
+  // 1. Look up human-friendly label from actionStatus and extraActionStatus in input.ts
+  const allStatusDefinitions = [...actionStatus, ...extraActionStatus];
+  const matchedDef = allStatusDefinitions.find((item) => {
+    const valKey = (item.value || '').toLowerCase().replace(/[\s_-]+/g, '');
+    const lblKey = (item.label || '').toLowerCase().replace(/[\s_-]+/g, '');
+    return valKey === lower || lblKey === lower;
+  });
+  const label = matchedDef?.label || raw;
+
+  // 2. Look up color from actionStatusColormap in input.ts
+  let muiColorKey: string | undefined = undefined;
+  for (const [key, val] of Object.entries(actionStatusColormap)) {
+    if (key.toLowerCase().replace(/[\s_-]+/g, '') === lower) {
+      muiColorKey = val;
+      break;
+    }
+  }
+
+  // Fallback for synonyms like 'resolved', 'closed', or 'active'
+  if (!muiColorKey) {
+    if (['resolved', 'done', 'doneinvestigated', 'closed'].includes(lower)) {
+      muiColorKey = 'success.main';
+    } else if (['acknowledged', 'accepted', 'investigated', 'arrived'].includes(lower)) {
+      muiColorKey = 'primary.main';
+    } else if (['dispatched', 'dispatch', 'waiting', 'postponeinvestigated'].includes(lower)) {
+      muiColorKey = 'warning.main';
+    } else {
+      muiColorKey = 'error.main';
+    }
+  }
+
+  const colors = COLOR_TOKEN_MAP[muiColorKey] || { bgcolor: '#FFEBEE', color: '#D32F2F' };
+  return {
+    bgcolor: colors.bgcolor,
+    color: colors.color,
+    label,
+  };
+}
+
 interface NewInvestigateContentProps {
   data?: PersonOverviewData | null;
   isLoading?: boolean;
@@ -278,50 +367,13 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   isVisitorSessionLoading = false,
 }) => {
   const theme = useTheme();
+  const { i18n } = useTranslation();
+  const currentLang = (i18n.language || 'en').startsWith('id') ? 'id' : 'en';
   const [activeTab, setActiveTab] = useState<'timeline' | 'movement' | 'area' | 'compliance' | 'incidents' | 'cardHistory'>('timeline');
   const [zoomLevel, setZoomLevel] = useState(1);
   const [selectedAlarmId, setSelectedAlarmId] = useState<string | null>(null);
 
-  if (!selectedPerson && !data && !visitorSessionData) {
-    return (
-      <Card
-        elevation={0}
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '16px',
-          p: 6,
-          textAlign: 'center',
-          bgcolor: 'background.paper',
-        }}
-      >
-        <Stack alignItems="center" justifyContent="center" spacing={2}>
-          <Box
-            sx={{
-              width: 64,
-              height: 64,
-              borderRadius: '50%',
-              bgcolor: '#E8F2FE',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1877F2',
-            }}
-          >
-            <IconUser size={32} />
-          </Box>
-          <Box>
-            <Typography variant="h5" fontWeight={700} color="text.primary" gutterBottom>
-              Select a Person to Investigate
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Choose a person from the filter above to view their detailed timeline, location, and access analysis.
-            </Typography>
-          </Box>
-        </Stack>
-      </Card>
-    );
-  }
+
 
   // Data Normalization
   const personName = data?.personInfo?.name || selectedPerson?.name || '-';
@@ -826,61 +878,80 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
     return areaBreakdownList.filter((a) => a.isRestrictedArea).length;
   }, [areaBreakdownList]);
 
-  // Incidents Summary & Categorization
   const acknowledgedIncidents = useMemo(() => {
-    return alarmsList.filter((a: any) => a.status?.toLowerCase() === 'acknowledged').length;
+    return alarmsList.filter((a: any) => {
+      const chipInfo = getStatusChipStyle(a.status);
+      return chipInfo.label.toLowerCase() === 'acknowledged' || chipInfo.label.toLowerCase() === 'acknowledge';
+    }).length;
   }, [alarmsList]);
 
   const resolvedIncidents = useMemo(() => {
-    return alarmsList.filter((a: any) => a.status?.toLowerCase() === 'resolved').length;
+    return alarmsList.filter((a: any) => {
+      const st = a.status?.toLowerCase();
+      return st === 'resolved' || st === 'done' || st === 'done_investigated' || st === 'closed';
+    }).length;
   }, [alarmsList]);
 
+  // Active Incidents: non-resolved alarms (matches backend incidentSummary.activeIncidents)
   const activeIncidentsComputed = useMemo(() => {
     if (data?.incidentSummary?.activeIncidents !== undefined) {
       return data.incidentSummary.activeIncidents;
     }
-    return alarmsList.filter((a: any) => !['resolved', 'acknowledged'].includes(a.status?.toLowerCase())).length;
+    return alarmsList.filter((a: any) => {
+      const st = a.status?.toLowerCase();
+      return st !== 'resolved' && st !== 'done' && st !== 'done_investigated' && st !== 'closed';
+    }).length;
   }, [data?.incidentSummary?.activeIncidents, alarmsList]);
 
   const incidentsByCategory = useMemo(() => {
     const counts: Record<string, number> = {};
+    const categoryColorMap: Record<string, string> = {};
+
     alarmsList.forEach((a: any) => {
       const rawCat = a.category || 'Other';
       const formatted = rawCat.charAt(0).toUpperCase() + rawCat.slice(1);
       counts[formatted] = (counts[formatted] || 0) + 1;
+      if (!categoryColorMap[formatted] && a.alarmColor) {
+        categoryColorMap[formatted] = a.alarmColor;
+      }
     });
+
     const labels = Object.keys(counts);
     const series = Object.values(counts);
+    const colors = labels.map((cat, idx) => {
+      return getCategoryColor(cat, categoryColorMap[cat], idx);
+    });
+
     return {
       labels: labels.length > 0 ? labels : ['None'],
       series: series.length > 0 ? series : [0],
+      colors: colors.length > 0 ? colors : ['#1877F2'],
       total: alarmsList.length,
     };
   }, [alarmsList]);
 
   const incidentsByStatus = useMemo(() => {
-    let active = 0;
-    let acknowledged = 0;
-    let resolved = 0;
+    // Dynamically categorize each alarm by its actual action status
+    // Every alarm must belong to exactly ONE mutually exclusive category so the chart sum equals total
+    const counts: Record<string, number> = {};
 
     alarmsList.forEach((a: any) => {
-      const st = (a.status || '').toLowerCase();
-      if (st === 'resolved') {
-        resolved += 1;
-      } else if (st === 'acknowledged') {
-        acknowledged += 1;
-      } else {
-        active += 1;
-      }
+      const chipInfo = getStatusChipStyle(a.status);
+      const label = chipInfo.label;
+      counts[label] = (counts[label] || 0) + 1;
     });
 
+    const labels = Object.keys(counts);
+    const series = Object.values(counts);
+    const colors = labels.map((lbl) => getStatusChipStyle(lbl).color);
     const total = alarmsList.length;
+
     return {
-      active,
-      acknowledged,
-      resolved,
+      counts,
+      labels: labels.length > 0 ? labels : ['None'],
+      series: series.length > 0 ? series : [0],
+      colors: colors.length > 0 ? colors : ['#00C853'],
       total,
-      series: total > 0 ? [active, acknowledged, resolved] : [0, 0, 0],
     };
   }, [alarmsList]);
 
@@ -977,6 +1048,251 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
 
   const incidentMarkerX = incidentCenter?.x ?? (incidentStageWidth * 0.5);
   const incidentMarkerY = incidentCenter?.y ?? (incidentStageHeight * 0.5);
+
+  // --- Table 1: Area Detail (activeTab === 'area') ---
+  const [areaDetailSearch, setAreaDetailSearch] = useState('');
+  const [areaDetailPage, setAreaDetailPage] = useState(0);
+  const [areaDetailRowsPerPage, setAreaDetailRowsPerPage] = useState(5);
+  const [areaDetailOrderBy, setAreaDetailOrderBy] = useState<string>('areaName');
+  const [areaDetailOrder, setAreaDetailOrder] = useState<'asc' | 'desc'>('asc');
+
+  const filteredSortedAreaDetail = useMemo(() => {
+    let list = [...areaBreakdownList];
+    if (areaDetailSearch.trim()) {
+      const q = areaDetailSearch.toLowerCase().trim();
+      list = list.filter(
+        (item) =>
+          (item.areaName && item.areaName.toLowerCase().includes(q)) ||
+          (item.buildingName && item.buildingName.toLowerCase().includes(q)) ||
+          (item.floorName && item.floorName.toLowerCase().includes(q))
+      );
+    }
+    list.sort((a: any, b: any) => {
+      let aVal: any = '';
+      let bVal: any = '';
+      if (areaDetailOrderBy === 'areaName') {
+        aVal = a.areaName || '';
+        bVal = b.areaName || '';
+      } else if (areaDetailOrderBy === 'buildingFloor') {
+        aVal = `${a.buildingName || ''} ${a.floorName || ''}`;
+        bVal = `${b.buildingName || ''} ${b.floorName || ''}`;
+      } else if (areaDetailOrderBy === 'visits') {
+        aVal = areaVisitsMap[a.areaName] ?? areaVisitsMap[a.areaId] ?? a.visits ?? a.visitCount ?? 1;
+        bVal = areaVisitsMap[b.areaName] ?? areaVisitsMap[b.areaId] ?? b.visits ?? b.visitCount ?? 1;
+      } else if (areaDetailOrderBy === 'duration') {
+        aVal = a.durationSeconds ?? a.durationMinutes ?? 0;
+        bVal = b.durationSeconds ?? b.durationMinutes ?? 0;
+      } else if (areaDetailOrderBy === 'percentage') {
+        aVal = a.percentage ?? 0;
+        bVal = b.percentage ?? 0;
+      } else if (areaDetailOrderBy === 'isRestrictedArea') {
+        aVal = a.isRestrictedArea ? 1 : 0;
+        bVal = b.isRestrictedArea ? 1 : 0;
+      } else if (areaDetailOrderBy === 'isAllowedByAccess') {
+        aVal = a.isAllowedByAccess ? 1 : 0;
+        bVal = b.isAllowedByAccess ? 1 : 0;
+      }
+      if (typeof aVal === 'string') {
+        return areaDetailOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return areaDetailOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return list;
+  }, [areaBreakdownList, areaDetailSearch, areaDetailOrderBy, areaDetailOrder, areaVisitsMap]);
+
+  const pagedAreaDetail = useMemo(() => {
+    const start = areaDetailPage * areaDetailRowsPerPage;
+    return filteredSortedAreaDetail.slice(start, start + areaDetailRowsPerPage);
+  }, [filteredSortedAreaDetail, areaDetailPage, areaDetailRowsPerPage]);
+
+  // --- Table 2: Unauthorized Access Breaches (Timeline tab & Compliance tab) ---
+  const [breachesPage, setBreachesPage] = useState(0);
+  const [breachesRowsPerPage, setBreachesRowsPerPage] = useState(5);
+  const [breachesOrderBy, setBreachesOrderBy] = useState<string>('enteredAt');
+  const [breachesOrder, setBreachesOrder] = useState<'asc' | 'desc'>('desc');
+
+  const sortedBreaches = useMemo(() => {
+    const list = [...breachesList];
+    list.sort((a: any, b: any) => {
+      let aVal: any = '';
+      let bVal: any = '';
+      if (breachesOrderBy === 'area') {
+        aVal = a.areaName || a.area || a.name || '';
+        bVal = b.areaName || b.area || b.name || '';
+      } else if (breachesOrderBy === 'buildingFloor') {
+        aVal = `${a.buildingName || a.building || ''} ${a.floorName || a.floor || ''}`;
+        bVal = `${b.buildingName || b.building || ''} ${b.floorName || b.floor || ''}`;
+      } else if (breachesOrderBy === 'enteredAt') {
+        aVal = new Date(a.enteredAt || a.timestamp || a.time || 0).getTime();
+        bVal = new Date(b.enteredAt || b.timestamp || b.time || 0).getTime();
+      } else if (breachesOrderBy === 'duration') {
+        aVal = a.durationMinutes ?? a.durationSeconds ?? 0;
+        bVal = b.durationMinutes ?? b.durationSeconds ?? 0;
+      } else if (breachesOrderBy === 'alarm') {
+        aVal = a.alarmTriggered || a.hasAlarm || a.alarm ? 1 : 0;
+        bVal = b.alarmTriggered || b.hasAlarm || b.alarm ? 1 : 0;
+      } else if (breachesOrderBy === 'category') {
+        aVal = a.alarmCategory || a.category || '';
+        bVal = b.alarmCategory || b.category || '';
+      } else if (breachesOrderBy === 'reason') {
+        aVal = a.reason || '';
+        bVal = b.reason || '';
+      }
+      if (typeof aVal === 'string') {
+        return breachesOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return breachesOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return list;
+  }, [breachesList, breachesOrderBy, breachesOrder]);
+
+  const pagedBreaches = useMemo(() => {
+    const start = breachesPage * breachesRowsPerPage;
+    return sortedBreaches.slice(start, start + breachesRowsPerPage);
+  }, [sortedBreaches, breachesPage, breachesRowsPerPage]);
+
+  // --- Table 3: Incident & Alarm List (activeTab === 'incidents') ---
+  const [alarmSearch, setAlarmSearch] = useState('');
+  const [alarmPage, setAlarmPage] = useState(0);
+  const [alarmRowsPerPage, setAlarmRowsPerPage] = useState(5);
+  const [alarmOrderBy, setAlarmOrderBy] = useState<string>('triggeredTime');
+  const [alarmOrder, setAlarmOrder] = useState<'asc' | 'desc'>('desc');
+
+  const filteredSortedAlarms = useMemo(() => {
+    let list = [...alarmsList];
+    if (alarmSearch.trim()) {
+      const q = alarmSearch.toLowerCase().trim();
+      list = list.filter((item: any) => {
+        const cat = (item.category || '').toLowerCase();
+        const area = (item.areaName || item.area || '').toLowerCase();
+        const st = (item.status || '').toLowerCase();
+        const bld = (item.buildingName || '').toLowerCase();
+        const flr = (item.floorName || '').toLowerCase();
+        const ack = (item.acknowledgedBy || '').toLowerCase();
+        return cat.includes(q) || area.includes(q) || st.includes(q) || bld.includes(q) || flr.includes(q) || ack.includes(q);
+      });
+    }
+    list.sort((a: any, b: any) => {
+      let aVal: any = '';
+      let bVal: any = '';
+      if (alarmOrderBy === 'triggeredTime') {
+        aVal = new Date(a.triggeredTime || a.timestamp || a.time || 0).getTime();
+        bVal = new Date(b.triggeredTime || b.timestamp || b.time || 0).getTime();
+      } else if (alarmOrderBy === 'category') {
+        aVal = a.category || '';
+        bVal = b.category || '';
+      } else if (alarmOrderBy === 'area') {
+        aVal = a.areaName || a.area || '';
+        bVal = b.areaName || b.area || '';
+      } else if (alarmOrderBy === 'buildingFloor') {
+        aVal = `${a.buildingName || ''} ${a.floorName || ''}`;
+        bVal = `${b.buildingName || ''} ${b.floorName || ''}`;
+      } else if (alarmOrderBy === 'status') {
+        aVal = a.status || '';
+        bVal = b.status || '';
+      } else if (alarmOrderBy === 'acknowledgedBy') {
+        aVal = a.acknowledgedBy || '';
+        bVal = b.acknowledgedBy || '';
+      } else if (alarmOrderBy === 'acknowledgedTime') {
+        aVal = new Date(a.acknowledgedTime || 0).getTime();
+        bVal = new Date(b.acknowledgedTime || 0).getTime();
+      }
+      if (typeof aVal === 'string') {
+        return alarmOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return alarmOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return list;
+  }, [alarmsList, alarmSearch, alarmOrderBy, alarmOrder]);
+
+  const pagedAlarms = useMemo(() => {
+    const start = alarmPage * alarmRowsPerPage;
+    return filteredSortedAlarms.slice(start, start + alarmRowsPerPage);
+  }, [filteredSortedAlarms, alarmPage, alarmRowsPerPage]);
+
+  // --- Table 4: Card Assignment & Activity Log (activeTab === 'cardHistory') ---
+  const [cardHistoryPage, setCardHistoryPage] = useState(0);
+  const [cardHistoryRowsPerPage, setCardHistoryRowsPerPage] = useState(5);
+  const [cardHistoryOrderBy, setCardHistoryOrderBy] = useState<string>('checkinAt');
+  const [cardHistoryOrder, setCardHistoryOrder] = useState<'asc' | 'desc'>('desc');
+
+  const sortedCardHistory = useMemo(() => {
+    const list = [...cardHistoryList];
+    list.sort((a: any, b: any) => {
+      let aVal: any = '';
+      let bVal: any = '';
+      if (cardHistoryOrderBy === 'checkinAt') {
+        aVal = new Date(a.checkinAt || a.timestamp || a.date || 0).getTime();
+        bVal = new Date(b.checkinAt || b.timestamp || b.date || 0).getTime();
+      } else if (cardHistoryOrderBy === 'cardNumber') {
+        aVal = a.cardNumber || '';
+        bVal = b.cardNumber || '';
+      } else if (cardHistoryOrderBy === 'bleCardNumber') {
+        aVal = a.bleCardNumber || '';
+        bVal = b.bleCardNumber || '';
+      } else if (cardHistoryOrderBy === 'event') {
+        aVal = a.isActive ? 1 : 0;
+        bVal = b.isActive ? 1 : 0;
+      } else if (cardHistoryOrderBy === 'status') {
+        aVal = a.isActive ? 1 : 0;
+        bVal = b.isActive ? 1 : 0;
+      } else if (cardHistoryOrderBy === 'issuedBy') {
+        aVal = a.checkinBy || '';
+        bVal = b.checkinBy || '';
+      }
+      if (typeof aVal === 'string') {
+        return cardHistoryOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return cardHistoryOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return list;
+  }, [cardHistoryList, cardHistoryOrderBy, cardHistoryOrder]);
+
+  const pagedCardHistory = useMemo(() => {
+    const start = cardHistoryPage * cardHistoryRowsPerPage;
+    return sortedCardHistory.slice(start, start + cardHistoryRowsPerPage);
+  }, [sortedCardHistory, cardHistoryPage, cardHistoryRowsPerPage]);
+
+  if (!selectedPerson && !data && !visitorSessionData) {
+    return (
+      <Card
+        elevation={0}
+        sx={{
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: '16px',
+          p: 6,
+          textAlign: 'center',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <Stack alignItems="center" justifyContent="center" spacing={2}>
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              bgcolor: '#E8F2FE',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#1877F2',
+            }}
+          >
+            <IconUser size={32} />
+          </Box>
+          <Box>
+            <Typography variant="h5" fontWeight={700} color="text.primary" gutterBottom>
+              Select a Person to Investigate
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Choose a person from the filter above to view their detailed timeline, location, and access analysis.
+            </Typography>
+          </Box>
+        </Stack>
+      </Card>
+    );
+  }
 
   return (
     <Stack spacing={3}>
@@ -1257,7 +1573,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   {totalIncidents}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
-                  {activeIncidents} active incident
+                  {activeIncidentsComputed} active incident{activeIncidentsComputed === 1 ? '' : 's'}
                 </Typography>
               </Box>
             </Stack>
@@ -1547,29 +1863,35 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           {/* Bottom Section Grid */}
           <Grid container spacing={2.5}>
             {/* Left Column: Chronological Timeline */}
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Card
-                elevation={0}
-                sx={{
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: '16px',
-                  p: 2.5,
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <Box mb={2}>
-                  <Typography variant="h6" fontWeight={700} color="text.primary">
-                    Chronological Timeline
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Complete history of movement and security events
-                  </Typography>
-                </Box>
+            <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <Box sx={{ position: 'relative', flex: 1, minHeight: 0, width: '100%', height: '100%' }}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    position: { xs: 'relative', md: 'absolute' },
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: '16px',
+                    p: 2.5,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    maxHeight: { xs: 520, md: 'none' },
+                  }}
+                >
+                  <Box mb={2} sx={{ flexShrink: 0 }}>
+                    <Typography variant="h6" fontWeight={700} color="text.primary">
+                      Chronological Timeline
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Complete history of movement and security events
+                    </Typography>
+                  </Box>
 
-                <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', pr: 1 }}>
+                  <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', pr: 1 }}>
                   <Stack
                     spacing={2.5}
                     sx={{
@@ -1593,15 +1915,25 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       const nodeColor = isAlarm ? '#D32F2F' : isPrimary ? '#1877F2' : '#00C853';
                       const badgeBg = isAlarm ? '#FFEBEE' : isPrimary ? '#E8F2FE' : '#E6F4EA';
                       const badgeTextColor = isAlarm ? '#D32F2F' : isPrimary ? '#1877F2' : '#00C853';
-                      const timeOnly = item.timestamp
-                        ? (String(item.timestamp).trim().endsWith('Z') || String(item.timestamp).trim().endsWith('z')
-                            ? dayjs(toLocalDate(item.timestamp)!).format('HH:mm')
-                            : (item.timestamp.includes(' ')
-                                ? item.timestamp.split(' ')[1].slice(0, 5)
-                                : item.timestamp.includes('T')
-                                ? item.timestamp.split('T')[1].slice(0, 5)
-                                : item.timestamp.slice(0, 5)))
-                        : '18:28';
+                      // Format date and time according to current language
+                      let dateStr = '';
+                      let timeStr = '18:28';
+                      if (item.timestamp) {
+                        const parsedDate = toLocalDate(item.timestamp);
+                        if (parsedDate && !isNaN(parsedDate.getTime())) {
+                          const d = dayjs(parsedDate).locale(currentLang);
+                          dateStr = d.format('ddd, DD MMM YYYY');
+                          timeStr = d.format('HH:mm');
+                        } else {
+                          const d = dayjs(item.timestamp).locale(currentLang);
+                          if (d.isValid()) {
+                            dateStr = d.format('ddd, DD MMM YYYY');
+                            timeStr = d.format('HH:mm');
+                          } else {
+                            timeStr = String(item.timestamp);
+                          }
+                        }
+                      }
 
                       return (
                         <Box key={idx} sx={{ position: 'relative' }}>
@@ -1620,14 +1952,19 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                             }}
                           />
 
-                          <Grid container spacing={1} alignItems="flex-start">
-                            <Grid size={2.5}>
-                              <Typography variant="caption" fontWeight={700} color="text.primary">
-                                {timeOnly}
+                          <Grid container spacing={1.5} alignItems="flex-start">
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <Typography variant="caption" fontWeight={700} color="text.primary" display="block" sx={{ lineHeight: 1.25 }}>
+                                {timeStr}
                               </Typography>
+                              {dateStr && (
+                                <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '11px', mt: 0.25, lineHeight: 1.2 }}>
+                                  {dateStr}
+                                </Typography>
+                              )}
                             </Grid>
 
-                            <Grid size={7}>
+                            <Grid size={{ xs: 8, sm: 5.5 }}>
                               <Typography variant="body2" fontWeight={700} color="text.primary">
                                 {item.title}
                               </Typography>
@@ -1639,7 +1976,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                               </Typography>
                             </Grid>
 
-                            <Grid size={2.5} sx={{ textAlign: 'right' }}>
+                            <Grid size={{ xs: 4, sm: 2.5 }} sx={{ textAlign: 'right' }}>
                               <Chip
                                 label={item.badge}
                                 size="small"
@@ -1660,7 +1997,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   </Stack>
                 </Box>
               </Card>
-            </Grid>
+            </Box>
+          </Grid>
 
             {/* Right Column: Area Analysis, Access Compliance, Unauthorized Breaches */}
             <Grid size={{ xs: 12, md: 6 }}>
@@ -1676,7 +2014,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     </Typography>
                   </Box>
 
-                  <TableContainer>
+                  <TableContainer sx={{ maxHeight: 320, overflowY: 'auto' }}>
                     <Table size="small">
                       <TableHead>
                         <TableRow>
@@ -1791,27 +2129,88 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     </Typography>
                   </Box>
 
-                  <TableContainer>
+                  <TableContainer sx={{ maxHeight: 320, overflowY: 'auto' }}>
                     <Table size="small">
                       <TableHead>
                         <TableRow>
                           <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>Area</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>Building / Floor</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>Entered At</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>Duration</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>Alarm</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>
+                            <TableSortLabel
+                              active={breachesOrderBy === 'area'}
+                              direction={breachesOrderBy === 'area' ? breachesOrder : 'asc'}
+                              onClick={() => {
+                                const isAsc = breachesOrderBy === 'area' && breachesOrder === 'asc';
+                                setBreachesOrder(isAsc ? 'desc' : 'asc');
+                                setBreachesOrderBy('area');
+                              }}
+                            >
+                              Area
+                            </TableSortLabel>
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>
+                            <TableSortLabel
+                              active={breachesOrderBy === 'buildingFloor'}
+                              direction={breachesOrderBy === 'buildingFloor' ? breachesOrder : 'asc'}
+                              onClick={() => {
+                                const isAsc = breachesOrderBy === 'buildingFloor' && breachesOrder === 'asc';
+                                setBreachesOrder(isAsc ? 'desc' : 'asc');
+                                setBreachesOrderBy('buildingFloor');
+                              }}
+                            >
+                              Building / Floor
+                            </TableSortLabel>
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>
+                            <TableSortLabel
+                              active={breachesOrderBy === 'enteredAt'}
+                              direction={breachesOrderBy === 'enteredAt' ? breachesOrder : 'asc'}
+                              onClick={() => {
+                                const isAsc = breachesOrderBy === 'enteredAt' && breachesOrder === 'asc';
+                                setBreachesOrder(isAsc ? 'desc' : 'asc');
+                                setBreachesOrderBy('enteredAt');
+                              }}
+                            >
+                              Entered At
+                            </TableSortLabel>
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>
+                            <TableSortLabel
+                              active={breachesOrderBy === 'duration'}
+                              direction={breachesOrderBy === 'duration' ? breachesOrder : 'asc'}
+                              onClick={() => {
+                                const isAsc = breachesOrderBy === 'duration' && breachesOrder === 'asc';
+                                setBreachesOrder(isAsc ? 'desc' : 'asc');
+                                setBreachesOrderBy('duration');
+                              }}
+                            >
+                              Duration
+                            </TableSortLabel>
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>
+                            <TableSortLabel
+                              active={breachesOrderBy === 'alarm'}
+                              direction={breachesOrderBy === 'alarm' ? breachesOrder : 'asc'}
+                              onClick={() => {
+                                const isAsc = breachesOrderBy === 'alarm' && breachesOrder === 'asc';
+                                setBreachesOrder(isAsc ? 'desc' : 'asc');
+                                setBreachesOrderBy('alarm');
+                              }}
+                            >
+                              Alarm
+                            </TableSortLabel>
+                          </TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {breachesList.length === 0 ? (
+                        {sortedBreaches.length === 0 ? (
                           <TableRow>
                             <TableCell colSpan={6} align="center" sx={{ py: 3, color: 'text.secondary' }}>
                               No unauthorized access breaches recorded
                             </TableCell>
                           </TableRow>
                         ) : (
-                          breachesList.map((row: any, idx: number) => {
+                          pagedBreaches.map((row: any, idx: number) => {
+                            const actualIdx = breachesPage * breachesRowsPerPage + idx;
                             const areaName = row.areaName || row.area || row.name || '-';
                             const building = row.buildingName || row.building;
                             const floor = row.floorName || row.floor;
@@ -1838,8 +2237,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                             );
 
                             return (
-                              <TableRow key={row.areaId || row.id || idx}>
-                                <TableCell>{idx + 1}</TableCell>
+                              <TableRow key={row.areaId || row.id || actualIdx}>
+                                <TableCell>{actualIdx + 1}</TableCell>
                                 <TableCell sx={{ fontWeight: 600 }}>{areaName}</TableCell>
                                 <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
                                   {buildingFloor}
@@ -1864,6 +2263,25 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       </TableBody>
                     </Table>
                   </TableContainer>
+
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={sortedBreaches.length}
+                    rowsPerPage={breachesRowsPerPage}
+                    page={breachesPage}
+                    onPageChange={(_, newPage) => setBreachesPage(newPage)}
+                    onRowsPerPageChange={(e) => {
+                      setBreachesRowsPerPage(parseInt(e.target.value, 10));
+                      setBreachesPage(0);
+                    }}
+                    sx={{
+                      borderTop: '1px solid',
+                      borderColor: 'divider',
+                      '.MuiTablePagination-toolbar': { minHeight: 40, px: 1 },
+                      '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': { fontSize: '12px', mb: 0 },
+                    }}
+                  />
                 </Card>
               </Stack>
             </Grid>
@@ -1887,7 +2305,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     Distribution of this person's presence duration in each area
                   </Typography>
                 </Box>
-                <Stack spacing={2.5} mt={3}>
+                <Stack spacing={2.5} mt={3} sx={{ maxHeight: 320, overflowY: 'auto', pr: 1 }}>
                   {areaBreakdownList.map((row, idx) => (
                     <Box key={idx}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
@@ -1940,7 +2358,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                     </Typography>
                   </Box>
                 ) : (
-                  <Stack spacing={2.5} mt={3}>
+                  <Stack spacing={2.5} mt={3} sx={{ maxHeight: 320, overflowY: 'auto', pr: 1 }}>
                     {areaVisitsList.map((item, idx) => (
                       <Box key={item.id || idx}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.5}>
@@ -2156,6 +2574,11 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 <TextField
                   placeholder="Search area..."
                   size="small"
+                  value={areaDetailSearch}
+                  onChange={(e) => {
+                    setAreaDetailSearch(e.target.value);
+                    setAreaDetailPage(0);
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -2171,102 +2594,239 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               </Stack>
             </Stack>
 
-            <TableContainer>
+            <TableContainer sx={{ maxHeight: 420, overflowY: 'auto' }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Area</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Building / Floor</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Visits</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Total Duration</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Percentage</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Restricted Area</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Allowed by Access</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={areaDetailOrderBy === 'areaName'}
+                        direction={areaDetailOrderBy === 'areaName' ? areaDetailOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = areaDetailOrderBy === 'areaName' && areaDetailOrder === 'asc';
+                          setAreaDetailOrder(isAsc ? 'desc' : 'asc');
+                          setAreaDetailOrderBy('areaName');
+                        }}
+                      >
+                        Area
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={areaDetailOrderBy === 'buildingFloor'}
+                        direction={areaDetailOrderBy === 'buildingFloor' ? areaDetailOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = areaDetailOrderBy === 'buildingFloor' && areaDetailOrder === 'asc';
+                          setAreaDetailOrder(isAsc ? 'desc' : 'asc');
+                          setAreaDetailOrderBy('buildingFloor');
+                        }}
+                      >
+                        Building / Floor
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={areaDetailOrderBy === 'visits'}
+                        direction={areaDetailOrderBy === 'visits' ? areaDetailOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = areaDetailOrderBy === 'visits' && areaDetailOrder === 'asc';
+                          setAreaDetailOrder(isAsc ? 'desc' : 'asc');
+                          setAreaDetailOrderBy('visits');
+                        }}
+                      >
+                        Visits
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={areaDetailOrderBy === 'duration'}
+                        direction={areaDetailOrderBy === 'duration' ? areaDetailOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = areaDetailOrderBy === 'duration' && areaDetailOrder === 'asc';
+                          setAreaDetailOrder(isAsc ? 'desc' : 'asc');
+                          setAreaDetailOrderBy('duration');
+                        }}
+                      >
+                        Total Duration
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={areaDetailOrderBy === 'percentage'}
+                        direction={areaDetailOrderBy === 'percentage' ? areaDetailOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = areaDetailOrderBy === 'percentage' && areaDetailOrder === 'asc';
+                          setAreaDetailOrder(isAsc ? 'desc' : 'asc');
+                          setAreaDetailOrderBy('percentage');
+                        }}
+                      >
+                        Percentage
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={areaDetailOrderBy === 'isRestrictedArea'}
+                        direction={areaDetailOrderBy === 'isRestrictedArea' ? areaDetailOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = areaDetailOrderBy === 'isRestrictedArea' && areaDetailOrder === 'asc';
+                          setAreaDetailOrder(isAsc ? 'desc' : 'asc');
+                          setAreaDetailOrderBy('isRestrictedArea');
+                        }}
+                      >
+                        Restricted Area
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={areaDetailOrderBy === 'isAllowedByAccess'}
+                        direction={areaDetailOrderBy === 'isAllowedByAccess' ? areaDetailOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = areaDetailOrderBy === 'isAllowedByAccess' && areaDetailOrder === 'asc';
+                          setAreaDetailOrder(isAsc ? 'desc' : 'asc');
+                          setAreaDetailOrderBy('isAllowedByAccess');
+                        }}
+                      >
+                        Allowed by Access
+                      </TableSortLabel>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {areaBreakdownList.length === 0 ? (
+                  {filteredSortedAreaDetail.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} align="center" sx={{ py: 3, color: 'text.secondary' }}>
                         No area detail records available
                       </TableCell>
                     </TableRow>
                   ) : (
-                    areaBreakdownList.map((row, idx) => (
-                      <TableRow key={row.areaId || idx}>
-                        <TableCell>{idx + 1}</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>{row.areaName || '-'}</TableCell>
-                        <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
-                          {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>
-                          {areaVisitsMap[row.areaName] ?? areaVisitsMap[row.areaId] ?? row.visits ?? row.visitCount ?? 1}
-                        </TableCell>
-                        <TableCell>{row.durationFormatted || (row.durationMinutes ? `${row.durationMinutes} min` : '-')}</TableCell>
-                        <TableCell sx={{ width: 140 }}>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Typography variant="caption" fontWeight={600} sx={{ width: 40 }}>
-                              {row.percentage}%
-                            </Typography>
-                            <Box sx={{ flex: 1 }}>
-                              <LinearProgress
-                                variant="determinate"
-                                value={row.percentage}
-                                sx={{ height: 6, borderRadius: 3, bgcolor: '#F1F5F9' }}
-                              />
-                            </Box>
-                          </Stack>
-                        </TableCell>
-                        <TableCell>{row.isRestrictedArea ? 'Yes' : 'No'}</TableCell>
-                        <TableCell>
-                          {row.isAllowedByAccess ? (
-                            <Chip label="Yes" size="small" icon={<IconShieldCheck size={14} color="#00C853" />} sx={{ bgcolor: '#E8F5E9', color: '#00C853', fontWeight: 700 }} />
-                          ) : (
-                            <Chip label="No" size="small" icon={<IconShieldX size={14} color="#D32F2F" />} sx={{ bgcolor: '#FFEBEE', color: '#D32F2F', fontWeight: 700 }} />
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    pagedAreaDetail.map((row, idx) => {
+                      const actualIdx = areaDetailPage * areaDetailRowsPerPage + idx;
+                      return (
+                        <TableRow key={row.areaId || actualIdx}>
+                          <TableCell>{actualIdx + 1}</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>{row.areaName || '-'}</TableCell>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
+                            {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>
+                            {areaVisitsMap[row.areaName] ?? areaVisitsMap[row.areaId] ?? row.visits ?? row.visitCount ?? 1}
+                          </TableCell>
+                          <TableCell>{row.durationFormatted || (row.durationMinutes ? `${row.durationMinutes} min` : '-')}</TableCell>
+                          <TableCell sx={{ width: 140 }}>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Typography variant="caption" fontWeight={600} sx={{ width: 40 }}>
+                                {row.percentage}%
+                              </Typography>
+                              <Box sx={{ flex: 1 }}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={row.percentage}
+                                  sx={{ height: 6, borderRadius: 3, bgcolor: '#F1F5F9' }}
+                                />
+                              </Box>
+                            </Stack>
+                          </TableCell>
+                          <TableCell>{row.isRestrictedArea ? 'Yes' : 'No'}</TableCell>
+                          <TableCell>
+                            {row.isAllowedByAccess ? (
+                              <Chip label="Yes" size="small" icon={<IconShieldCheck size={14} color="#00C853" />} sx={{ bgcolor: '#E8F5E9', color: '#00C853', fontWeight: 700 }} />
+                            ) : (
+                              <Chip label="No" size="small" icon={<IconShieldX size={14} color="#D32F2F" />} sx={{ bgcolor: '#FFEBEE', color: '#D32F2F', fontWeight: 700 }} />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
             </TableContainer>
 
-            {/* Pagination Footer */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
-              <Typography variant="caption" color="text.secondary">
-                Showing 1 to 3 of 3 records
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
-                  &lt;
-                </Button>
-                <Button size="small" variant="contained" sx={{ minWidth: 32, p: 0.5, borderRadius: '6px', bgcolor: '#1877F2' }}>
-                  1
-                </Button>
-                <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
-                  &gt;
-                </Button>
-              </Stack>
-            </Stack>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={filteredSortedAreaDetail.length}
+              rowsPerPage={areaDetailRowsPerPage}
+              page={areaDetailPage}
+              onPageChange={(_, newPage) => setAreaDetailPage(newPage)}
+              onRowsPerPageChange={(e) => {
+                setAreaDetailRowsPerPage(parseInt(e.target.value, 10));
+                setAreaDetailPage(0);
+              }}
+              sx={{
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                '.MuiTablePagination-toolbar': { minHeight: 40, px: 1 },
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': { fontSize: '12px', mb: 0 },
+              }}
+            />
           </Card>
         </Stack>
       )}
 
       {/* Movement Replay Tab View (Excluded in Export) */}
-      {activeTab === 'movement' && !isExporting && (
-        <Box sx={{ width: '100%' }}>
-          <InvestigateContent
-            initialSessionData={visitorSessionData}
-            showHeader={false}
-            selectedPersonOption={selectedPerson}
-            fromDate={fromDate ?? undefined}
-            toDate={toDate ?? undefined}
-            isLoading={isVisitorSessionLoading}
-          />
-        </Box>
-      )}
+      {activeTab === 'movement' && !isExporting && (() => {
+        // Calculate the 1-day date target:
+        // If range covers today or extends past today, use today.
+        // If whole range is in the past, use the last day of the range (toDate).
+        const now = dayjs();
+        const startDay = fromDate ? dayjs(fromDate).startOf('day') : null;
+        const endDay = toDate ? dayjs(toDate).endOf('day') : null;
+
+        let targetDay = now;
+        if (startDay && endDay) {
+          if (now.isAfter(endDay)) {
+            targetDay = dayjs(toDate);
+          } else if (now.isBefore(startDay)) {
+            targetDay = dayjs(fromDate);
+          } else {
+            targetDay = now;
+          }
+        } else if (endDay && now.isAfter(endDay)) {
+          targetDay = dayjs(toDate);
+        } else {
+          targetDay = now;
+        }
+
+        const displayDayStr = targetDay.locale(currentLang).format('dddd, DD MMMM YYYY');
+        const movementFromIso = targetDay.startOf('day').toISOString();
+        const movementToIso = targetDay.endOf('day').toISOString();
+
+        return (
+          <Box sx={{ width: '100%' }}>
+            {/* Warning Box at the top */}
+            <Alert
+              severity="warning"
+              icon={<IconAlertTriangle size={20} />}
+              sx={{
+                mb: 2.5,
+                borderRadius: '12px',
+                fontWeight: 600,
+                fontSize: '13.5px',
+                border: '1px solid',
+                borderColor: '#FFE082',
+                bgcolor: '#FFF8E1',
+                color: '#B78103',
+                '& .MuiAlert-icon': {
+                  color: '#F59E0B',
+                },
+              }}
+            >
+              Movement displayed only for 1 day ({displayDayStr})
+            </Alert>
+
+            <InvestigateContent
+              initialSessionData={visitorSessionData}
+              showHeader={false}
+              selectedPersonOption={selectedPerson}
+              fromDate={movementFromIso}
+              toDate={movementToIso}
+              isLoading={isVisitorSessionLoading}
+            />
+          </Box>
+        );
+      })()}
 
       {/* Access Compliance Tab View */}
       {activeTab === 'compliance' && (
@@ -2733,71 +3293,147 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               </Typography>
             </Box>
 
-            <TableContainer>
+            <TableContainer sx={{ maxHeight: 420, overflowY: 'auto' }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Area</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Building / Floor</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Entered At</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Duration</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Reason</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={breachesOrderBy === 'area'}
+                        direction={breachesOrderBy === 'area' ? breachesOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = breachesOrderBy === 'area' && breachesOrder === 'asc';
+                          setBreachesOrder(isAsc ? 'desc' : 'asc');
+                          setBreachesOrderBy('area');
+                        }}
+                      >
+                        Area
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={breachesOrderBy === 'buildingFloor'}
+                        direction={breachesOrderBy === 'buildingFloor' ? breachesOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = breachesOrderBy === 'buildingFloor' && breachesOrder === 'asc';
+                          setBreachesOrder(isAsc ? 'desc' : 'asc');
+                          setBreachesOrderBy('buildingFloor');
+                        }}
+                      >
+                        Building / Floor
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={breachesOrderBy === 'enteredAt'}
+                        direction={breachesOrderBy === 'enteredAt' ? breachesOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = breachesOrderBy === 'enteredAt' && breachesOrder === 'asc';
+                          setBreachesOrder(isAsc ? 'desc' : 'asc');
+                          setBreachesOrderBy('enteredAt');
+                        }}
+                      >
+                        Entered At
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={breachesOrderBy === 'duration'}
+                        direction={breachesOrderBy === 'duration' ? breachesOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = breachesOrderBy === 'duration' && breachesOrder === 'asc';
+                          setBreachesOrder(isAsc ? 'desc' : 'asc');
+                          setBreachesOrderBy('duration');
+                        }}
+                      >
+                        Duration
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={breachesOrderBy === 'category'}
+                        direction={breachesOrderBy === 'category' ? breachesOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = breachesOrderBy === 'category' && breachesOrder === 'asc';
+                          setBreachesOrder(isAsc ? 'desc' : 'asc');
+                          setBreachesOrderBy('category');
+                        }}
+                      >
+                        Category
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={breachesOrderBy === 'reason'}
+                        direction={breachesOrderBy === 'reason' ? breachesOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = breachesOrderBy === 'reason' && breachesOrder === 'asc';
+                          setBreachesOrder(isAsc ? 'desc' : 'asc');
+                          setBreachesOrderBy('reason');
+                        }}
+                      >
+                        Reason
+                      </TableSortLabel>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {breachesList.length === 0 ? (
+                  {sortedBreaches.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>
                         No unauthorized access breaches recorded
                       </TableCell>
                     </TableRow>
                   ) : (
-                    breachesList.map((row: any, idx: number) => (
-                      <TableRow key={row.areaId || idx}>
-                        <TableCell>{idx + 1}</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>{row.areaName || row.area || '-'}</TableCell>
-                        <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
-                          {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: '12px' }}>
-                          {formatOrRawTime(row.enteredAt, 'MMM D, YYYY HH:mm:ss')}
-                        </TableCell>
-                        <TableCell>
-                          {row.durationFormatted ||
-                            (row.durationMinutes != null
-                              ? row.durationMinutes >= 60
-                                ? `${Math.floor(row.durationMinutes / 60)}h ${row.durationMinutes % 60}m`
-                                : `${row.durationMinutes} min`
-                              : row.duration || '-')}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.alarmCategory || '-'}</TableCell>
-                        <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.reason || '-'}</TableCell>
-                      </TableRow>
-                    ))
+                    pagedBreaches.map((row: any, idx: number) => {
+                      const actualIdx = breachesPage * breachesRowsPerPage + idx;
+                      return (
+                        <TableRow key={row.areaId || actualIdx}>
+                          <TableCell>{actualIdx + 1}</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>{row.areaName || row.area || '-'}</TableCell>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
+                            {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
+                          </TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>
+                            {formatOrRawTime(row.enteredAt, 'MMM D, YYYY HH:mm:ss')}
+                          </TableCell>
+                          <TableCell>
+                            {row.durationFormatted ||
+                              (row.durationMinutes != null
+                                ? row.durationMinutes >= 60
+                                  ? `${Math.floor(row.durationMinutes / 60)}h ${row.durationMinutes % 60}m`
+                                  : `${row.durationMinutes} min`
+                                : row.duration || '-')}
+                          </TableCell>
+                          <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.alarmCategory || '-'}</TableCell>
+                          <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.reason || '-'}</TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
             </TableContainer>
 
-            {/* Pagination Footer */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
-              <Typography variant="caption" color="text.secondary">
-                Showing {breachesList.length > 0 ? 1 : 0} to {breachesList.length} of {breachesList.length} {breachesList.length === 1 ? 'record' : 'records'}
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
-                  &lt;
-                </Button>
-                <Button size="small" variant="contained" sx={{ minWidth: 32, p: 0.5, borderRadius: '6px', bgcolor: '#1877F2' }}>
-                  1
-                </Button>
-                <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
-                  &gt;
-                </Button>
-              </Stack>
-            </Stack>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={sortedBreaches.length}
+              rowsPerPage={breachesRowsPerPage}
+              page={breachesPage}
+              onPageChange={(_, newPage) => setBreachesPage(newPage)}
+              onRowsPerPageChange={(e) => {
+                setBreachesRowsPerPage(parseInt(e.target.value, 10));
+                setBreachesPage(0);
+              }}
+              sx={{
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                '.MuiTablePagination-toolbar': { minHeight: 40, px: 1 },
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': { fontSize: '12px', mb: 0 },
+              }}
+            />
           </Card>
         </Stack>
       )}
@@ -2926,7 +3562,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Chart
                         options={{
                           chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
-                          colors: ['#D32F2F', '#FF9800', '#1877F2', '#9C27B0', '#00C853', '#00BCD4'],
+                          colors: incidentsByCategory.colors,
                           labels: incidentsByCategory.labels,
                           legend: { show: false },
                           dataLabels: { enabled: false },
@@ -2959,7 +3595,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       {incidentsByCategory.labels.map((catLabel, idx) => {
                         const count = incidentsByCategory.series[idx] || 0;
                         const pct = incidentsByCategory.total > 0 ? ((count / incidentsByCategory.total) * 100).toFixed(1) : '0';
-                        const color = ['#D32F2F', '#FF9800', '#1877F2', '#9C27B0', '#00C853', '#00BCD4'][idx % 6];
+                        const color = incidentsByCategory.colors[idx] || '#1877F2';
                         return (
                           <Stack key={catLabel} direction="row" justifyContent="space-between" alignItems="center">
                             <Stack direction="row" spacing={1} alignItems="center">
@@ -2992,8 +3628,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Chart
                         options={{
                           chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
-                          colors: ['#D32F2F', '#1877F2', '#00C853'],
-                          labels: ['Active', 'Acknowledged', 'Resolved'],
+                          colors: incidentsByStatus.colors,
+                          labels: incidentsByStatus.labels,
                           legend: { show: false },
                           dataLabels: { enabled: false },
                           plotOptions: {
@@ -3021,34 +3657,23 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       />
                     </Box>
 
-                    <Stack spacing={1.5} sx={{ flex: 1 }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#D32F2F' }} />
-                          <Typography variant="caption" color="text.secondary">Active</Typography>
-                        </Stack>
-                        <Typography variant="caption" fontWeight={700}>
-                          {incidentsByStatus.active} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.active / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
-                        </Typography>
-                      </Stack>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#1877F2' }} />
-                          <Typography variant="caption" color="text.secondary">Acknowledged</Typography>
-                        </Stack>
-                        <Typography variant="caption" fontWeight={700}>
-                          {incidentsByStatus.acknowledged} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.acknowledged / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
-                        </Typography>
-                      </Stack>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#00C853' }} />
-                          <Typography variant="caption" color="text.secondary">Resolved</Typography>
-                        </Stack>
-                        <Typography variant="caption" fontWeight={700}>
-                          {incidentsByStatus.resolved} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.resolved / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
-                        </Typography>
-                      </Stack>
+                    <Stack spacing={1} sx={{ flex: 1 }}>
+                      {incidentsByStatus.labels.map((statusLabel, idx) => {
+                        const count = incidentsByStatus.series[idx] || 0;
+                        const pct = incidentsByStatus.total > 0 ? ((count / incidentsByStatus.total) * 100).toFixed(1) : '0';
+                        const color = incidentsByStatus.colors[idx] || '#00C853';
+                        return (
+                          <Stack key={statusLabel} direction="row" justifyContent="space-between" alignItems="center">
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color }} />
+                              <Typography variant="caption" color="text.secondary">{statusLabel}</Typography>
+                            </Stack>
+                            <Typography variant="caption" fontWeight={700}>
+                              {count} ({pct}%)
+                            </Typography>
+                          </Stack>
+                        );
+                      })}
                     </Stack>
                   </Stack>
                 </Card>
@@ -3072,6 +3697,11 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 <TextField
                   placeholder="Search area, category, or status..."
                   size="small"
+                  value={alarmSearch}
+                  onChange={(e) => {
+                    setAlarmSearch(e.target.value);
+                    setAlarmPage(0);
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -3087,31 +3717,116 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               </Stack>
             </Stack>
 
-            <TableContainer>
+            <TableContainer sx={{ maxHeight: 420, overflowY: 'auto' }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Triggered Time</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Area</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Building / Floor</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Acknowledged By</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Acknowledged Time</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={alarmOrderBy === 'triggeredTime'}
+                        direction={alarmOrderBy === 'triggeredTime' ? alarmOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = alarmOrderBy === 'triggeredTime' && alarmOrder === 'asc';
+                          setAlarmOrder(isAsc ? 'desc' : 'asc');
+                          setAlarmOrderBy('triggeredTime');
+                        }}
+                      >
+                        Triggered Time
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={alarmOrderBy === 'category'}
+                        direction={alarmOrderBy === 'category' ? alarmOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = alarmOrderBy === 'category' && alarmOrder === 'asc';
+                          setAlarmOrder(isAsc ? 'desc' : 'asc');
+                          setAlarmOrderBy('category');
+                        }}
+                      >
+                        Category
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={alarmOrderBy === 'area'}
+                        direction={alarmOrderBy === 'area' ? alarmOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = alarmOrderBy === 'area' && alarmOrder === 'asc';
+                          setAlarmOrder(isAsc ? 'desc' : 'asc');
+                          setAlarmOrderBy('area');
+                        }}
+                      >
+                        Area
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={alarmOrderBy === 'buildingFloor'}
+                        direction={alarmOrderBy === 'buildingFloor' ? alarmOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = alarmOrderBy === 'buildingFloor' && alarmOrder === 'asc';
+                          setAlarmOrder(isAsc ? 'desc' : 'asc');
+                          setAlarmOrderBy('buildingFloor');
+                        }}
+                      >
+                        Building / Floor
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={alarmOrderBy === 'status'}
+                        direction={alarmOrderBy === 'status' ? alarmOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = alarmOrderBy === 'status' && alarmOrder === 'asc';
+                          setAlarmOrder(isAsc ? 'desc' : 'asc');
+                          setAlarmOrderBy('status');
+                        }}
+                      >
+                        Status
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={alarmOrderBy === 'acknowledgedBy'}
+                        direction={alarmOrderBy === 'acknowledgedBy' ? alarmOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = alarmOrderBy === 'acknowledgedBy' && alarmOrder === 'asc';
+                          setAlarmOrder(isAsc ? 'desc' : 'asc');
+                          setAlarmOrderBy('acknowledgedBy');
+                        }}
+                      >
+                        Acknowledged By
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={alarmOrderBy === 'acknowledgedTime'}
+                        direction={alarmOrderBy === 'acknowledgedTime' ? alarmOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = alarmOrderBy === 'acknowledgedTime' && alarmOrder === 'asc';
+                          setAlarmOrder(isAsc ? 'desc' : 'asc');
+                          setAlarmOrderBy('acknowledgedTime');
+                        }}
+                      >
+                        Acknowledged Time
+                      </TableSortLabel>
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {alarmsList.length === 0 ? (
+                  {filteredSortedAlarms.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} align="center" sx={{ py: 3, color: 'text.secondary' }}>
                         No incidents or alarms recorded
                       </TableCell>
                     </TableRow>
                   ) : (
-                    alarmsList.map((row: any, idx: number) => {
-                      const rowId = row.alarmId || row.id || String(idx);
+                    pagedAlarms.map((row: any, idx: number) => {
+                      const actualIdx = alarmPage * alarmRowsPerPage + idx;
+                      const rowId = row.alarmId || row.id || String(actualIdx);
                       const isSelected = (primaryAlarm?.alarmId || primaryAlarm?.id) === rowId;
                       return (
                         <TableRow
@@ -3127,28 +3842,48 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                             },
                           }}
                         >
-                          <TableCell>{idx + 1}</TableCell>
+                          <TableCell>{actualIdx + 1}</TableCell>
                           <TableCell sx={{ fontSize: '12px' }}>
                             {formatOrRawTime(row.triggeredTime)}
                           </TableCell>
                           <TableCell>
-                            <Chip label={row.category || 'cardaccess'} size="small" sx={{ bgcolor: '#FFEBEE', color: '#D32F2F', fontWeight: 600, fontSize: '11px' }} />
+                            {(() => {
+                              const catColor = getCategoryColor(row.category, row.alarmColor);
+                              return (
+                                <Chip
+                                  label={row.category || 'cardaccess'}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: `${catColor}1A`,
+                                    color: catColor,
+                                    border: `1px solid ${catColor}33`,
+                                    fontWeight: 700,
+                                    fontSize: '11px',
+                                  }}
+                                />
+                              );
+                            })()}
                           </TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>{row.areaName || '-'}</TableCell>
                           <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
                             {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
                           </TableCell>
                           <TableCell>
-                            <Chip
-                              label={row.status || 'Active'}
-                              size="small"
-                              sx={{
-                                bgcolor: row.status?.toLowerCase() === 'resolved' ? '#E8F5E9' : row.status?.toLowerCase() === 'acknowledged' ? '#E8F2FE' : '#FFEBEE',
-                                color: row.status?.toLowerCase() === 'resolved' ? '#00C853' : row.status?.toLowerCase() === 'acknowledged' ? '#1877F2' : '#D32F2F',
-                                fontWeight: 600,
-                                fontSize: '11px',
-                              }}
-                            />
+                            {(() => {
+                              const statusStyle = getStatusChipStyle(row.status);
+                              return (
+                                <Chip
+                                  label={statusStyle.label}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: statusStyle.bgcolor,
+                                    color: statusStyle.color,
+                                    fontWeight: 600,
+                                    fontSize: '11px',
+                                  }}
+                                />
+                              );
+                            })()}
                           </TableCell>
                           <TableCell sx={{ fontSize: '12px' }}>{row.acknowledgedBy || '-'}</TableCell>
                           <TableCell sx={{ fontSize: '12px' }}>
@@ -3187,23 +3922,24 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               </Table>
             </TableContainer>
 
-            {/* Pagination Footer */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
-              <Typography variant="caption" color="text.secondary">
-                Showing {alarmsList.length > 0 ? 1 : 0} to {alarmsList.length} of {alarmsList.length} {alarmsList.length === 1 ? 'record' : 'records'}
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
-                  &lt;
-                </Button>
-                <Button size="small" variant="contained" sx={{ minWidth: 32, p: 0.5, borderRadius: '6px', bgcolor: '#1877F2' }}>
-                  1
-                </Button>
-                <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
-                  &gt;
-                </Button>
-              </Stack>
-            </Stack>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={filteredSortedAlarms.length}
+              rowsPerPage={alarmRowsPerPage}
+              page={alarmPage}
+              onPageChange={(_, newPage) => setAlarmPage(newPage)}
+              onRowsPerPageChange={(e) => {
+                setAlarmRowsPerPage(parseInt(e.target.value, 10));
+                setAlarmPage(0);
+              }}
+              sx={{
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                '.MuiTablePagination-toolbar': { minHeight: 40, px: 1 },
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': { fontSize: '12px', mb: 0 },
+              }}
+            />
           </Card>
 
           {/* Section 3: Incident Detail & Incident Location */}
@@ -3236,18 +3972,21 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                         </Typography>
                       </Box>
                     </Stack>
-                    {primaryAlarm && (
-                      <Chip
-                        label={primaryAlarm.status || 'Active'}
-                        size="small"
-                        sx={{
-                          bgcolor: primaryAlarm.status?.toLowerCase() === 'resolved' ? '#E8F5E9' : primaryAlarm.status?.toLowerCase() === 'acknowledged' ? '#E8F2FE' : '#FFEBEE',
-                          color: primaryAlarm.status?.toLowerCase() === 'resolved' ? '#00C853' : primaryAlarm.status?.toLowerCase() === 'acknowledged' ? '#1877F2' : '#D32F2F',
-                          fontWeight: 600,
-                          fontSize: '11px',
-                        }}
-                      />
-                    )}
+                    {primaryAlarm && (() => {
+                      const statusStyle = getStatusChipStyle(primaryAlarm.status);
+                      return (
+                        <Chip
+                          label={statusStyle.label}
+                          size="small"
+                          sx={{
+                            bgcolor: statusStyle.bgcolor,
+                            color: statusStyle.color,
+                            fontWeight: 600,
+                            fontSize: '11px',
+                          }}
+                        />
+                      );
+                    })()}
                   </Stack>
                 </Box>
 
@@ -3632,74 +4371,150 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               </Typography>
             </Box>
 
-            <TableContainer>
+            <TableContainer sx={{ maxHeight: 420, overflowY: 'auto' }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Date & Time</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Card Number</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>BLE MAC</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Event / Action</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Issued By / Notes</TableCell>
+                    <TableCell sx={{ fontWeight: 700, width: 50 }}>#</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={cardHistoryOrderBy === 'checkinAt'}
+                        direction={cardHistoryOrderBy === 'checkinAt' ? cardHistoryOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = cardHistoryOrderBy === 'checkinAt' && cardHistoryOrder === 'asc';
+                          setCardHistoryOrder(isAsc ? 'desc' : 'asc');
+                          setCardHistoryOrderBy('checkinAt');
+                        }}
+                      >
+                        Date & Time
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={cardHistoryOrderBy === 'cardNumber'}
+                        direction={cardHistoryOrderBy === 'cardNumber' ? cardHistoryOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = cardHistoryOrderBy === 'cardNumber' && cardHistoryOrder === 'asc';
+                          setCardHistoryOrder(isAsc ? 'desc' : 'asc');
+                          setCardHistoryOrderBy('cardNumber');
+                        }}
+                      >
+                        Card Number
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={cardHistoryOrderBy === 'bleCardNumber'}
+                        direction={cardHistoryOrderBy === 'bleCardNumber' ? cardHistoryOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = cardHistoryOrderBy === 'bleCardNumber' && cardHistoryOrder === 'asc';
+                          setCardHistoryOrder(isAsc ? 'desc' : 'asc');
+                          setCardHistoryOrderBy('bleCardNumber');
+                        }}
+                      >
+                        BLE MAC
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={cardHistoryOrderBy === 'event'}
+                        direction={cardHistoryOrderBy === 'event' ? cardHistoryOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = cardHistoryOrderBy === 'event' && cardHistoryOrder === 'asc';
+                          setCardHistoryOrder(isAsc ? 'desc' : 'asc');
+                          setCardHistoryOrderBy('event');
+                        }}
+                      >
+                        Event / Action
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={cardHistoryOrderBy === 'status'}
+                        direction={cardHistoryOrderBy === 'status' ? cardHistoryOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = cardHistoryOrderBy === 'status' && cardHistoryOrder === 'asc';
+                          setCardHistoryOrder(isAsc ? 'desc' : 'asc');
+                          setCardHistoryOrderBy('status');
+                        }}
+                      >
+                        Status
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      <TableSortLabel
+                        active={cardHistoryOrderBy === 'issuedBy'}
+                        direction={cardHistoryOrderBy === 'issuedBy' ? cardHistoryOrder : 'asc'}
+                        onClick={() => {
+                          const isAsc = cardHistoryOrderBy === 'issuedBy' && cardHistoryOrder === 'asc';
+                          setCardHistoryOrder(isAsc ? 'desc' : 'asc');
+                          setCardHistoryOrderBy('issuedBy');
+                        }}
+                      >
+                        Issued By / Notes
+                      </TableSortLabel>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {cardHistoryList.length === 0 ? (
+                  {pagedCardHistory.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>
                         No card assignment history recorded
                       </TableCell>
                     </TableRow>
                   ) : (
-                    cardHistoryList.map((row: any, idx: number) => (
-                      <TableRow key={row.cardId || idx}>
-                        <TableCell>{idx + 1}</TableCell>
-                        <TableCell sx={{ fontSize: '12px' }}>
-                          {formatOrRawTime(row.checkinAt)}
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>{row.cardNumber || '-'}</TableCell>
-                        <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.bleCardNumber || '-'}</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>{row.isActive ? 'Card Assigned' : 'Card Unassigned'}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.isActive ? 'Active' : 'Inactive'}
-                            size="small"
-                            sx={{
-                              bgcolor: row.isActive ? '#E8F5E9' : '#F1F5F9',
-                              color: row.isActive ? '#00C853' : '#64748B',
-                              fontWeight: 700,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>
-                          Assigned by: {row.checkinBy || 'System'}
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    pagedCardHistory.map((row: any, idx: number) => {
+                      const actualIdx = cardHistoryPage * cardHistoryRowsPerPage + idx + 1;
+                      return (
+                        <TableRow key={row.cardId || idx}>
+                          <TableCell>{actualIdx}</TableCell>
+                          <TableCell sx={{ fontSize: '12px' }}>
+                            {formatOrRawTime(row.checkinAt)}
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>{row.cardNumber || '-'}</TableCell>
+                          <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.bleCardNumber || '-'}</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>{row.isActive ? 'Card Assigned' : 'Card Unassigned'}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={row.isActive ? 'Active' : 'Inactive'}
+                              size="small"
+                              sx={{
+                                bgcolor: row.isActive ? '#E8F5E9' : '#F1F5F9',
+                                color: row.isActive ? '#00C853' : '#64748B',
+                                fontWeight: 700,
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>
+                            Assigned by: {row.checkinBy || 'System'}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
             </TableContainer>
 
-            {/* Pagination Footer */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
-              <Typography variant="caption" color="text.secondary">
-                Showing {cardHistoryList.length > 0 ? 1 : 0} to {cardHistoryList.length} of {cardHistoryList.length} {cardHistoryList.length === 1 ? 'record' : 'records'}
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
-                  &lt;
-                </Button>
-                <Button size="small" variant="contained" sx={{ minWidth: 32, p: 0.5, borderRadius: '6px', bgcolor: '#1877F2' }}>
-                  1
-                </Button>
-                <Button size="small" variant="outlined" disabled sx={{ minWidth: 32, p: 0.5, borderRadius: '6px' }}>
-                  &gt;
-                </Button>
-              </Stack>
-            </Stack>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={sortedCardHistory.length}
+              rowsPerPage={cardHistoryRowsPerPage}
+              page={cardHistoryPage}
+              onPageChange={(_, newPage) => setCardHistoryPage(newPage)}
+              onRowsPerPageChange={(e) => {
+                setCardHistoryRowsPerPage(parseInt(e.target.value, 10));
+                setCardHistoryPage(0);
+              }}
+              sx={{
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                '.MuiTablePagination-toolbar': { minHeight: 40, px: 1 },
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': { fontSize: '12px', mb: 0 },
+              }}
+            />
           </Card>
         </Stack>
       )}
@@ -3865,7 +4680,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
               <Typography variant="h5" fontWeight={800} color={totalIncidents > 0 ? '#D32F2F' : '#00C853'} mt={0.5}>
                 {totalIncidents} Incidents
               </Typography>
-              <Typography variant="caption" color="text.secondary">{activeIncidents} Unresolved / Active</Typography>
+              <Typography variant="caption" color="text.secondary">{activeIncidentsComputed} Unresolved / Active</Typography>
             </Box>
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -4620,7 +5435,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Chart
                         options={{
                           chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
-                          colors: ['#D32F2F', '#FF9800', '#1877F2', '#9C27B0', '#00C853', '#00BCD4'],
+                          colors: incidentsByCategory.colors,
                           labels: incidentsByCategory.labels,
                           legend: { show: false },
                           dataLabels: { enabled: false },
@@ -4653,7 +5468,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       {incidentsByCategory.labels.map((catLabel, idx) => {
                         const count = incidentsByCategory.series[idx] || 0;
                         const pct = incidentsByCategory.total > 0 ? ((count / incidentsByCategory.total) * 100).toFixed(1) : '0';
-                        const color = ['#D32F2F', '#FF9800', '#1877F2', '#9C27B0', '#00C853', '#00BCD4'][idx % 6];
+                        const color = incidentsByCategory.colors[idx] || '#1877F2';
                         return (
                           <Stack key={catLabel} direction="row" justifyContent="space-between" alignItems="center">
                             <Stack direction="row" spacing={1} alignItems="center">
@@ -4682,8 +5497,8 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       <Chart
                         options={{
                           chart: { type: 'donut', fontFamily: "'Plus Jakarta Sans', sans-serif;" },
-                          colors: ['#D32F2F', '#1877F2', '#00C853'],
-                          labels: ['Active', 'Acknowledged', 'Resolved'],
+                          colors: incidentsByStatus.colors,
+                          labels: incidentsByStatus.labels,
                           legend: { show: false },
                           dataLabels: { enabled: false },
                           plotOptions: {
@@ -4711,34 +5526,23 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                       />
                     </Box>
 
-                    <Stack spacing={1.2} sx={{ flex: 1 }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#D32F2F' }} />
-                          <Typography variant="caption" color="text.secondary">Active</Typography>
-                        </Stack>
-                        <Typography variant="caption" fontWeight={700}>
-                          {incidentsByStatus.active} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.active / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
-                        </Typography>
-                      </Stack>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1877F2' }} />
-                          <Typography variant="caption" color="text.secondary">Acknowledged</Typography>
-                        </Stack>
-                        <Typography variant="caption" fontWeight={700}>
-                          {incidentsByStatus.acknowledged} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.acknowledged / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
-                        </Typography>
-                      </Stack>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#00C853' }} />
-                          <Typography variant="caption" color="text.secondary">Resolved</Typography>
-                        </Stack>
-                        <Typography variant="caption" fontWeight={700}>
-                          {incidentsByStatus.resolved} ({incidentsByStatus.total > 0 ? ((incidentsByStatus.resolved / incidentsByStatus.total) * 100).toFixed(1) : 0}%)
-                        </Typography>
-                      </Stack>
+                    <Stack spacing={1} sx={{ flex: 1 }}>
+                      {incidentsByStatus.labels.map((statusLabel, idx) => {
+                        const count = incidentsByStatus.series[idx] || 0;
+                        const pct = incidentsByStatus.total > 0 ? ((count / incidentsByStatus.total) * 100).toFixed(1) : '0';
+                        const color = incidentsByStatus.colors[idx] || '#00C853';
+                        return (
+                          <Stack key={statusLabel} direction="row" justifyContent="space-between" alignItems="center">
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color }} />
+                              <Typography variant="caption" color="text.secondary">{statusLabel}</Typography>
+                            </Stack>
+                            <Typography variant="caption" fontWeight={700}>
+                              {count} ({pct}%)
+                            </Typography>
+                          </Stack>
+                        );
+                      })}
                     </Stack>
                   </Stack>
                 </Card>
@@ -4781,8 +5585,6 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   ) : (
                     alarmsList.map((row: any, idx: number) => {
                       const rowId = row.alarmId || row.id || String(idx);
-                      const isResolved = row.status?.toLowerCase() === 'resolved';
-                      const isAcknowledged = row.status?.toLowerCase() === 'acknowledged';
                       return (
                         <TableRow key={rowId}>
                           <TableCell>{idx + 1}</TableCell>
@@ -4790,23 +5592,43 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                             {formatOrRawTime(row.triggeredTime)}
                           </TableCell>
                           <TableCell>
-                            <Chip label={row.category || 'cardaccess'} size="small" sx={{ bgcolor: '#FFEBEE', color: '#D32F2F', fontWeight: 600, fontSize: '11px' }} />
+                            {(() => {
+                              const catColor = getCategoryColor(row.category, row.alarmColor);
+                              return (
+                                <Chip
+                                  label={row.category || 'cardaccess'}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: `${catColor}1A`,
+                                    color: catColor,
+                                    border: `1px solid ${catColor}33`,
+                                    fontWeight: 700,
+                                    fontSize: '11px',
+                                  }}
+                                />
+                              );
+                            })()}
                           </TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>{row.areaName || '-'}</TableCell>
                           <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
                             {row.buildingName || '-'} {row.floorName ? `(${row.floorName})` : ''}
                           </TableCell>
                           <TableCell>
-                            <Chip
-                              label={row.status || 'Active'}
-                              size="small"
-                              sx={{
-                                bgcolor: isResolved ? '#E8F5E9' : isAcknowledged ? '#E8F2FE' : '#FFEBEE',
-                                color: isResolved ? '#00C853' : isAcknowledged ? '#1877F2' : '#D32F2F',
-                                fontWeight: 600,
-                                fontSize: '11px',
-                              }}
-                            />
+                            {(() => {
+                              const statusStyle = getStatusChipStyle(row.status);
+                              return (
+                                <Chip
+                                  label={statusStyle.label}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: statusStyle.bgcolor,
+                                    color: statusStyle.color,
+                                    fontWeight: 600,
+                                    fontSize: '11px',
+                                  }}
+                                />
+                              );
+                            })()}
                           </TableCell>
                           <TableCell sx={{ fontSize: '12px' }}>{row.acknowledgedBy || '-'}</TableCell>
                           <TableCell sx={{ fontSize: '12px' }}>

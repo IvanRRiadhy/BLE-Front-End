@@ -1,0 +1,15 @@
+{
+  "total_time_ms": 143330.88,
+  "mean_per_image_ms": 10823.28,
+  "p50_per_image_ms": 22.57,
+  "p95_per_image_ms": 58252.1,
+  "p99_per_image_ms": 111256.35,
+  "min_per_image_ms": 2.97,
+  "max_per_image_ms": 124507.41,
+  "stage_timings_mean_ms": {
+    "geometry_validation": 7175.39,
+    "deduplication": 148.9,
+    "clustering": 91.72,
+    "selection": 3.53
+  }
+}

@@ -276,18 +276,22 @@ const TrackCard = ({
         .filter(Boolean)
         .join(' - ') || '-';
     col2Label = 'HEAD MEMBER 1';
-    col2Value = member.headMember1 || '-';
+    const head1 = member.memberHead1 || member.headMember1;
+    col2Value = typeof head1 === 'object' ? (head1 as any)?.name || '-' : head1 || '-';
     col3Label = 'HEAD MEMBER 2';
-    col3Value = member.headMember2 || '-';
+    const head2 = member.memberHead2 || member.headMember2;
+    col3Value = typeof head2 === 'object' ? (head2 as any)?.name || '-' : head2 || '-';
   } else if (security) {
     orgValue =
       [security.organization?.name, security.department?.name, security.district?.name]
         .filter(Boolean)
         .join(' - ') || '-';
     col2Label = 'HEAD MEMBER 1';
-    col2Value = security.headMember1 || '-';
+    const sHead1 = security.headMember1;
+    col2Value = typeof sHead1 === 'object' ? (sHead1 as any)?.name || '-' : sHead1 || '-';
     col3Label = 'HEAD MEMBER 2';
-    col3Value = security.headMember2 || '-';
+    const sHead2 = security.headMember2;
+    col3Value = typeof sHead2 === 'object' ? (sHead2 as any)?.name || '-' : sHead2 || '-';
   }
 
   const person = member || visitor || security;

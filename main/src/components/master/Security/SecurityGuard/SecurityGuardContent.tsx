@@ -396,7 +396,7 @@ const SecurityGuardContent = () => {
                                           variant='contained'
                                           color='info'
                                           onClick={() => {
-                                            handleOpenReleasePopup(securityGuardDetail.cardNumber)
+                                            handleOpenReleasePopup(securityGuardDetail.cardNumber!)
                                           }}
                                           sx={{
                                             boxShadow: 2,
@@ -444,11 +444,11 @@ const SecurityGuardContent = () => {
                 <CustomFormLabel htmlFor="Address">Address</CustomFormLabel>
                 <Typography>{securityGuardDetail.address}</Typography>
                 <CustomFormLabel htmlFor="birth-Date">Birth Date</CustomFormLabel>
-                <Typography>{formatDate(securityGuardDetail.birthDate)}</Typography>
+                <Typography>{formatDate(securityGuardDetail.birthDate!)}</Typography>
                 <CustomFormLabel htmlFor="join-Date">Join Date</CustomFormLabel>
-                <Typography>{formatDate(securityGuardDetail.joinDate)}</Typography>
+                <Typography>{formatDate(securityGuardDetail.joinDate!)}</Typography>
                 <CustomFormLabel htmlFor="exit-Date">Exit Date</CustomFormLabel>
-                <Typography>{formatDate(securityGuardDetail.exitDate)}</Typography>
+                <Typography>{formatDate(securityGuardDetail.exitDate!)}</Typography>
               </Grid>
               <Grid size={{ lg: 6, md: 12, sm: 12 }} display="flex" flexDirection={'column'}>
                 <CustomFormLabel htmlFor="phone">Phone</CustomFormLabel>
@@ -456,9 +456,17 @@ const SecurityGuardContent = () => {
                 <CustomFormLabel htmlFor="gender">Gender</CustomFormLabel>
                 <Typography>{securityGuardDetail.gender}</Typography>
                 <CustomFormLabel htmlFor="head-Member-1">Head Security 1</CustomFormLabel>
-                <Typography>{securityGuardDetail.headMember1}</Typography>
+                <Typography>
+                  {typeof securityGuardDetail.securityHead1 === 'object'
+                    ? securityGuardDetail.securityHead1?.name
+                    : securityGuardDetail.securityHead1}
+                </Typography>
                 <CustomFormLabel htmlFor="head-Member-2">Head Security 2</CustomFormLabel>
-                <Typography>{securityGuardDetail.headMember2}</Typography>
+                <Typography>
+                  {typeof securityGuardDetail.securityHead2 === 'object'
+                    ? securityGuardDetail.securityHead2?.name
+                    : securityGuardDetail.securityHead2}
+                </Typography>
                 <CustomFormLabel htmlFor="status-employee">Status Employee</CustomFormLabel>
                 <Typography>{securityGuardDetail.statusEmployee}</Typography>
               </Grid>

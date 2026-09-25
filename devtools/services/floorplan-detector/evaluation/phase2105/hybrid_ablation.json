@@ -1,0 +1,81 @@
+{
+  "phase": "2.10.5",
+  "experiment": "hybrid_ablation",
+  "description": "Controlled offline ablation study comparing Full Hybrid vs Hybrid without Strategy B (Planar Face), Hybrid without Strategy D (Doorway Topology), and Hybrid without both B and D.",
+  "variants": {
+    "FULL_HYBRID": {
+      "total_proposals": 4664,
+      "valid_proposals_iou50": 20,
+      "partial_proposals_iou25": 30,
+      "cavity_split_recall_10": 0.7895,
+      "cavity_split_recall_25": 0.5614,
+      "cavity_split_recall_50": 0.2807,
+      "cavity_split_recall_75": 0.1754,
+      "mean_best_iou": 0.3692,
+      "median_best_iou": 0.3288,
+      "duplicate_count": 1556,
+      "low_quality_count": 1501,
+      "redundant_count": 1462,
+      "mean_coverage_ratio": 1.2587,
+      "mean_overlap_ratio": 0.3718
+    },
+    "HYBRID_WITHOUT_PLANAR_FACE": {
+      "total_proposals": 4664,
+      "valid_proposals_iou50": 20,
+      "partial_proposals_iou25": 30,
+      "cavity_split_recall_10": 0.7895,
+      "cavity_split_recall_25": 0.5614,
+      "cavity_split_recall_50": 0.2807,
+      "cavity_split_recall_75": 0.1754,
+      "mean_best_iou": 0.3692,
+      "median_best_iou": 0.3288,
+      "duplicate_count": 1556,
+      "low_quality_count": 1501,
+      "redundant_count": 1462,
+      "mean_coverage_ratio": 1.2587,
+      "mean_overlap_ratio": 0.3718,
+      "delta_vs_full": "Identical (Strategy B contributed 0 proposals)"
+    },
+    "HYBRID_WITHOUT_DOORWAY_TOPOLOGY": {
+      "total_proposals": 4664,
+      "valid_proposals_iou50": 20,
+      "partial_proposals_iou25": 30,
+      "cavity_split_recall_10": 0.7895,
+      "cavity_split_recall_25": 0.5614,
+      "cavity_split_recall_50": 0.2807,
+      "cavity_split_recall_75": 0.1754,
+      "mean_best_iou": 0.3692,
+      "median_best_iou": 0.3288,
+      "duplicate_count": 1556,
+      "low_quality_count": 1501,
+      "redundant_count": 1462,
+      "mean_coverage_ratio": 1.2587,
+      "mean_overlap_ratio": 0.3718,
+      "delta_vs_full": "Identical (Strategy D contributed 0 proposals)"
+    },
+    "HYBRID_WITHOUT_BOTH_B_AND_D": {
+      "total_proposals": 4664,
+      "valid_proposals_iou50": 20,
+      "partial_proposals_iou25": 30,
+      "cavity_split_recall_10": 0.7895,
+      "cavity_split_recall_25": 0.5614,
+      "cavity_split_recall_50": 0.2807,
+      "cavity_split_recall_75": 0.1754,
+      "mean_best_iou": 0.3692,
+      "median_best_iou": 0.3288,
+      "duplicate_count": 1556,
+      "low_quality_count": 1501,
+      "redundant_count": 1462,
+      "mean_coverage_ratio": 1.2587,
+      "mean_overlap_ratio": 0.3718,
+      "delta_vs_full": "Identical (Both strategies generated 0 proposals; hybrid performance is 100% driven by Strategies A, C, and E)"
+    }
+  },
+  "scientific_attribution": {
+    "Strategy_B_Attribution": "NO_CONTRIBUTION (removing it causes 0 delta in proposals, recall, or configurations)",
+    "Strategy_D_Attribution": "NO_CONTRIBUTION (removing it causes 0 delta in proposals, recall, or configurations)",
+    "Strategy_A_Attribution": "CONTRIBUTING (supplies 122 clean wall-network polygon proposals, seeded 72 hybrid proposals)",
+    "Strategy_C_Attribution": "CONTRIBUTING (supplies 112 partition-based proposals)",
+    "Strategy_E_Attribution": "NECESSARY (supplies 4,592 proposals, responsible for all proposal-guided coverage gains)"
+  }
+}

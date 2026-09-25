@@ -10,6 +10,7 @@ import usePreventWindowClose from './hooks/usePreventWindowClose';
 import { getActiveFeatures, useLicenseInfo } from './hooks/useInfo';
 import { setActiveFeatures } from './store/apps/session';
 import AboutPage from './views/About/aboutPage';
+import { getAccessToken } from './utils/axios';
 
 function App() {
   const theme = ThemeSettings();
@@ -20,14 +21,16 @@ function App() {
   // Fetch license info on initialization
   const { data: licenseData, isLoading: isLicenseLoading } = useLicenseInfo();
 
-  const isLoggedIn = typeof window !== 'undefined' && (!!localStorage.getItem('response') || !!localStorage.getItem('token'));
+  const isLoggedIn =
+    typeof window !== 'undefined' &&
+    (!!getAccessToken() || !!localStorage.getItem('levelPriority'));
   const { data: featureData } = getActiveFeatures(isLoggedIn && !!licenseData?.isValid);
 
   useEffect(() => {
     if (featureData?.activeFeatures) {
       dispatch(setActiveFeatures(featureData.activeFeatures));
     }
-  }, [featureData, dispatch]);
+  }, [featureData, dispatch, isLoggedIn]);
 
   // Global browser close preventer
   // usePreventWindowClose(true);

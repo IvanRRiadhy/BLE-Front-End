@@ -1,0 +1,48 @@
+{
+  "phase": "2.10.5",
+  "experiment": "selective_latency_benchmark",
+  "description": "Offline selective latency benchmark measuring oversized-cavity detection, per-flagged cavity splitting, and image-level latency without full unselective overhead.",
+  "dataset": {
+    "total_images": 12,
+    "total_cavities_evaluated": 88,
+    "total_flagged_cavities": 68,
+    "average_flagged_cavities_per_image": 5.67,
+    "median_flagged_cavities_per_image": 1.5,
+    "min_flagged_cavities": 0,
+    "max_flagged_cavities": 21
+  },
+  "single_cavity_split_latency_ms": {
+    "mean": 5819.0,
+    "p50": 56.4,
+    "p95": 872.6,
+    "p99": 158897.1,
+    "min": 2.1,
+    "max": 305706.9,
+    "bottleneck_note": "Extreme tail latency is driven by sample-floorplan-house3 which has 3,687 Phase 2.10.4 proposals polygon-clipped against 17 cavities. For plans with normal proposal counts (1-500 proposals), per-cavity split is under 60ms."
+  },
+  "oversized_cavity_detection_latency_ms": {
+    "mean": 333.1,
+    "p50": 11.2,
+    "max": 3143.5
+  },
+  "per_image_selective_latency_ms": {
+    "mean": 35526.8,
+    "p50": 24.5,
+    "p95": 191708.5,
+    "p50_sub_250ms_status": "PASS for median image (24.5ms), but heavy outlier images with thousands of proposals exceed 250ms."
+  },
+  "flagged_cavities_scaling": [
+    { "flagged_cavities": 0, "image_count": 1, "mean_split_ms": 0.0, "median_split_ms": 0.0 },
+    { "flagged_cavities": 1, "image_count": 5, "mean_split_ms": 7.3, "median_split_ms": 4.2 },
+    { "flagged_cavities": 2, "image_count": 2, "mean_split_ms": 11.6, "median_split_ms": 11.6 },
+    { "flagged_cavities": 10, "image_count": 1, "mean_split_ms": 76.7, "median_split_ms": 76.7 },
+    { "flagged_cavities": 11, "image_count": 1, "mean_split_ms": 459.6, "median_split_ms": 459.6 },
+    { "flagged_cavities": 17, "image_count": 1, "mean_split_ms": 393345.8, "median_split_ms": 393345.8, "note": "Contains 3,687 dense proposals clipped against 17 cavities" },
+    { "flagged_cavities": 21, "image_count": 1, "mean_split_ms": 1751.1, "median_split_ms": 1751.1 }
+  ],
+  "resource_usage": {
+    "ram_peak_mb": 196.7,
+    "ram_delta_mb": 17.6
+  },
+  "conclusion": "Under normal proposal densities and for 8 out of 12 benchmark plans (<= 2 flagged cavities), selective cavity splitting runs in 4ms to 12ms. For median floorplans (P50 = 24.5ms total including detection), splitting is well under 250ms. However, unconstrained dense proposal pools create an extreme P99 tail (up to 393s) demonstrating that proposal deduplication/budget pruning (Phase 2.10.6) is strictly required before selective splitting can be deployed to production."
+}
