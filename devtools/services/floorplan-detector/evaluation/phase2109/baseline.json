@@ -1,0 +1,14 @@
+{
+  "authoritative_gt_count": 148,
+  "available_gt_count": 19,
+  "phase2107_baseline": {
+    "tp_050": 19,
+    "fp_050": 348,
+    "fn_050": 129
+  },
+  "phase2108_baseline": {
+    "tp_050": 14,
+    "fp_050": 323,
+    "fn_050": 134
+  }
+}

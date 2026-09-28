@@ -62,7 +62,7 @@ const AddEditFloorplan = lazy(() => import('./AddEditFloorplan'));
 const getCdnUrl = (url?: string | null) => {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `https://ble-cdn.tunnel.piranticerdasindonesia.com/${url}`;
+  return `https://ble-cdn.app.bio-experience.com${url}`;
 };
 
 const SKELETON_ROWS = 5;

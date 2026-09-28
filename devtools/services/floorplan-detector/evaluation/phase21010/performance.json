@@ -1,0 +1,19 @@
+{
+  "mean_latency_ms": 181.81,
+  "max_latency_ms": 977.97,
+  "min_latency_ms": 5.66,
+  "per_image_latencies_ms": {
+    "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": 191.7,
+    "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": 94.84,
+    "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": 16.05,
+    "Floorplan-House.png": 486.1,
+    "Lantai 1.jpg": 30.16,
+    "Lantai 2.jpg": 5.66,
+    "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": 106.79,
+    "library-floor-plan.png": 5.92,
+    "sample-floorplan-house2.png": 236.34,
+    "sample-floorplan-house3.png": 977.97,
+    "sample-floorplan.png": 24.0,
+    "simple-apartment-floor-plan.png": 6.21
+  }
+}

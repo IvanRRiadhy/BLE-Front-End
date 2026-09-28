@@ -1,0 +1,77 @@
+{
+  "total_evaluated": 367,
+  "tp_count": 19,
+  "fp_count": 348,
+  "distributions": {
+    "wall_boundary_support": {
+      "tp_mean": 0.8042,
+      "tp_median": 0.83,
+      "fp_mean": 0.9434,
+      "fp_median": 1.0,
+      "separation": -0.1393
+    },
+    "enclosure_score": {
+      "tp_mean": 0.8805,
+      "tp_median": 0.9545,
+      "fp_mean": 0.9563,
+      "fp_median": 1.0,
+      "separation": -0.0758
+    },
+    "doorway_evidence": {
+      "tp_mean": 0.0,
+      "tp_median": 0.0,
+      "fp_mean": 0.0,
+      "fp_median": 0.0,
+      "separation": 0.0
+    },
+    "topology_consistency": {
+      "tp_mean": 0.3,
+      "tp_median": 0.3,
+      "fp_mean": 0.3,
+      "fp_median": 0.3,
+      "separation": 0.0
+    },
+    "exterior_likelihood": {
+      "tp_mean": 0.3921,
+      "tp_median": 0.6,
+      "fp_mean": 0.0369,
+      "fp_median": 0.0,
+      "separation": 0.3552
+    },
+    "furniture_likelihood": {
+      "tp_mean": 0.0,
+      "tp_median": 0.0,
+      "fp_mean": 0.0,
+      "fp_median": 0.0,
+      "separation": 0.0
+    },
+    "text_likelihood": {
+      "tp_mean": 0.0,
+      "tp_median": 0.0,
+      "fp_mean": 0.0,
+      "fp_median": 0.0,
+      "separation": 0.0
+    },
+    "sliver_likelihood": {
+      "tp_mean": 0.0,
+      "tp_median": 0.0,
+      "fp_mean": 0.4092,
+      "fp_median": 0.0,
+      "separation": -0.4092
+    },
+    "artificial_cavity_likelihood": {
+      "tp_mean": 0.0,
+      "tp_median": 0.0,
+      "fp_mean": 0.0324,
+      "fp_median": 0.0,
+      "separation": -0.0324
+    },
+    "room_validity_score": {
+      "tp_mean": 0.5156,
+      "tp_median": 0.435,
+      "fp_mean": 0.6557,
+      "fp_median": 0.6125,
+      "separation": -0.1401
+    }
+  }
+}

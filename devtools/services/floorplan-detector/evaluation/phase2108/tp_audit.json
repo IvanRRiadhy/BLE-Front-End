@@ -1,0 +1,156 @@
+[
+  {
+    "image_id": "Floorplan-House.png",
+    "room_id": "val_room_000",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_274",
+    "room_validity_score": 0.7782,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_005",
+    "gt_iou": 0.7975,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "room_id": "val_room_001",
+    "hypothesis_id": "hyp_cavity_15__split_hyb_4",
+    "room_validity_score": 0.9328,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_011",
+    "gt_iou": 0.7846,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "room_id": "val_room_009",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_220",
+    "room_validity_score": 0.9126,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_007",
+    "gt_iou": 0.5061,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "room_id": "val_room_001",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_54",
+    "room_validity_score": 0.99,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_001",
+    "gt_iou": 0.6548,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "room_id": "val_room_015",
+    "hypothesis_id": "hyp_cavity_4__split_hyb_4",
+    "room_validity_score": 0.594,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_018",
+    "gt_iou": 0.5288,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "room_id": "val_room_017",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_7",
+    "room_validity_score": 0.825,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_006",
+    "gt_iou": 0.6761,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "room_id": "val_room_000",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_4",
+    "room_validity_score": 0.435,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_003",
+    "gt_iou": 0.5665,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "room_id": "val_room_001",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_7",
+    "room_validity_score": 0.3838,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_008",
+    "gt_iou": 0.8667,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "room_id": "val_room_003",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_1",
+    "room_validity_score": 0.435,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_004",
+    "gt_iou": 0.891,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "room_id": "val_room_005",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_18",
+    "room_validity_score": 0.3722,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_005",
+    "gt_iou": 0.9475,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "room_id": "val_room_006",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_8",
+    "room_validity_score": 0.825,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_006",
+    "gt_iou": 0.8005,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "room_id": "val_room_007",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_11",
+    "room_validity_score": 0.5112,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_007",
+    "gt_iou": 0.8249,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "simple-apartment-floor-plan.png",
+    "room_id": "val_room_000",
+    "hypothesis_id": "hyp_cavity_1__split_hyb_1",
+    "room_validity_score": 0.4175,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_005",
+    "gt_iou": 0.9634,
+    "is_true_positive": true
+  },
+  {
+    "image_id": "simple-apartment-floor-plan.png",
+    "room_id": "val_room_001",
+    "hypothesis_id": "simple-apartment-floor-plan.png__prop_comb_5",
+    "room_validity_score": 0.3722,
+    "architectural_score": 0.0,
+    "boundary_quality": 0.8,
+    "matched_gt_id": "gt_003",
+    "gt_iou": 0.5424,
+    "is_true_positive": true
+  }
+]

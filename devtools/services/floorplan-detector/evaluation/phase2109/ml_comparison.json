@@ -1,0 +1,27 @@
+{
+  "ml_off": {
+    "final_room_count": 151,
+    "tp_050": 16,
+    "fp_050": 135,
+    "fn_050": 132,
+    "precision_050": 0.106,
+    "recall_050": 0.1081,
+    "f1_050": 0.107,
+    "mean_iou": 0.3014
+  },
+  "ml_on": {
+    "final_room_count": 151,
+    "tp_050": 16,
+    "fp_050": 135,
+    "fn_050": 132,
+    "precision_050": 0.106,
+    "recall_050": 0.1081,
+    "f1_050": 0.107,
+    "mean_iou": 0.3014
+  },
+  "delta": {
+    "tp_delta": 0,
+    "fp_delta": 0,
+    "f1_delta": 0.0
+  }
+}

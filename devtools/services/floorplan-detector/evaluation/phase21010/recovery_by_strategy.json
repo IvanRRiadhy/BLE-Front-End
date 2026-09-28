@@ -1,0 +1,26 @@
+{
+  "doorway_recovery": {
+    "total_proposals": 0,
+    "mean_proposals_per_image": 0.0
+  },
+  "partition_recovery": {
+    "total_proposals": 694,
+    "mean_proposals_per_image": 57.83
+  },
+  "neighbor_recovery": {
+    "total_proposals": 2,
+    "mean_proposals_per_image": 0.17
+  },
+  "repetition_recovery": {
+    "total_proposals": 46,
+    "mean_proposals_per_image": 3.83
+  },
+  "wall_reconstruction": {
+    "total_proposals": 184,
+    "mean_proposals_per_image": 15.33
+  },
+  "combined_recovery": {
+    "total_proposals": 0,
+    "mean_proposals_per_image": 0.0
+  }
+}

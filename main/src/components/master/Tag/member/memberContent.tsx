@@ -217,6 +217,11 @@ const MemberContent = () => {
           try {
             await releaseMutation.mutateAsync(selectedCardNumber);
             toast.success('Card Released');
+            dispatch(SelectMemberId(''));
+            queryClient.invalidateQueries({ queryKey: ['member-list-infinite'] });
+            queryClient.invalidateQueries({ queryKey: ['member-list'] });
+            queryClient.invalidateQueries({ queryKey: ['member-all'] });
+            queryClient.invalidateQueries({ queryKey: ['member'] });
           } catch (error) {
             toast.error('Release failed');
             console.error(error);
@@ -471,17 +476,13 @@ const MemberContent = () => {
                 <Typography color={memberDetail.isHead ? 'text.secondary' : 'inherit'}>
                   {memberDetail.isHead
                     ? 'None (Head Member)'
-                    : typeof (memberDetail.memberHead1 || memberDetail.headMember1) === 'object'
-                    ? (memberDetail.memberHead1 || memberDetail.headMember1)?.name || '-'
-                    : memberDetail.memberHead1 || memberDetail.headMember1 || '-'}
+                    : memberDetail.memberHead1 || '-'}
                 </Typography>
                 <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
                 <Typography color={memberDetail.isHead ? 'text.secondary' : 'inherit'}>
                   {memberDetail.isHead
                     ? 'None (Head Member)'
-                    : typeof (memberDetail.memberHead2 || memberDetail.headMember2) === 'object'
-                    ? (memberDetail.memberHead2 || memberDetail.headMember2)?.name || '-'
-                    : memberDetail.memberHead2 || memberDetail.headMember2 || '-'}
+                    : memberDetail.memberHead2 || '-'}
                 </Typography>
                 <CustomFormLabel htmlFor="status-employee">Status Employee</CustomFormLabel>
                 <Typography>{memberDetail.statusEmployee}</Typography>
@@ -626,7 +627,7 @@ const MemberContent = () => {
               <DialogTitle>Confirm Card Release</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  Are you sure you want to release the Card <strong>{selectedCardNumber}</strong> from its user <strong>{selectedMember?.name}</strong>?
+                  Are you sure you want to release the Card <strong>{selectedCardNumber}</strong> from its user <strong>{memberDetail?.name}</strong>?
                 </DialogContentText>
               </DialogContent>
               <DialogActions>

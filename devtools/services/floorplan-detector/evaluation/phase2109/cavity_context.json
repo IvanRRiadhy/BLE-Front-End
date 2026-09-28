@@ -1,0 +1,3672 @@
+[
+  {
+    "hypothesisId": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_1",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_2",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_3",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_4",
+    "enclosureScore": 0.644,
+    "wallSupport": 0.56,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_12",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_13",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_14",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_18",
+    "enclosureScore": 0.644,
+    "wallSupport": 0.56,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_17",
+    "enclosureScore": 0.6555,
+    "wallSupport": 0.57,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_4",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_6",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_2",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_5",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_3",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_1",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_face_face_12__split_hyb_3",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_face_face_10__split_hyb_1",
+    "enclosureScore": 1.0,
+    "wallSupport": 0.94,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_comb_3",
+    "enclosureScore": 1.0,
+    "wallSupport": 0.98,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_506",
+    "enclosureScore": 0.414,
+    "wallSupport": 0.36,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.7,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_274",
+    "enclosureScore": 0.69,
+    "wallSupport": 0.6,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_15__split_hyb_4",
+    "enclosureScore": 0.9545,
+    "wallSupport": 0.83,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_341",
+    "enclosureScore": 0.621,
+    "wallSupport": 0.54,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_face_face_19_sub1__split_hyb_6",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_face_face_19_sub1__split_hyb_5",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_458",
+    "enclosureScore": 0.575,
+    "wallSupport": 0.5,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_face_face_16__split_hyb_1",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_face_face_19_sub1__split_hyb_8",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_244",
+    "enclosureScore": 0.759,
+    "wallSupport": 0.66,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_220",
+    "enclosureScore": 0.92,
+    "wallSupport": 0.8,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_1_sub2__split_hyb_17",
+    "enclosureScore": 0.92,
+    "wallSupport": 0.8,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_199",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_16__split_hyb_18",
+    "enclosureScore": 0.1725,
+    "wallSupport": 0.15,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.7,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_11",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_41",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_190",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_115",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_104",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_117",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_38",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_40",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_169",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_192",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_198",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_43",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_114",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_194",
+    "enclosureScore": 1.0,
+    "wallSupport": 0.9828,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_118",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_208",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_188",
+    "enclosureScore": 1.0,
+    "wallSupport": 0.975,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_89",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_205",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_146",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_185",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_209",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_16__split_hyb_3",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_147",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_150",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_91",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_145",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_111",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_96",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_63",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_109",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_95",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_207",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_120",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_112",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_103",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_61",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_68",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_122",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_66",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_9",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_98",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_121",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_93",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_195",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_49",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_124",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_108",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_69",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_88",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_58",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_71",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_206",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_60",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_64",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_70",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_74",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_187",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_47",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_53",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_102",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 10,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_51",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_80",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_110",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_86",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_77",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_62",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_67",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_85",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_94",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_79",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_82",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_203",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_78",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_81",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_59",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_100",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_54",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_92",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_1_sub2__split_hyb_7",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_65",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_72",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_73",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_16__split_hyb_10",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_105",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_148",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_44",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_56",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_212",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_16__split_hyb_5",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_1_sub2__split_hyb_5",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_46",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_50",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_55",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_57",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_90",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_16__split_hyb_4",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_97",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_76",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_170",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_75",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_99",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_210",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_48",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 9,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_52",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_106",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_101",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 10,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_140",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_189",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_107",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 11,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_84",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Floorplan-House.png__prop_comb_45",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_16__split_hyb_12",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_16__split_hyb_9",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 1.jpg__prop_comb_11",
+    "enclosureScore": 0.9545,
+    "wallSupport": 0.83,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 1.jpg__prop_comb_5",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 1.jpg__prop_comb_10",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 1.jpg__prop_comb_7",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 1.jpg__prop_comb_6",
+    "enclosureScore": 0.8395,
+    "wallSupport": 0.73,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 1.jpg__prop_comb_12",
+    "enclosureScore": 0.874,
+    "wallSupport": 0.76,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 1.jpg__prop_comb_17",
+    "enclosureScore": 0.6555,
+    "wallSupport": 0.57,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 2.jpg__prop_comb_13",
+    "enclosureScore": 0.897,
+    "wallSupport": 0.78,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 2.jpg__prop_comb_12",
+    "enclosureScore": 0.713,
+    "wallSupport": 0.62,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "Lantai 2.jpg__prop_comb_14",
+    "enclosureScore": 0.552,
+    "wallSupport": 0.48,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_5",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_6",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_11",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_2",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_3",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_10",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_7",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_13",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_12",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_9",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_8",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_1",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_4",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "library-floor-plan.png__prop_comb_2",
+    "enclosureScore": 0.437,
+    "wallSupport": 0.38,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "library-floor-plan.png__prop_comb_1",
+    "enclosureScore": 0.5405,
+    "wallSupport": 0.47,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_85",
+    "enclosureScore": 0.805,
+    "wallSupport": 0.7,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_54",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_3",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_113",
+    "enclosureScore": 0.9583,
+    "wallSupport": 0.8333,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_58",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_71",
+    "enclosureScore": 0.8855,
+    "wallSupport": 0.77,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_81",
+    "enclosureScore": 0.759,
+    "wallSupport": 0.66,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_74",
+    "enclosureScore": 0.8395,
+    "wallSupport": 0.73,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_3__split_hyb_3",
+    "enclosureScore": 0.897,
+    "wallSupport": 0.78,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_118",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_62",
+    "enclosureScore": 1.0,
+    "wallSupport": 0.93,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_4__split_hyb_3",
+    "enclosureScore": 0.8433,
+    "wallSupport": 0.7333,
+    "doorwayCount": 0,
+    "neighborCount": 10,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_4",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_156",
+    "enclosureScore": 0.6053,
+    "wallSupport": 0.5263,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_5",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_6",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_6__split_hyb_3",
+    "enclosureScore": 0.713,
+    "wallSupport": 0.62,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_4__split_hyb_4",
+    "enclosureScore": 0.6325,
+    "wallSupport": 0.55,
+    "doorwayCount": 0,
+    "neighborCount": 12,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_48",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_7",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_9",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_161",
+    "enclosureScore": 0.6552,
+    "wallSupport": 0.5698,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_149",
+    "enclosureScore": 0.6787,
+    "wallSupport": 0.5902,
+    "doorwayCount": 0,
+    "neighborCount": 10,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_10",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_169",
+    "enclosureScore": 0.4362,
+    "wallSupport": 0.3793,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.7,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_140",
+    "enclosureScore": 0.6982,
+    "wallSupport": 0.6071,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_9__split_hyb_2",
+    "enclosureScore": 0.851,
+    "wallSupport": 0.74,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_160",
+    "enclosureScore": 0.453,
+    "wallSupport": 0.3939,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.7,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_126",
+    "enclosureScore": 0.69,
+    "wallSupport": 0.6,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_159",
+    "enclosureScore": 0.6571,
+    "wallSupport": 0.5714,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_11",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_13",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_176",
+    "enclosureScore": 0.644,
+    "wallSupport": 0.56,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_132",
+    "enclosureScore": 0.3565,
+    "wallSupport": 0.31,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_163",
+    "enclosureScore": 0.2633,
+    "wallSupport": 0.2289,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.7,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_1__split_hyb_4",
+    "enclosureScore": 0.8,
+    "wallSupport": 0.6957,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_77",
+    "enclosureScore": 0.7826,
+    "wallSupport": 0.6806,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_87",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_22",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_45",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_50",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_8",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_55",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_104",
+    "enclosureScore": 0.7015,
+    "wallSupport": 0.61,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_197",
+    "enclosureScore": 0.414,
+    "wallSupport": 0.36,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.7,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house2.png__prop_comb_30",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1989",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_4__split_hyb_1",
+    "enclosureScore": 0.69,
+    "wallSupport": 0.6,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_2614",
+    "enclosureScore": 0.7935,
+    "wallSupport": 0.69,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_2422",
+    "enclosureScore": 0.9775,
+    "wallSupport": 0.85,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_2061",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_910",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_900",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_2100",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_572",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_573",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_876",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_741",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_770",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_2096",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_2097",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_2783",
+    "enclosureScore": 0.322,
+    "wallSupport": 0.28,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_101",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_147",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_146",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_125",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1636",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1637",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_349",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_75",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_2430",
+    "enclosureScore": 0.7419,
+    "wallSupport": 0.6452,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_76",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1638",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_13",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_476",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_262",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1640",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_327",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_117",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1639",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_423",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_73",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1835",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_499",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_22",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_281",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_492",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_495",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_515",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_74",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_79",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_241",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_422",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_43",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_263",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_280",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_49",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_59",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_91",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_32",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_85",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_421",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_23",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_410",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_412",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_8",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_315",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_24",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_313",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_269",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_283",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_318",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_320",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_497",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_307",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_21",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1225",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_44",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_317",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_420",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_306",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_10",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_50",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_408",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_411",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_500",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_344",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_865",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_875",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_200",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_45",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_60",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_92",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_327",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_740",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_324",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_622",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1927",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_11",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_33",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_86",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 4,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_311",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_314",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_164",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_340",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_769",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_12",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_21",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_51",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_312",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_61",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_93",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_19",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_9",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_268",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_282",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_319",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_325",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_34",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_87",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_42",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_310",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1226",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_776",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_740",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_48",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 8,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_326",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 1,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.5,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_58",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_90",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_704",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_304",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_119",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_31",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_84",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_413",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_309",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_194",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan-house3.png__prop_comb_1227",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_2_sub1__split_hyb_426",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.85,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_4",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_7",
+    "enclosureScore": 0.989,
+    "wallSupport": 0.86,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_20",
+    "enclosureScore": 0.6213,
+    "wallSupport": 0.5402,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_1",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_13",
+    "enclosureScore": 0.851,
+    "wallSupport": 0.74,
+    "doorwayCount": 0,
+    "neighborCount": 6,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_18",
+    "enclosureScore": 0.966,
+    "wallSupport": 0.84,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_8",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_11",
+    "enclosureScore": 0.8846,
+    "wallSupport": 0.7692,
+    "doorwayCount": 0,
+    "neighborCount": 7,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_17",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": false,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_12",
+    "enclosureScore": 0.7377,
+    "wallSupport": 0.6415,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_14",
+    "enclosureScore": 0.7077,
+    "wallSupport": 0.6154,
+    "doorwayCount": 0,
+    "neighborCount": 3,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "sample-floorplan.png__prop_comb_9",
+    "enclosureScore": 1.0,
+    "wallSupport": 1.0,
+    "doorwayCount": 0,
+    "neighborCount": 5,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "hyp_cavity_1__split_hyb_1",
+    "enclosureScore": 1.0,
+    "wallSupport": 0.95,
+    "doorwayCount": 0,
+    "neighborCount": 0,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.15,
+    "isFullyWalledWithoutOpenings": true
+  },
+  {
+    "hypothesisId": "hyp_cavity_1__split_hyb_2",
+    "enclosureScore": 0.805,
+    "wallSupport": 0.7,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "simple-apartment-floor-plan.png__prop_comb_5",
+    "enclosureScore": 0.966,
+    "wallSupport": 0.84,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  },
+  {
+    "hypothesisId": "simple-apartment-floor-plan.png__prop_comb_6",
+    "enclosureScore": 1.0,
+    "wallSupport": 0.875,
+    "doorwayCount": 0,
+    "neighborCount": 2,
+    "exteriorConnection": true,
+    "artificialCavityLikelihood": 0.05,
+    "isFullyWalledWithoutOpenings": false
+  }
+]

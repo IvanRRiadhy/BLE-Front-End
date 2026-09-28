@@ -1,0 +1,82 @@
+{
+  "sample-floorplan.png": {
+    "gt_count": 8,
+    "final_rooms": 17,
+    "tp_050": 6,
+    "fp_050": 11,
+    "fn_050": 2,
+    "precision_050": 0.3529,
+    "recall_050": 0.75,
+    "f1_050": 0.48
+  },
+  "Lantai 1.jpg": {
+    "gt_count": 5,
+    "final_rooms": 10,
+    "tp_050": 0,
+    "fp_050": 10,
+    "fn_050": 5,
+    "precision_050": 0.0,
+    "recall_050": 0.0,
+    "f1_050": 0.0
+  },
+  "Lantai 2.jpg": {
+    "gt_count": 5,
+    "final_rooms": 13,
+    "tp_050": 3,
+    "fp_050": 10,
+    "fn_050": 2,
+    "precision_050": 0.2308,
+    "recall_050": 0.6,
+    "f1_050": 0.3333
+  },
+  "simple-apartment-floor-plan.png": {
+    "gt_count": 7,
+    "final_rooms": 3,
+    "tp_050": 2,
+    "fp_050": 1,
+    "fn_050": 5,
+    "precision_050": 0.6667,
+    "recall_050": 0.2857,
+    "f1_050": 0.4
+  },
+  "library-floor-plan.png": {
+    "gt_count": 5,
+    "final_rooms": 6,
+    "tp_050": 0,
+    "fp_050": 6,
+    "fn_050": 5,
+    "precision_050": 0.0,
+    "recall_050": 0.0,
+    "f1_050": 0.0
+  },
+  "sample-floorplan-house2.png": {
+    "gt_count": 17,
+    "final_rooms": 49,
+    "tp_050": 4,
+    "fp_050": 45,
+    "fn_050": 13,
+    "precision_050": 0.0816,
+    "recall_050": 0.2353,
+    "f1_050": 0.1212
+  },
+  "Floorplan-House.png": {
+    "gt_count": 16,
+    "final_rooms": 70,
+    "tp_050": 3,
+    "fp_050": 67,
+    "fn_050": 13,
+    "precision_050": 0.0429,
+    "recall_050": 0.1875,
+    "f1_050": 0.0698
+  },
+  "sample-floorplan-house3.png": {
+    "gt_count": 21,
+    "final_rooms": 24,
+    "tp_050": 0,
+    "fp_050": 24,
+    "fn_050": 21,
+    "precision_050": 0.0,
+    "recall_050": 0.0,
+    "f1_050": 0.0
+  }
+}

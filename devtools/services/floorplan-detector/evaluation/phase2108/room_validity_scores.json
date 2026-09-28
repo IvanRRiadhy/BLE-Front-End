@@ -1,0 +1,3672 @@
+[
+  {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_1",
+    "area_px": 51231.0,
+    "room_validity_score": 0.95,
+    "positive_score": 0.81,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_2",
+    "area_px": 51069.0,
+    "room_validity_score": 0.95,
+    "positive_score": 0.81,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_3",
+    "area_px": 50396.0,
+    "room_validity_score": 0.95,
+    "positive_score": 0.81,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png__prop_comb_4",
+    "area_px": 37608.7,
+    "room_validity_score": 0.6963,
+    "positive_score": 0.5563,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_12",
+    "area_px": 29701.5,
+    "room_validity_score": 0.98,
+    "positive_score": 0.84,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_13",
+    "area_px": 29652.0,
+    "room_validity_score": 0.98,
+    "positive_score": 0.84,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_14",
+    "area_px": 29216.0,
+    "room_validity_score": 0.98,
+    "positive_score": 0.84,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_18",
+    "area_px": 13050.6,
+    "room_validity_score": 0.5448,
+    "positive_score": 0.4048,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_17",
+    "area_px": 16978.4,
+    "room_validity_score": 0.5506,
+    "positive_score": 0.4106,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_4",
+    "area_px": 2806.1,
+    "room_validity_score": 0.615,
+    "positive_score": 0.685,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.4693,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_6",
+    "area_px": 1849.7,
+    "room_validity_score": 0.56,
+    "positive_score": 0.63,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.5,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_2",
+    "area_px": 1276.5,
+    "room_validity_score": 0.615,
+    "positive_score": 0.685,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.4693,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_5",
+    "area_px": 754.5,
+    "room_validity_score": 0.3475,
+    "positive_score": 0.63,
+    "negative_score": 0.4225,
+    "ambiguity_score": 0.8029,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_3",
+    "area_px": 681.6,
+    "room_validity_score": 0.3475,
+    "positive_score": 0.63,
+    "negative_score": 0.4225,
+    "ambiguity_score": 0.8029,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png__prop_comb_1",
+    "area_px": 655.5,
+    "room_validity_score": 0.4025,
+    "positive_score": 0.685,
+    "negative_score": 0.4225,
+    "ambiguity_score": 0.763,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_face_face_12__split_hyb_3",
+    "area_px": 671.0,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_face_face_10__split_hyb_1",
+    "area_px": 244380.5,
+    "room_validity_score": 0.359,
+    "positive_score": 0.609,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7808,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png",
+    "hypothesis_id": "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png__prop_comb_3",
+    "area_px": 339748.5,
+    "room_validity_score": 0.373,
+    "positive_score": 0.623,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.77,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_506",
+    "area_px": 39302.0,
+    "room_validity_score": 0.1438,
+    "positive_score": 0.3438,
+    "negative_score": 0.34,
+    "ambiguity_score": 0.9944,
+    "decision": "PROBABLE_NON_ROOM"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_274",
+    "area_px": 271441.5,
+    "room_validity_score": 0.7782,
+    "positive_score": 0.6382,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_15__split_hyb_4",
+    "area_px": 239525.8,
+    "room_validity_score": 0.9328,
+    "positive_score": 0.7928,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_341",
+    "area_px": 229461.4,
+    "room_validity_score": 0.7379,
+    "positive_score": 0.5979,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_face_face_19_sub1__split_hyb_6",
+    "area_px": 598.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_face_face_19_sub1__split_hyb_5",
+    "area_px": 1011.8,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_458",
+    "area_px": 39302.0,
+    "room_validity_score": 0.586,
+    "positive_score": 0.571,
+    "negative_score": 0.125,
+    "ambiguity_score": 0.3592,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_face_face_16__split_hyb_1",
+    "area_px": 343.6,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_face_face_19_sub1__split_hyb_8",
+    "area_px": 314.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_244",
+    "area_px": 107236.2,
+    "room_validity_score": 0.8185,
+    "positive_score": 0.6785,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_220",
+    "area_px": 83863.2,
+    "room_validity_score": 0.9126,
+    "positive_score": 0.7726,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_1_sub2__split_hyb_17",
+    "area_px": 56430.0,
+    "room_validity_score": 0.9126,
+    "positive_score": 0.7726,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_199",
+    "area_px": 38036.5,
+    "room_validity_score": 0.99,
+    "positive_score": 0.865,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_16__split_hyb_18",
+    "area_px": 18810.0,
+    "room_validity_score": 0.01,
+    "positive_score": 0.167,
+    "negative_score": 0.4675,
+    "ambiguity_score": 0.5264,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_11",
+    "area_px": 3216.0,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_41",
+    "area_px": 2873.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_190",
+    "area_px": 2688.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_115",
+    "area_px": 2465.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_104",
+    "area_px": 2281.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_117",
+    "area_px": 2268.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_38",
+    "area_px": 2197.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_40",
+    "area_px": 2197.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_169",
+    "area_px": 2160.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_192",
+    "area_px": 2112.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_198",
+    "area_px": 2100.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_43",
+    "area_px": 2054.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_114",
+    "area_px": 1885.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_194",
+    "area_px": 1828.8,
+    "room_validity_score": 0.764,
+    "positive_score": 0.624,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_118",
+    "area_px": 1806.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_208",
+    "area_px": 1768.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_188",
+    "area_px": 1680.0,
+    "room_validity_score": 0.8163,
+    "positive_score": 0.6763,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_89",
+    "area_px": 1675.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_205",
+    "area_px": 1587.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_146",
+    "area_px": 1523.8,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_185",
+    "area_px": 1522.8,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_209",
+    "area_px": 1498.2,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_16__split_hyb_3",
+    "area_px": 1436.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_147",
+    "area_px": 1391.2,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_150",
+    "area_px": 1391.2,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_91",
+    "area_px": 1337.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_145",
+    "area_px": 1325.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_111",
+    "area_px": 1320.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_96",
+    "area_px": 1303.2,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_63",
+    "area_px": 1295.0,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_109",
+    "area_px": 1288.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_95",
+    "area_px": 1272.8,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_207",
+    "area_px": 1258.8,
+    "room_validity_score": 0.8975,
+    "positive_score": 0.7575,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_120",
+    "area_px": 1164.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_112",
+    "area_px": 1100.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_103",
+    "area_px": 1079.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_61",
+    "area_px": 1073.0,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_68",
+    "area_px": 1073.0,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_122",
+    "area_px": 1049.8,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_66",
+    "area_px": 1036.0,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_9",
+    "area_px": 1026.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_98",
+    "area_px": 1016.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_121",
+    "area_px": 970.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_93",
+    "area_px": 960.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_195",
+    "area_px": 959.7,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_49",
+    "area_px": 953.8,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_124",
+    "area_px": 939.2,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_108",
+    "area_px": 927.4,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_69",
+    "area_px": 925.0,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_88",
+    "area_px": 893.8,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_58",
+    "area_px": 851.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_71",
+    "area_px": 851.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_206",
+    "area_px": 824.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_60",
+    "area_px": 814.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_64",
+    "area_px": 814.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_70",
+    "area_px": 814.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_74",
+    "area_px": 814.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_187",
+    "area_px": 807.5,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_47",
+    "area_px": 790.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_53",
+    "area_px": 790.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_102",
+    "area_px": 772.5,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_51",
+    "area_px": 763.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_80",
+    "area_px": 760.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_110",
+    "area_px": 747.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_86",
+    "area_px": 746.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_77",
+    "area_px": 742.8,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_62",
+    "area_px": 740.0,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_67",
+    "area_px": 740.0,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_85",
+    "area_px": 739.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_94",
+    "area_px": 736.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_79",
+    "area_px": 721.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_82",
+    "area_px": 721.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_203",
+    "area_px": 720.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_78",
+    "area_px": 714.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_81",
+    "area_px": 714.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_59",
+    "area_px": 703.0,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_100",
+    "area_px": 690.0,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_54",
+    "area_px": 681.2,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_92",
+    "area_px": 671.9,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_1_sub2__split_hyb_7",
+    "area_px": 667.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_65",
+    "area_px": 666.0,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_72",
+    "area_px": 666.0,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_73",
+    "area_px": 666.0,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_16__split_hyb_10",
+    "area_px": 652.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_105",
+    "area_px": 629.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_148",
+    "area_px": 627.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_44",
+    "area_px": 626.8,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_56",
+    "area_px": 626.8,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_212",
+    "area_px": 614.2,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_16__split_hyb_5",
+    "area_px": 607.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_1_sub2__split_hyb_5",
+    "area_px": 600.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_46",
+    "area_px": 599.5,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_50",
+    "area_px": 599.5,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_55",
+    "area_px": 599.5,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_57",
+    "area_px": 599.5,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_90",
+    "area_px": 593.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_16__split_hyb_4",
+    "area_px": 585.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_97",
+    "area_px": 582.0,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_76",
+    "area_px": 566.5,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_170",
+    "area_px": 563.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_75",
+    "area_px": 561.0,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_99",
+    "area_px": 549.7,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_210",
+    "area_px": 546.2,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_48",
+    "area_px": 545.0,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_52",
+    "area_px": 545.0,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_106",
+    "area_px": 540.0,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_101",
+    "area_px": 529.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_140",
+    "area_px": 525.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_189",
+    "area_px": 525.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_107",
+    "area_px": 521.6,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_84",
+    "area_px": 518.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "Floorplan-House.png__prop_comb_45",
+    "area_px": 517.8,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_16__split_hyb_12",
+    "area_px": 517.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Floorplan-House.png",
+    "hypothesis_id": "hyp_cavity_16__split_hyb_9",
+    "area_px": 517.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Lantai 1.jpg",
+    "hypothesis_id": "Lantai 1.jpg__prop_comb_11",
+    "area_px": 106737.5,
+    "room_validity_score": 0.4434,
+    "positive_score": 0.6934,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7199,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "Lantai 1.jpg",
+    "hypothesis_id": "Lantai 1.jpg__prop_comb_5",
+    "area_px": 36414.0,
+    "room_validity_score": 0.98,
+    "positive_score": 0.84,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Lantai 1.jpg",
+    "hypothesis_id": "Lantai 1.jpg__prop_comb_10",
+    "area_px": 23679.5,
+    "room_validity_score": 0.38,
+    "positive_score": 0.63,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7647,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "Lantai 1.jpg",
+    "hypothesis_id": "Lantai 1.jpg__prop_comb_7",
+    "area_px": 25051.0,
+    "room_validity_score": 0.99,
+    "positive_score": 0.865,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Lantai 1.jpg",
+    "hypothesis_id": "Lantai 1.jpg__prop_comb_6",
+    "area_px": 17250.6,
+    "room_validity_score": 0.6984,
+    "positive_score": 0.5584,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "Lantai 1.jpg",
+    "hypothesis_id": "Lantai 1.jpg__prop_comb_12",
+    "area_px": 68093.0,
+    "room_validity_score": 0.3258,
+    "positive_score": 0.5758,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.8076,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "Lantai 1.jpg",
+    "hypothesis_id": "Lantai 1.jpg__prop_comb_17",
+    "area_px": 6055.1,
+    "room_validity_score": 0.3406,
+    "positive_score": 0.4106,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.6768,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "Lantai 2.jpg",
+    "hypothesis_id": "Lantai 2.jpg__prop_comb_13",
+    "area_px": 117312.0,
+    "room_validity_score": 0.3374,
+    "positive_score": 0.5874,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.798,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "Lantai 2.jpg",
+    "hypothesis_id": "Lantai 2.jpg__prop_comb_12",
+    "area_px": 90175.0,
+    "room_validity_score": 0.2446,
+    "positive_score": 0.4946,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.8818,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "Lantai 2.jpg",
+    "hypothesis_id": "Lantai 2.jpg__prop_comb_14",
+    "area_px": 59997.0,
+    "room_validity_score": 0.0334,
+    "positive_score": 0.4134,
+    "negative_score": 0.52,
+    "ambiguity_score": 0.8858,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_5",
+    "area_px": 2693.4,
+    "room_validity_score": 0.6,
+    "positive_score": 0.66,
+    "negative_score": 0.2,
+    "ambiguity_score": 0.4651,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_6",
+    "area_px": 2064.6,
+    "room_validity_score": 0.6,
+    "positive_score": 0.66,
+    "negative_score": 0.2,
+    "ambiguity_score": 0.4651,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_11",
+    "area_px": 1035.5,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_2",
+    "area_px": 1022.8,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_3",
+    "area_px": 986.4,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_10",
+    "area_px": 830.0,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_7",
+    "area_px": 820.0,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_13",
+    "area_px": 635.1,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_12",
+    "area_px": 606.3,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_9",
+    "area_px": 599.5,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_8",
+    "area_px": 586.4,
+    "room_validity_score": 0.275,
+    "positive_score": 0.66,
+    "negative_score": 0.525,
+    "ambiguity_score": 0.8861,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_1",
+    "area_px": 581.1,
+    "room_validity_score": 0.065,
+    "positive_score": 0.66,
+    "negative_score": 0.735,
+    "ambiguity_score": 0.9462,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png",
+    "hypothesis_id": "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png__prop_comb_4",
+    "area_px": 560.3,
+    "room_validity_score": 0.065,
+    "positive_score": 0.66,
+    "negative_score": 0.735,
+    "ambiguity_score": 0.9462,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "library-floor-plan.png",
+    "hypothesis_id": "library-floor-plan.png__prop_comb_2",
+    "area_px": 128626.0,
+    "room_validity_score": 0.01,
+    "positive_score": 0.3004,
+    "negative_score": 0.545,
+    "ambiguity_score": 0.7107,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "library-floor-plan.png",
+    "hypothesis_id": "library-floor-plan.png__prop_comb_1",
+    "area_px": 108252.2,
+    "room_validity_score": 0.0976,
+    "positive_score": 0.4801,
+    "negative_score": 0.5225,
+    "ambiguity_score": 0.9577,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_85",
+    "area_px": 56913.0,
+    "room_validity_score": 0.8454,
+    "positive_score": 0.7054,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_54",
+    "area_px": 56913.0,
+    "room_validity_score": 0.99,
+    "positive_score": 0.865,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_3",
+    "area_px": 500.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_113",
+    "area_px": 7365.9,
+    "room_validity_score": 0.7583,
+    "positive_score": 0.6183,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_58",
+    "area_px": 533.5,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_71",
+    "area_px": 22990.5,
+    "room_validity_score": 0.1691,
+    "positive_score": 0.5816,
+    "negative_score": 0.5525,
+    "ambiguity_score": 0.9743,
+    "decision": "PROBABLE_NON_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_81",
+    "area_px": 163834.5,
+    "room_validity_score": 0.1053,
+    "positive_score": 0.5178,
+    "negative_score": 0.5525,
+    "ambiguity_score": 0.9676,
+    "decision": "PROBABLE_NON_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_74",
+    "area_px": 23973.0,
+    "room_validity_score": 0.8656,
+    "positive_score": 0.7256,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "hyp_cavity_3__split_hyb_3",
+    "area_px": 23973.0,
+    "room_validity_score": 0.8992,
+    "positive_score": 0.7592,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_118",
+    "area_px": 1375.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_62",
+    "area_px": 3702.1,
+    "room_validity_score": 0.873,
+    "positive_score": 0.733,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "hyp_cavity_4__split_hyb_3",
+    "area_px": 10938.5,
+    "room_validity_score": 0.7003,
+    "positive_score": 0.5603,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_4",
+    "area_px": 1002.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_156",
+    "area_px": 3761.6,
+    "room_validity_score": 0.5253,
+    "positive_score": 0.3853,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_5",
+    "area_px": 825.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_6",
+    "area_px": 1155.0,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "hyp_cavity_6__split_hyb_3",
+    "area_px": 21537.4,
+    "room_validity_score": 0.7916,
+    "positive_score": 0.6516,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "hyp_cavity_4__split_hyb_4",
+    "area_px": 15916.5,
+    "room_validity_score": 0.594,
+    "positive_score": 0.454,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_48",
+    "area_px": 1170.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_7",
+    "area_px": 8043.8,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_9",
+    "area_px": 701.2,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_161",
+    "area_px": 3441.0,
+    "room_validity_score": 0.5505,
+    "positive_score": 0.4105,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_149",
+    "area_px": 2275.5,
+    "room_validity_score": 0.5623,
+    "positive_score": 0.4223,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_10",
+    "area_px": 546.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_169",
+    "area_px": 930.0,
+    "room_validity_score": 0.3398,
+    "positive_score": 0.355,
+    "negative_score": 0.1552,
+    "ambiguity_score": 0.6083,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_140",
+    "area_px": 803.0,
+    "room_validity_score": 0.6271,
+    "positive_score": 0.4871,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "hyp_cavity_9__split_hyb_2",
+    "area_px": 32159.0,
+    "room_validity_score": 0.8723,
+    "positive_score": 0.7323,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_160",
+    "area_px": 1271.0,
+    "room_validity_score": 0.352,
+    "positive_score": 0.3635,
+    "negative_score": 0.1515,
+    "ambiguity_score": 0.5884,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_126",
+    "area_px": 16212.5,
+    "room_validity_score": 0.623,
+    "positive_score": 0.483,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_159",
+    "area_px": 1950.0,
+    "room_validity_score": 0.5514,
+    "positive_score": 0.4114,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_11",
+    "area_px": 1155.0,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_13",
+    "area_px": 742.5,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_176",
+    "area_px": 63688.0,
+    "room_validity_score": 0.7513,
+    "positive_score": 0.6113,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_132",
+    "area_px": 110916.0,
+    "room_validity_score": 0.01,
+    "positive_score": 0.2898,
+    "negative_score": 0.5595,
+    "ambiguity_score": 0.6824,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_163",
+    "area_px": 5883.0,
+    "room_validity_score": 0.01,
+    "positive_score": 0.2428,
+    "negative_score": 0.4241,
+    "ambiguity_score": 0.7281,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "hyp_cavity_1__split_hyb_4",
+    "area_px": 10512.5,
+    "room_validity_score": 0.6785,
+    "positive_score": 0.5385,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_77",
+    "area_px": 3407.5,
+    "room_validity_score": 0.6147,
+    "positive_score": 0.4747,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_87",
+    "area_px": 3197.2,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_22",
+    "area_px": 942.5,
+    "room_validity_score": 0.8,
+    "positive_score": 0.66,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_45",
+    "area_px": 761.2,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_50",
+    "area_px": 652.5,
+    "room_validity_score": 0.5575,
+    "positive_score": 0.63,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.5045,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_8",
+    "area_px": 514.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_55",
+    "area_px": 58608.0,
+    "room_validity_score": 0.99,
+    "positive_score": 0.865,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_104",
+    "area_px": 44082.0,
+    "room_validity_score": 0.7299,
+    "positive_score": 0.5899,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_197",
+    "area_px": 24678.5,
+    "room_validity_score": 0.1438,
+    "positive_score": 0.3438,
+    "negative_score": 0.34,
+    "ambiguity_score": 0.9944,
+    "decision": "PROBABLE_NON_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan-house2.png",
+    "hypothesis_id": "sample-floorplan-house2.png__prop_comb_30",
+    "area_px": 2210.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1989",
+    "area_px": 288102.5,
+    "room_validity_score": 0.95,
+    "positive_score": 0.81,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_4__split_hyb_1",
+    "area_px": 247592.5,
+    "room_validity_score": 0.7532,
+    "positive_score": 0.6132,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_2614",
+    "area_px": 93872.5,
+    "room_validity_score": 0.8137,
+    "positive_score": 0.6737,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_2422",
+    "area_px": 30000.2,
+    "room_validity_score": 0.9462,
+    "positive_score": 0.8062,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_2061",
+    "area_px": 2119.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_910",
+    "area_px": 2119.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_900",
+    "area_px": 1956.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_2100",
+    "area_px": 72239.5,
+    "room_validity_score": 0.99,
+    "positive_score": 0.865,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_572",
+    "area_px": 624.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_573",
+    "area_px": 528.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_876",
+    "area_px": 528.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_741",
+    "area_px": 517.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_770",
+    "area_px": 506.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_2096",
+    "area_px": 83104.0,
+    "room_validity_score": 0.99,
+    "positive_score": 0.865,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_2097",
+    "area_px": 83104.0,
+    "room_validity_score": 0.99,
+    "positive_score": 0.865,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_2783",
+    "area_px": 66540.0,
+    "room_validity_score": 0.01,
+    "positive_score": 0.2724,
+    "negative_score": 0.576,
+    "ambiguity_score": 0.6421,
+    "decision": "NON_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_101",
+    "area_px": 3159.5,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_147",
+    "area_px": 3150.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_146",
+    "area_px": 3118.5,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_125",
+    "area_px": 2736.8,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1636",
+    "area_px": 2407.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1637",
+    "area_px": 2086.5,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1",
+    "area_px": 1800.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_349",
+    "area_px": 1743.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_75",
+    "area_px": 1710.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_2430",
+    "area_px": 1709.5,
+    "room_validity_score": 0.5942,
+    "positive_score": 0.4542,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_76",
+    "area_px": 1660.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1638",
+    "area_px": 1620.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_13",
+    "area_px": 1602.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_476",
+    "area_px": 1452.5,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_262",
+    "area_px": 1278.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1640",
+    "area_px": 1260.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_327",
+    "area_px": 1203.5,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_117",
+    "area_px": 1201.5,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1639",
+    "area_px": 1200.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_423",
+    "area_px": 1165.5,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_73",
+    "area_px": 1160.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1835",
+    "area_px": 1156.0,
+    "room_validity_score": 0.8975,
+    "positive_score": 0.7575,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_499",
+    "area_px": 1099.8,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_22",
+    "area_px": 1080.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_281",
+    "area_px": 1071.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_492",
+    "area_px": 1016.8,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_495",
+    "area_px": 1016.8,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_515",
+    "area_px": 1016.8,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_74",
+    "area_px": 1000.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_79",
+    "area_px": 980.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_241",
+    "area_px": 972.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_422",
+    "area_px": 962.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_43",
+    "area_px": 918.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_263",
+    "area_px": 905.2,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_280",
+    "area_px": 884.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_49",
+    "area_px": 882.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_59",
+    "area_px": 864.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_91",
+    "area_px": 864.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_32",
+    "area_px": 846.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_85",
+    "area_px": 846.0,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_421",
+    "area_px": 771.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_23",
+    "area_px": 765.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_410",
+    "area_px": 756.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_412",
+    "area_px": 756.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_8",
+    "area_px": 735.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_315",
+    "area_px": 724.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_24",
+    "area_px": 720.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_313",
+    "area_px": 708.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_269",
+    "area_px": 693.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_283",
+    "area_px": 693.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_318",
+    "area_px": 693.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_320",
+    "area_px": 693.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_497",
+    "area_px": 689.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_307",
+    "area_px": 673.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_21",
+    "area_px": 660.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1225",
+    "area_px": 656.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_44",
+    "area_px": 650.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_317",
+    "area_px": 643.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_420",
+    "area_px": 637.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_306",
+    "area_px": 637.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_10",
+    "area_px": 624.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_50",
+    "area_px": 624.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_408",
+    "area_px": 624.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_411",
+    "area_px": 624.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_500",
+    "area_px": 624.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_344",
+    "area_px": 624.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_865",
+    "area_px": 624.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_875",
+    "area_px": 624.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_200",
+    "area_px": 614.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_45",
+    "area_px": 612.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_60",
+    "area_px": 612.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_92",
+    "area_px": 612.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_327",
+    "area_px": 611.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_740",
+    "area_px": 611.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_324",
+    "area_px": 609.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_622",
+    "area_px": 609.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1927",
+    "area_px": 606.0,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_11",
+    "area_px": 600.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_33",
+    "area_px": 599.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_86",
+    "area_px": 599.2,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_311",
+    "area_px": 598.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_314",
+    "area_px": 598.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_164",
+    "area_px": 598.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_340",
+    "area_px": 598.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_769",
+    "area_px": 598.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_12",
+    "area_px": 588.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_21",
+    "area_px": 588.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_51",
+    "area_px": 588.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_312",
+    "area_px": 585.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_61",
+    "area_px": 576.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_93",
+    "area_px": 576.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_19",
+    "area_px": 575.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_9",
+    "area_px": 575.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_268",
+    "area_px": 572.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_282",
+    "area_px": 572.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_319",
+    "area_px": 572.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_325",
+    "area_px": 565.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_34",
+    "area_px": 564.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_87",
+    "area_px": 564.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_42",
+    "area_px": 561.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_310",
+    "area_px": 555.8,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1226",
+    "area_px": 555.5,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_776",
+    "area_px": 541.6,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_740",
+    "area_px": 540.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_48",
+    "area_px": 539.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_326",
+    "area_px": 536.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_58",
+    "area_px": 528.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_90",
+    "area_px": 528.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_704",
+    "area_px": 526.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_304",
+    "area_px": 525.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_119",
+    "area_px": 522.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_31",
+    "area_px": 517.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "merged_hyp_cavity_1_hyp_cavity_2__split_hyb_84",
+    "area_px": 517.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_413",
+    "area_px": 514.5,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_309",
+    "area_px": 513.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_194",
+    "area_px": 507.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "sample-floorplan-house3.png__prop_comb_1227",
+    "area_px": 505.0,
+    "room_validity_score": 0.5875,
+    "positive_score": 0.66,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4871,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan-house3.png",
+    "hypothesis_id": "hyp_cavity_2_sub1__split_hyb_426",
+    "area_px": 504.0,
+    "room_validity_score": 0.6125,
+    "positive_score": 0.685,
+    "negative_score": 0.2125,
+    "ambiguity_score": 0.4735,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_4",
+    "area_px": 49206.0,
+    "room_validity_score": 0.435,
+    "positive_score": 0.685,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7256,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_7",
+    "area_px": 22587.5,
+    "room_validity_score": 0.3838,
+    "positive_score": 0.6338,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7619,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_20",
+    "area_px": 10354.5,
+    "room_validity_score": 0.5883,
+    "positive_score": 0.4483,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_1",
+    "area_px": 34506.8,
+    "room_validity_score": 0.435,
+    "positive_score": 0.685,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7256,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_13",
+    "area_px": 30600.0,
+    "room_validity_score": 0.8723,
+    "positive_score": 0.7323,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_18",
+    "area_px": 23345.0,
+    "room_validity_score": 0.3722,
+    "positive_score": 0.6222,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7706,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_8",
+    "area_px": 11563.2,
+    "room_validity_score": 0.825,
+    "positive_score": 0.685,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_11",
+    "area_px": 7972.2,
+    "room_validity_score": 0.5112,
+    "positive_score": 0.5812,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.5309,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_17",
+    "area_px": 1068.0,
+    "room_validity_score": 0.77,
+    "positive_score": 0.63,
+    "negative_score": 0.0,
+    "ambiguity_score": 0.0,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_12",
+    "area_px": 1003.5,
+    "room_validity_score": 0.3821,
+    "positive_score": 0.4521,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.6344,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_14",
+    "area_px": 985.5,
+    "room_validity_score": 0.3669,
+    "positive_score": 0.4369,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.6492,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "sample-floorplan.png",
+    "hypothesis_id": "sample-floorplan.png__prop_comb_9",
+    "area_px": 858.0,
+    "room_validity_score": 0.59,
+    "positive_score": 0.66,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.4828,
+    "decision": "VALID"
+  },
+  {
+    "image_id": "simple-apartment-floor-plan.png",
+    "hypothesis_id": "hyp_cavity_1__split_hyb_1",
+    "area_px": 116421.0,
+    "room_validity_score": 0.4175,
+    "positive_score": 0.6675,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7376,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "simple-apartment-floor-plan.png",
+    "hypothesis_id": "hyp_cavity_1__split_hyb_2",
+    "area_px": 116052.5,
+    "room_validity_score": 0.291,
+    "positive_score": 0.541,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.8378,
+    "decision": "AMBIGUOUS"
+  },
+  {
+    "image_id": "simple-apartment-floor-plan.png",
+    "hypothesis_id": "simple-apartment-floor-plan.png__prop_comb_5",
+    "area_px": 109466.5,
+    "room_validity_score": 0.3722,
+    "positive_score": 0.6222,
+    "negative_score": 0.39,
+    "ambiguity_score": 0.7706,
+    "decision": "PROBABLE_ROOM"
+  },
+  {
+    "image_id": "simple-apartment-floor-plan.png",
+    "hypothesis_id": "simple-apartment-floor-plan.png__prop_comb_6",
+    "area_px": 3523.5,
+    "room_validity_score": 0.5713,
+    "positive_score": 0.6412,
+    "negative_score": 0.21,
+    "ambiguity_score": 0.4934,
+    "decision": "VALID"
+  }
+]

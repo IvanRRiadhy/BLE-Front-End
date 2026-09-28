@@ -114,7 +114,6 @@ export function useSecurityByID(id: string) {
   return useQuery({
     ...securityByIdQuery(id),
     enabled: !!id,
-    placeholderData: {} as securityType,
   });
 }
 // -----------------------------------------------------------------------------

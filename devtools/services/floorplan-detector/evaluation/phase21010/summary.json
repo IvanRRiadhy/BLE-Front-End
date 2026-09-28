@@ -1,0 +1,50 @@
+{
+  "phase": "2.10.10",
+  "description": "Targeted Missing-Room Recovery",
+  "authoritative_gt_count": 148,
+  "phase2109_baseline": {
+    "tp_050": 16,
+    "fp_050": 135,
+    "fn_050": 132,
+    "precision_050": 0.106,
+    "recall_050": 0.1081,
+    "available_recall_050": 0.8421,
+    "f1_050": 0.107
+  },
+  "recovery_proposals_summary": {
+    "total_raw_proposals": 926,
+    "total_fused_proposals": 275,
+    "duplicates_pruned": 235,
+    "mean_fused_per_image": 22.92,
+    "proposals_by_strategy": {
+      "doorway_recovery": 0,
+      "partition_recovery": 694,
+      "neighbor_recovery": 2,
+      "repetition_recovery": 46,
+      "wall_reconstruction": 184,
+      "combined_recovery": 0
+    }
+  },
+  "unrepresented_rooms_audit": {
+    "total_unrepresented_in_p2109": 110,
+    "recovered_into_final_tp": 0,
+    "proposal_generated_but_pruned": 1,
+    "still_unrepresented": 109
+  },
+  "final_synthesized_metrics": {
+    "tp_050": 18,
+    "fp_050": 192,
+    "fn_050": 130,
+    "precision_050": 0.0857,
+    "recall_050": 0.1216,
+    "f1_050": 0.1006,
+    "tp_025": 28,
+    "fp_025": 182,
+    "fn_025": 120,
+    "precision_025": 0.1333,
+    "recall_025": 0.1892,
+    "f1_025": 0.1564,
+    "tp_delta_vs_p2109": 2,
+    "fp_delta_vs_p2109": 57
+  }
+}

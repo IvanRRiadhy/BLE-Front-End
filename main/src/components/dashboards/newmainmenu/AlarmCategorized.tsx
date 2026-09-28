@@ -1,5 +1,6 @@
-import { Box, Typography, Divider, Stack, Grid2 as Grid } from '@mui/material';
+import { Box, Typography, Divider, Stack, Tooltip } from '@mui/material';
 import { AbbreviatedNumber } from 'src/utils/numberAbbreviation';
+import { useRef, useState, useCallback } from 'react';
 
 interface AlarmByStatusItem {
   status: string;
@@ -17,6 +18,35 @@ interface PublicProps {
   title: string;
   data: PublicData;
 }
+
+/**
+ * Renders a Typography label that shows a Tooltip only when
+ * the text is actually truncated (scrollWidth > clientWidth).
+ */
+interface TruncatedLabelProps {
+  text: string;
+  sx?: object;
+}
+
+const TruncatedLabel: React.FC<TruncatedLabelProps> = ({ text, sx }) => {
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  const checkOverflow = useCallback(() => {
+    const el = textRef.current;
+    if (el) {
+      setIsOverflowing(el.scrollWidth > el.clientWidth);
+    }
+  }, []);
+
+  return (
+    <Tooltip title={isOverflowing ? text : ''} placement="top" arrow>
+      <Typography ref={textRef} onMouseEnter={checkOverflow} sx={sx}>
+        {text}
+      </Typography>
+    </Tooltip>
+  );
+};
 
 const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
   const formatTitle = (value: string) => {
@@ -75,7 +105,8 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
           data.length > 0 &&
           data.map((item) => (
             <Box key={(item as AlarmByStatusItem).status}>
-              <Typography
+              <TruncatedLabel
+                text={formatTitle((item as AlarmByStatusItem).status)}
                 sx={{
                   fontSize: 14,
                   fontWeight: 700,
@@ -85,9 +116,7 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}
-              >
-                {formatTitle((item as AlarmByStatusItem).status)}
-              </Typography>
+              />
               <AbbreviatedNumber
                 value={(item as AlarmByStatusItem).total}
                 sx={{
@@ -105,7 +134,8 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
           Array.isArray(data) &&
           data.map((item) => (
             <Box key={(item as AlarmByAreaItem).areaName}>
-              <Typography
+              <TruncatedLabel
+                text={formatTitle((item as AlarmByAreaItem).areaName)}
                 sx={{
                   fontSize: 14,
                   fontWeight: 700,
@@ -116,9 +146,7 @@ const AlarmCategorized: React.FC<PublicProps> = ({ title, data }) => {
                   textOverflow: 'ellipsis',
                   my: 0.5,
                 }}
-              >
-                {formatTitle((item as AlarmByAreaItem).areaName)}
-              </Typography>
+              />
               <AbbreviatedNumber
                 value={(item as AlarmByAreaItem).total}
                 sx={{

@@ -1,0 +1,8 @@
+{
+  "total_floorplans": 12,
+  "total_input_hypotheses": 367,
+  "mean_latency_ms": 29.15,
+  "p50_latency_ms": 13.24,
+  "p95_latency_ms": 92.67,
+  "hypotheses_per_second": 1049.2
+}

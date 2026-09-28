@@ -1,0 +1,172 @@
+[
+  {
+    "threshold": 0.1,
+    "valid_rooms_count": 358,
+    "tp_050": 18,
+    "fp_050": 340,
+    "fn_050": 130,
+    "precision_050": 0.0503,
+    "recall_050": 0.1216,
+    "f1_050": 0.0711
+  },
+  {
+    "threshold": 0.15,
+    "valid_rooms_count": 355,
+    "tp_050": 17,
+    "fp_050": 338,
+    "fn_050": 131,
+    "precision_050": 0.0479,
+    "recall_050": 0.1149,
+    "f1_050": 0.0676
+  },
+  {
+    "threshold": 0.2,
+    "valid_rooms_count": 354,
+    "tp_050": 17,
+    "fp_050": 337,
+    "fn_050": 131,
+    "precision_050": 0.048,
+    "recall_050": 0.1149,
+    "f1_050": 0.0677
+  },
+  {
+    "threshold": 0.25,
+    "valid_rooms_count": 353,
+    "tp_050": 16,
+    "fp_050": 337,
+    "fn_050": 132,
+    "precision_050": 0.0453,
+    "recall_050": 0.1081,
+    "f1_050": 0.0639
+  },
+  {
+    "threshold": 0.3,
+    "valid_rooms_count": 343,
+    "tp_050": 15,
+    "fp_050": 328,
+    "fn_050": 133,
+    "precision_050": 0.0437,
+    "recall_050": 0.1014,
+    "f1_050": 0.0611
+  },
+  {
+    "threshold": 0.35,
+    "valid_rooms_count": 337,
+    "tp_050": 14,
+    "fp_050": 323,
+    "fn_050": 134,
+    "precision_050": 0.0415,
+    "recall_050": 0.0946,
+    "f1_050": 0.0577
+  },
+  {
+    "threshold": 0.4,
+    "valid_rooms_count": 328,
+    "tp_050": 11,
+    "fp_050": 317,
+    "fn_050": 137,
+    "precision_050": 0.0335,
+    "recall_050": 0.0743,
+    "f1_050": 0.0462
+  },
+  {
+    "threshold": 0.45,
+    "valid_rooms_count": 323,
+    "tp_050": 8,
+    "fp_050": 315,
+    "fn_050": 140,
+    "precision_050": 0.0248,
+    "recall_050": 0.0541,
+    "f1_050": 0.034
+  },
+  {
+    "threshold": 0.5,
+    "valid_rooms_count": 323,
+    "tp_050": 8,
+    "fp_050": 315,
+    "fn_050": 140,
+    "precision_050": 0.0248,
+    "recall_050": 0.0541,
+    "f1_050": 0.034
+  },
+  {
+    "threshold": 0.55,
+    "valid_rooms_count": 320,
+    "tp_050": 7,
+    "fp_050": 313,
+    "fn_050": 141,
+    "precision_050": 0.0219,
+    "recall_050": 0.0473,
+    "f1_050": 0.0299
+  },
+  {
+    "threshold": 0.6,
+    "valid_rooms_count": 272,
+    "tp_050": 6,
+    "fp_050": 266,
+    "fn_050": 142,
+    "precision_050": 0.0221,
+    "recall_050": 0.0405,
+    "f1_050": 0.0286
+  },
+  {
+    "threshold": 0.65,
+    "valid_rooms_count": 151,
+    "tp_050": 6,
+    "fp_050": 145,
+    "fn_050": 142,
+    "precision_050": 0.0397,
+    "recall_050": 0.0405,
+    "f1_050": 0.0401
+  },
+  {
+    "threshold": 0.7,
+    "valid_rooms_count": 148,
+    "tp_050": 6,
+    "fp_050": 142,
+    "fn_050": 142,
+    "precision_050": 0.0405,
+    "recall_050": 0.0405,
+    "f1_050": 0.0405
+  },
+  {
+    "threshold": 0.75,
+    "valid_rooms_count": 145,
+    "tp_050": 6,
+    "fp_050": 139,
+    "fn_050": 142,
+    "precision_050": 0.0414,
+    "recall_050": 0.0405,
+    "f1_050": 0.041
+  },
+  {
+    "threshold": 0.8,
+    "valid_rooms_count": 85,
+    "tp_050": 5,
+    "fp_050": 80,
+    "fn_050": 143,
+    "precision_050": 0.0588,
+    "recall_050": 0.0338,
+    "f1_050": 0.0429
+  },
+  {
+    "threshold": 0.85,
+    "valid_rooms_count": 26,
+    "tp_050": 3,
+    "fp_050": 23,
+    "fn_050": 145,
+    "precision_050": 0.1154,
+    "recall_050": 0.0203,
+    "f1_050": 0.0345
+  },
+  {
+    "threshold": 0.9,
+    "valid_rooms_count": 19,
+    "tp_050": 3,
+    "fp_050": 16,
+    "fn_050": 145,
+    "precision_050": 0.1579,
+    "recall_050": 0.0203,
+    "f1_050": 0.0359
+  }
+]

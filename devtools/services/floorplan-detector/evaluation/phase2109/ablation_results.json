@@ -1,0 +1,72 @@
+{
+  "A_local_validity_only": {
+    "final_room_count": 323,
+    "tp_050": 8,
+    "fp_050": 315,
+    "fn_050": 140,
+    "precision_050": 0.0248,
+    "recall_050": 0.0541,
+    "f1_050": 0.034,
+    "mean_iou": 0.0
+  },
+  "B_global_without_doorway": {
+    "final_room_count": 151,
+    "tp_050": 16,
+    "fp_050": 135,
+    "fn_050": 132,
+    "precision_050": 0.106,
+    "recall_050": 0.1081,
+    "f1_050": 0.107,
+    "mean_iou": 0.3014
+  },
+  "C_global_with_doorway": {
+    "final_room_count": 153,
+    "tp_050": 17,
+    "fp_050": 136,
+    "fn_050": 131,
+    "precision_050": 0.1111,
+    "recall_050": 0.1149,
+    "f1_050": 0.113,
+    "mean_iou": 0.3118
+  },
+  "D_global_doorway_and_topology": {
+    "final_room_count": 152,
+    "tp_050": 16,
+    "fp_050": 136,
+    "fn_050": 132,
+    "precision_050": 0.1053,
+    "recall_050": 0.1081,
+    "f1_050": 0.1067,
+    "mean_iou": 0.3014
+  },
+  "E_global_doorway_topology_cavity": {
+    "final_room_count": 151,
+    "tp_050": 16,
+    "fp_050": 135,
+    "fn_050": 132,
+    "precision_050": 0.106,
+    "recall_050": 0.1081,
+    "f1_050": 0.107,
+    "mean_iou": 0.3014
+  },
+  "F_full_synthesis": {
+    "final_room_count": 151,
+    "tp_050": 16,
+    "fp_050": 135,
+    "fn_050": 132,
+    "precision_050": 0.106,
+    "recall_050": 0.1081,
+    "f1_050": 0.107,
+    "mean_iou": 0.3014
+  },
+  "G_full_synthesis_ml": {
+    "final_room_count": 151,
+    "tp_050": 16,
+    "fp_050": 135,
+    "fn_050": 132,
+    "precision_050": 0.106,
+    "recall_050": 0.1081,
+    "f1_050": 0.107,
+    "mean_iou": 0.3014
+  }
+}

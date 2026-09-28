@@ -1,0 +1,446 @@
+{
+  "ChatGPT Image Sep 16, 2026, 01_19_00 PM.png": [
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.4365392,
+      "room_count": 3
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.42676094000000003,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.42676094000000003,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.42676094000000003,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.42676094000000003,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.42676094000000003,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.42676094000000003,
+      "room_count": 4
+    }
+  ],
+  "ChatGPT Image Sep 9, 2026, 05_41_12 PM.png": [
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.5515670266666667,
+      "room_count": 6
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.52820616,
+      "room_count": 8
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.52820616,
+      "room_count": 8
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.52820616,
+      "room_count": 8
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.52820616,
+      "room_count": 8
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.52820616,
+      "room_count": 8
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.49958811636363637,
+      "room_count": 11
+    }
+  ],
+  "ChatGPT Image Sep 9, 2026, 05_48_42 PM.png": [
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.32380000000000003,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.32380000000000003,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.32380000000000003,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.32380000000000003,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.32380000000000003,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.2562,
+      "room_count": 3
+    },
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.0,
+      "room_count": 0
+    }
+  ],
+  "Floorplan-House.png": [
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.5336661428571429,
+      "room_count": 56
+    },
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.48869845161290326,
+      "room_count": 62
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.4769031562499999,
+      "room_count": 128
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.4724431384615385,
+      "room_count": 65
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.4724431384615385,
+      "room_count": 65
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.4724431384615385,
+      "room_count": 65
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.4724431384615385,
+      "room_count": 65
+    }
+  ],
+  "Lantai 1.jpg": [
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.6131284533333333,
+      "room_count": 6
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.5830418542857142,
+      "room_count": 7
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.5830418542857142,
+      "room_count": 7
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.5830418542857142,
+      "room_count": 7
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.5830418542857142,
+      "room_count": 7
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.5830418542857142,
+      "room_count": 7
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.5830418542857142,
+      "room_count": 7
+    }
+  ],
+  "Lantai 2.jpg": [
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.36474740000000005,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.3506301333333333,
+      "room_count": 3
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.3506301333333333,
+      "room_count": 3
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.3506301333333333,
+      "room_count": 3
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.3506301333333333,
+      "room_count": 3
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.3506301333333333,
+      "room_count": 3
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.3506301333333333,
+      "room_count": 3
+    }
+  ],
+  "WhatsApp Image 2025-11-28 at 14.52.53_d902a408.png": [
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.5487965876923078,
+      "room_count": 13
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.0,
+      "room_count": 0
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.0,
+      "room_count": 0
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.0,
+      "room_count": 0
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.0,
+      "room_count": 0
+    },
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.0,
+      "room_count": 0
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.0,
+      "room_count": 0
+    }
+  ],
+  "library-floor-plan.png": [
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.26737564,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.26737564,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.26737564,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.26737564,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.26737564,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.26737564,
+      "room_count": 2
+    },
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.0,
+      "room_count": 0
+    }
+  ],
+  "sample-floorplan-house2.png": [
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.6258923076923076,
+      "room_count": 26
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.6088653548387096,
+      "room_count": 31
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.5885207878787879,
+      "room_count": 33
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.5885207878787879,
+      "room_count": 33
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.5885207878787879,
+      "room_count": 33
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.5885207878787879,
+      "room_count": 33
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.5023448695652175,
+      "room_count": 46
+    }
+  ],
+  "sample-floorplan-house3.png": [
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.5267017142857143,
+      "room_count": 21
+    },
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.3927398888888889,
+      "room_count": 36
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.37196917073170743,
+      "room_count": 41
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.37196917073170743,
+      "room_count": 41
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.37196917073170743,
+      "room_count": 41
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.37196917073170743,
+      "room_count": 41
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.2555651940298507,
+      "room_count": 134
+    }
+  ],
+  "sample-floorplan.png": [
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.5835480490909091,
+      "room_count": 11
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.5742795399999999,
+      "room_count": 12
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.5742795399999999,
+      "room_count": 12
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.5742795399999999,
+      "room_count": 12
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.5742795399999999,
+      "room_count": 12
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.5742795399999999,
+      "room_count": 12
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.5742795399999999,
+      "room_count": 12
+    }
+  ],
+  "simple-apartment-floor-plan.png": [
+    {
+      "configuration_id": "cfg_05_high_architectural",
+      "global_score": 0.42670850000000005,
+      "room_count": 3
+    },
+    {
+      "configuration_id": "cfg_00_all_candidates",
+      "global_score": 0.41026769999999996,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_01_cleaned_baseline",
+      "global_score": 0.41026769999999996,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_02_parent_preferred",
+      "global_score": 0.41026769999999996,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_03_child_preferred",
+      "global_score": 0.41026769999999996,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_04_doorway_anchored",
+      "global_score": 0.41026769999999996,
+      "room_count": 4
+    },
+    {
+      "configuration_id": "cfg_06_alternative_optimized",
+      "global_score": 0.41026769999999996,
+      "room_count": 4
+    }
+  ]
+}

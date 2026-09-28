@@ -73,17 +73,16 @@ class MLInferenceEngine:
 
         t_start = time.perf_counter()
 
-        # Run Ultralytics RT-DETR prediction
-        # Ultralytics letterboxes to imgsz (1024), runs inference, and un-letterboxes boxes back to (orig_w, orig_h)
-        results = self.detector.model.predict(
-            source=img_bgr,
-            imgsz=self.config.input_size,
-            conf=conf,
-            iou=self.config.iou_threshold,
-            device=self.config.device,
-            half=self.config.half_precision,
-            verbose=False,
-        )
+        with torch.no_grad():
+            results = self.detector.model.predict(
+                source=img_bgr,
+                imgsz=self.config.input_size,
+                conf=conf,
+                iou=self.config.iou_threshold,
+                device=self.config.device,
+                half=self.config.half_precision,
+                verbose=False,
+            )
 
         total_elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 
@@ -132,6 +131,10 @@ class MLInferenceEngine:
                         class_id=c_id,
                     )
                 )
+
+        del results
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
         return MLInferenceResult(
             image_id=img_id,

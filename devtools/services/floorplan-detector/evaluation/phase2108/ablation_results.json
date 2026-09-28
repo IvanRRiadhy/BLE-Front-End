@@ -1,0 +1,110 @@
+{
+  "A_full_pipeline": {
+    "valid_rooms": 337,
+    "tp_050": 14,
+    "fp_050": 323,
+    "fn_050": 134,
+    "precision_050": 0.0415,
+    "recall_050": 0.0946,
+    "f1_050": 0.0577
+  },
+  "B_no_exterior_suppression": {
+    "valid_rooms": 346,
+    "tp_050": 18,
+    "fp_050": 328,
+    "fn_050": 130,
+    "precision_050": 0.052,
+    "recall_050": 0.1216,
+    "f1_050": 0.0729
+  },
+  "C_no_furniture_suppression": {
+    "valid_rooms": 337,
+    "tp_050": 14,
+    "fp_050": 323,
+    "fn_050": 134,
+    "precision_050": 0.0415,
+    "recall_050": 0.0946,
+    "f1_050": 0.0577
+  },
+  "D_no_text_suppression": {
+    "valid_rooms": 337,
+    "tp_050": 14,
+    "fp_050": 323,
+    "fn_050": 134,
+    "precision_050": 0.0415,
+    "recall_050": 0.0946,
+    "f1_050": 0.0577
+  },
+  "E_no_artificial_cavity_penalty": {
+    "valid_rooms": 346,
+    "tp_050": 14,
+    "fp_050": 332,
+    "fn_050": 134,
+    "precision_050": 0.0405,
+    "recall_050": 0.0946,
+    "f1_050": 0.0567
+  },
+  "F_no_boundary_refinement": {
+    "valid_rooms": 337,
+    "tp_050": 14,
+    "fp_050": 323,
+    "fn_050": 134,
+    "precision_050": 0.0415,
+    "recall_050": 0.0946,
+    "f1_050": 0.0577
+  },
+  "G_no_corridor_safeguard": {
+    "valid_rooms": 337,
+    "tp_050": 14,
+    "fp_050": 323,
+    "fn_050": 134,
+    "precision_050": 0.0415,
+    "recall_050": 0.0946,
+    "f1_050": 0.0577
+  },
+  "H_high_precision_policy": {
+    "valid_rooms": 323,
+    "tp_050": 8,
+    "fp_050": 315,
+    "fn_050": 140,
+    "precision_050": 0.0248,
+    "recall_050": 0.0541,
+    "f1_050": 0.034
+  },
+  "I_high_recall_policy": {
+    "valid_rooms": 354,
+    "tp_050": 17,
+    "fp_050": 337,
+    "fn_050": 131,
+    "precision_050": 0.048,
+    "recall_050": 0.1149,
+    "f1_050": 0.0677
+  },
+  "J_wall_support_only": {
+    "valid_rooms": 363,
+    "tp_050": 19,
+    "fp_050": 344,
+    "fn_050": 129,
+    "precision_050": 0.0523,
+    "recall_050": 0.1284,
+    "f1_050": 0.0744
+  },
+  "K_negative_penalties_only": {
+    "valid_rooms": 162,
+    "tp_050": 7,
+    "fp_050": 155,
+    "fn_050": 141,
+    "precision_050": 0.0432,
+    "recall_050": 0.0473,
+    "f1_050": 0.0452
+  },
+  "L_ml_assisted_fusion": {
+    "valid_rooms": 329,
+    "tp_050": 11,
+    "fp_050": 318,
+    "fn_050": 137,
+    "precision_050": 0.0334,
+    "recall_050": 0.0743,
+    "f1_050": 0.0461
+  }
+}

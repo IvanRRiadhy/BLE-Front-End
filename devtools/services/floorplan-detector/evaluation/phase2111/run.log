@@ -1,0 +1,15 @@
+================================================================================
+PHASE 2.10.11: MULTIMODAL STRUCTURAL WALL MASK REFINEMENT EXPERIMENT
+================================================================================
+Loading precomputed bundles cache from E:\mencoba\Web\Modernize\packages\typescript\devtools\services\floorplan-detector\evaluation\cache_precomputed_bundles.pkl...
+Verified GT Count across 12 floorplans: 148 (Authoritative Benchmark: 148)
+Total Phase 2.10.9 Input Hypotheses Ingested: 367 (Expected: 367)
+
+--- 1. Reproducing Frozen Phase 2.10.9 Baseline ---
+Phase 2.10.9 Baseline: TP@0.50=16 | FP@0.50=135 | FN@0.50=132
+
+--- 2. Executing Multimodal Wall Refinement Pipeline (Strategy G) ---
+[MLDetector] Loading RT-DETR model from E:\mencoba\Web\Modernize\packages\typescript\devtools\services\floorplan-detector\ml\weights\rtdetr_l_autoresearch_60ep.pt onto device 'cuda'...
+[MLDetector] Loaded model classes: {0: 'wall', 1: 'door', 2: 'window', 3: 'railing', 4: 'linkage_point'}
+[MLDetector] Model loaded successfully in 460.6ms
+WARNING 'half' is deprecated and will be removed in the future. Use 'quantize' instead.

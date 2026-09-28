@@ -1,0 +1,15 @@
+{
+  "phase": "2.10.9_frozen_baseline",
+  "authoritative_gt_count": 148,
+  "input_hypotheses": 367,
+  "tp_050": 16,
+  "fp_050": 135,
+  "fn_050": 132,
+  "precision_050": 0.106,
+  "recall_050": 0.1081,
+  "available_recall_050": 0.8421,
+  "f1_050": 0.107,
+  "tp_025": 25,
+  "fp_025": 126,
+  "fn_025": 123
+}

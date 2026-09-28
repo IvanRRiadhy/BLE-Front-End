@@ -64,9 +64,8 @@ const SecurityGuardContent = () => {
   ]);
 
   // Resolve the selected member directly from cache
-  // const securityGuardDetail = memberCache?.data.find((m) => m.id === selectedMemberId);
-  const securityGuardDetail = useSecurityByID(selectedMemberId).data;
-  // console.log("securityGuardDetail", securityGuardDetail)
+  const fetchedSecurityGuard = useSecurityByID(selectedMemberId).data;
+  const securityGuardDetail = selectedMemberId && fetchedSecurityGuard?.id ? fetchedSecurityGuard : null;
   const dispatch = useDispatch();
   // const theme = useTheme();
   const [loading, setLoading] = useState(false);
@@ -214,6 +213,11 @@ const SecurityGuardContent = () => {
             try {
               await releaseMutation.mutateAsync(selectedCardNumber);
               toast.success('Card Released');
+              dispatch(SelectMemberId(''));
+              queryClient.invalidateQueries({ queryKey: ['security-list-infinite'] });
+              queryClient.invalidateQueries({ queryKey: ['security-list'] });
+              queryClient.invalidateQueries({ queryKey: ['security-all'] });
+              queryClient.invalidateQueries({ queryKey: ['security'] });
             } catch (error) {
               toast.error('Release failed');
               console.error(error);
@@ -605,7 +609,7 @@ const SecurityGuardContent = () => {
                     <DialogTitle>Confirm Card Release</DialogTitle>
                     <DialogContent>
                       <DialogContentText>
-                        Are you sure you want to release the Card <strong>{selectedCardNumber}</strong> from its user <strong>{selectedMember?.name}</strong>?
+                        Are you sure you want to release the Card <strong>{selectedCardNumber}</strong> from its user <strong>{securityGuardDetail?.name}</strong>?
                       </DialogContentText>
                     </DialogContent>
                     <DialogActions>
