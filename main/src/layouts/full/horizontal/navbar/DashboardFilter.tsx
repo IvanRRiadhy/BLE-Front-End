@@ -1,17 +1,9 @@
 import { Box, Button, Drawer, Grid2 as Grid, Typography } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
-import { useCallback, useEffect, useState } from 'react';
-import { fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloors } from 'src/store/apps/crud/floor';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
+import { useCallback, useState } from 'react';
 import AutocompleteFilterNew from './AutocompleteFilterNew';
 import { setDashboardFilter } from 'src/store/customizer/CustomizerSlice';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 
 type FilterState = {
   BuildingId: string[];
@@ -49,14 +41,7 @@ const DashboardFilter = () => {
     setOpen(true);
   };
 
-  const buildingList = useAllBuilding().data || [];
-  const floorList = useAllFloors().data || [];
-  const floorplanList = useAllFloorplans().data || [];
-  const maskedAreaList = useAllMaskedAreas().data || [];
 
-  // useEffect(() => {
-  //   console.log('Building List:', buildingList);
-  // }, [buildingList]);
 
   const handleApplyFilter = () => {
     const finalFloorIds = appliedFilter.FloorId;
@@ -128,10 +113,6 @@ const DashboardFilter = () => {
           <Box sx={{ width: '100%' }}>
             {open && (
               <AutocompleteFilterNew
-                buildings={buildingList}
-                floors={floorList}
-                floorplans={floorplanList}
-                maskedAreas={maskedAreaList}
                 initial={{
                   BuildingId: dashboardFilter?.BuildingId ?? [],
                   FloorId: dashboardFilter?.FloorId ?? [],

@@ -16,10 +16,6 @@ import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 
 import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import { useReaderReport, readerReportFilterType, defaultReaderReportFilter } from 'src/hooks/useReaderReport';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { PersonType } from 'src/types/crud/input';
@@ -33,12 +29,6 @@ export type SelectedNode =
   | null;
 
 const ReaderReportFilter = () => {
-  /* ===================== DATA ===================== */
-  const buildings = useAllBuilding().data || [];
-  const floors = useAllFloors().data || [];
-  const floorplans = useAllFloorplans().data || [];
-  const areas = useAllMaskedAreas().data || [];
-  
   // Dummy readers for now (added later)
   const readerOptions: any[] = [];
 
@@ -159,10 +149,6 @@ const ReaderReportFilter = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <AreaHierarchySelector
               multiple
-              buildings={buildings}
-              floors={floors}
-              floorplans={floorplans}
-              maskedAreas={areas}
               value={selectedAreas}
               onChange={setSelectedAreas}
             />

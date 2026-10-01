@@ -1,11 +1,14 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
+import { safeParseAreaShape } from 'src/utils/isJsonObject';
 
 const API_URL = '/api/TrackingAnalytics/investigation/person-overview';
+const AREA_URL ='/api/TrackingAnalytics/investigation/area-overview'
 
 export interface InvestigateOverviewPayload {
   personId?: string | null;
   areaId?: string | null;
+  timeRange?: string | null;
   from?: string | null;
   to?: string | null;
   timezone?: string | null;
@@ -138,9 +141,13 @@ export function usePersonOverview(payload?: InvestigateOverviewPayload, enabled:
     queryKey: ['investigation-person-overview', payload],
     queryFn: async () => {
       const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
+      const isCustom = (payload?.timeRange || '').toLowerCase() === 'custom';
       const body: InvestigateOverviewPayload = {
         timezone: deviceTimezone,
         ...payload,
+        timeRange: payload?.timeRange || 'daily',
+        from: isCustom ? payload?.from ?? null : null,
+        to: isCustom ? payload?.to ?? null : null,
       };
       const response = await axiosServices.post<PersonOverviewResponse>(API_URL, body);
       return response.data.collection.data;
@@ -154,12 +161,273 @@ export function usePersonOverviewMutation() {
   return useMutation({
     mutationFn: async (payload: InvestigateOverviewPayload) => {
       const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
+      const isCustom = (payload?.timeRange || '').toLowerCase() === 'custom';
       const body: InvestigateOverviewPayload = {
         timezone: deviceTimezone,
         ...payload,
+        timeRange: payload?.timeRange || 'daily',
+        from: isCustom ? payload?.from ?? null : null,
+        to: isCustom ? payload?.to ?? null : null,
       };
       const response = await axiosServices.post<PersonOverviewResponse>(API_URL, body);
       return response.data.collection.data;
+    },
+  });
+}
+
+// ==========================================
+// Area Investigation Types & Fetchers
+// ==========================================
+export type Nodes = {
+    id: string;
+    x: number;
+    y: number;
+    x_px: number;
+    y_px: number;
+};
+
+export type AreaInvestigationTimeRange =
+  | 'daily'
+  | 'yesterday'
+  | 'weekly'
+  | 'last_week'
+  | 'monthly'
+  | 'last_month'
+  | 'yearly'
+  | 'last_year'
+  | 'last_7_days'
+  | 'last_30_days'
+  | 'last_90_days'
+  | 'custom'
+  | 'Custom';
+
+export interface AreaInvestigationParams {
+  areaId?: string | null;
+  timeRange?: AreaInvestigationTimeRange | string;
+  from?: string | null;
+  to?: string | null;
+}
+
+export interface AreaInvestigationRequestPayload {
+  areaId: string;
+  timeRange: string;
+  from: string | null;
+  to: string | null;
+  timezone: string;
+  includeTimeline: boolean;
+  topLoiterers: number;
+  onlyBreaches: boolean;
+}
+
+export interface AreaInvestigationAuthorizedAccessGroup {
+  cardAccessId: string;
+  accessName: string;
+  allowedAreasCount: number;
+  isAllAccess: boolean;
+}
+
+export interface AreaInvestigationAreaInfo {
+  areaId: string;
+  areaName: string;
+  areaShape: string;
+  nodes?: Nodes[];
+  floorplanId: string;
+  floorplanName: string;
+  floorplanImage: string;
+  floorId: string;
+  floorName: string;
+  buildingId: string;
+  buildingName: string;
+  colorArea?: string;
+  restrictedStatus?: string;
+  isRestricted?: boolean;
+  authorizedAccessGroups?: AreaInvestigationAuthorizedAccessGroup[];
+}
+
+export interface AreaInvestigationActiveOccupant {
+  personId: string;
+  personName: string;
+  personType: string;
+  cardNumber: string;
+  enteredAt: string;
+  currentDwellMinutes: number;
+  currentDwellFormatted: string;
+  isAuthorized: boolean;
+  faceImage?: string | null;
+}
+
+export interface AreaInvestigationLiveState {
+  currentOccupancy: number;
+  membersCount: number;
+  visitorsCount: number;
+  securitiesCount: number;
+  hasActiveAlarm: boolean;
+  activeOccupants: AreaInvestigationActiveOccupant[];
+}
+
+export interface AreaInvestigationComplianceSummary {
+  complianceScore: number;
+  complianceStatus: string;
+  totalVisits: number;
+  authorizedVisitsCount: number;
+  unauthorizedVisitsCount: number;
+}
+
+export interface AreaInvestigationUnauthorizedBreach {
+  personId: string;
+  personName: string;
+  personType: string;
+  cardNumber: string;
+  enteredAt: string;
+  exitedAt?: string | null;
+  durationMinutes: number;
+  durationFormatted: string;
+  alarmTriggered: boolean;
+  alarmState?: string;
+  alarmStatus?: string;
+  alarmCategory?: string | null;
+  reason: string;
+}
+
+export interface AreaInvestigationAlarm {
+  alarmId: string;
+  incidentCode?: string;
+  personId?: string | null;
+  personName?: string | null;
+  personType?: string | null;
+  faceImage?: string | null;
+  cardNumber?: string | null;
+  category: string;
+  areaName: string;
+  floorplanName: string;
+  floorplanImage: string;
+  floorName: string;
+  buildingName: string;
+  triggeredTime: string;
+  status: string;
+  alarmColor?: string;
+  acknowledgedBy?: string | null;
+  acknowledgedTime?: string | null;
+  dispatchedTo?: string | null;
+  dispatchedTime?: string | null;
+  investigatedBy?: string | null;
+  investigatedTime?: string | null;
+  investigatedResult?: string | null;
+  isCarriedOver: boolean;
+}
+
+export interface AreaInvestigationIncidentSummary {
+  totalIncidents: number;
+  activeIncidents: number;
+  triggeredInPeriod: number;
+  carriedOverIncidents: number;
+  alarms: AreaInvestigationAlarm[];
+}
+
+export interface AreaInvestigationTrafficDynamics {
+  totalUniquePeople: number;
+  totalSessions: number;
+  averageDwellMinutes: number;
+  averageDwellFormatted: string;
+  peakHour: string;
+  peakOccupancy: number;
+}
+
+export interface AreaInvestigationTopLoiterer {
+  personId: string;
+  personName: string;
+  personType: string;
+  cardNumber: string;
+  totalStayMinutes: number;
+  totalStayFormatted: string;
+  visitCount: number;
+  lastSeenAt: string;
+  isAuthorized: boolean;
+}
+
+export interface AreaInvestigationTimelineItem {
+  timestamp: string;
+  eventType: string;
+  badge: string;
+  title: string;
+  description: string;
+  location: string;
+}
+
+export interface AreaInvestigationData {
+  areaInfo: AreaInvestigationAreaInfo;
+  liveState: AreaInvestigationLiveState;
+  complianceSummary: AreaInvestigationComplianceSummary;
+  unauthorizedBreaches: AreaInvestigationUnauthorizedBreach[];
+  incidentSummary: AreaInvestigationIncidentSummary;
+  trafficDynamics: AreaInvestigationTrafficDynamics;
+  topLoiterers: AreaInvestigationTopLoiterer[];
+  chronologicalTimeline: AreaInvestigationTimelineItem[];
+}
+
+export interface AreaInvestigationResponse {
+  success: boolean;
+  msg: string;
+  collection: {
+    data: AreaInvestigationData;
+  };
+  code: number;
+}
+
+const buildAreaInvestigationPayload = (
+  params?: AreaInvestigationParams
+): AreaInvestigationRequestPayload => {
+  const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
+  const isCustom = (params?.timeRange || '').toLowerCase() === 'custom';
+
+  return {
+    areaId: params?.areaId || '',
+    timeRange: params?.timeRange || 'daily',
+    from: isCustom ? params?.from ?? null : null,
+    to: isCustom ? params?.to ?? null : null,
+    timezone: deviceTimezone,
+    includeTimeline: true,
+    topLoiterers: 10,
+    onlyBreaches: false,
+  };
+};
+
+export function useAreaInvestigation(
+  params?: AreaInvestigationParams,
+  enabled: boolean = true
+) {
+  return useQuery({
+    queryKey: ['investigation-area-overview', params],
+    queryFn: async () => {
+      const body = buildAreaInvestigationPayload(params);
+      const response = await axiosServices.post<AreaInvestigationResponse>(AREA_URL, body);
+      const data = response.data.collection.data;
+      if (data?.areaInfo) {
+        data.areaInfo = {
+          ...data.areaInfo,
+          nodes: safeParseAreaShape(data.areaInfo.areaShape) as Nodes[],
+        };
+      }
+      return data;
+    },
+    enabled: enabled && Boolean(params?.areaId),
+    staleTime: 5_000,
+  });
+}
+
+export function useAreaInvestigationMutation() {
+  return useMutation({
+    mutationFn: async (params?: AreaInvestigationParams) => {
+      const body = buildAreaInvestigationPayload(params);
+      const response = await axiosServices.post<AreaInvestigationResponse>(AREA_URL, body);
+      const data = response.data.collection.data;
+      if (data?.areaInfo) {
+        data.areaInfo = {
+          ...data.areaInfo,
+          nodes: safeParseAreaShape(data.areaInfo.areaShape) as Nodes[],
+        };
+      }
+      return data;
     },
   });
 }

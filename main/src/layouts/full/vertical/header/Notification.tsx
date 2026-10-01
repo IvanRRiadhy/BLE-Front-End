@@ -180,7 +180,11 @@ const Notifications = () => {
 
     params.set('alarmTriggerId', trigger.id);
     console.log('Redirecting to alarm list with params:', params.toString());
-    window.location.href = `/alarm/alarmlist?${params.toString()}`;
+    const targetUrl = `/alarm/alarmlist?${params.toString()}`;
+    const newWindow = window.open(targetUrl, '_blank');
+    if (newWindow) {
+      newWindow.focus();
+    }
   };
 
   // const getName = (ble: string) =>

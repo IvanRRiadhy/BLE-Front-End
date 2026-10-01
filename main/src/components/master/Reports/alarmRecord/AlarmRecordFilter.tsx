@@ -23,10 +23,6 @@ import { defaultAlarmRecordFilter } from 'src/store/apps/defaultForm';
 import { fetchVisitor } from 'src/store/apps/crud/visitor';
 import { fetchBleReaders } from 'src/store/apps/crud/bleReader';
 import { fetchMembers } from 'src/store/apps/crud/member';
-import { fetchMaskedAreas } from 'src/store/apps/crud/maskedArea';
-import { fetchFloorplan } from 'src/store/apps/crud/floorplan';
-import { fetchFloors } from 'src/store/apps/crud/floor';
-import { fetchBuildings } from 'src/store/apps/crud/building';
 import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 import dayjs, { Dayjs } from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -67,10 +63,6 @@ const AlarmRecordFilter = () => {
 
   const visitorData = useSelector((state: RootState) => state.visitorReducer.visitorAll);
   const memberData = useSelector((state: RootState) => state.memberReducer.memberAll);
-  const areaData = useSelector((state: RootState) => state.maskedAreaReducer.maskedAreaAll);
-  const floorplanData = useSelector((state: RootState) => state.floorplanReducer.floorplanAll);
-  const floorData = useSelector((state: RootState) => state.floorReducer.floorAll);
-  const buildingData = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const bleReaderData = useSelector((state: RootState) => state.bleReaderReducer.bleReaderAll);
 
   // Local UI filter state
@@ -99,10 +91,6 @@ const AlarmRecordFilter = () => {
     dispatch(fetchVisitor());
     dispatch(fetchBleReaders());
     dispatch(fetchMembers());
-    // dispatch(fetchMaskedAreas());
-    dispatch(fetchFloorplan());
-    dispatch(fetchFloors());
-    dispatch(fetchBuildings());
   }, [dispatch]);
 
   // --- Time Range Helpers ---
@@ -436,10 +424,6 @@ const AlarmRecordFilter = () => {
                 <Typography variant="caption">Area :</Typography>
               </CustomFormLabel>
               <AutocompleteFilter
-                buildings={buildingData}
-                floors={floorData}
-                floorplans={floorplanData}
-                maskedAreas={areaData}
                 initial={{
                   BuildingId: [],
                   FloorId: [],

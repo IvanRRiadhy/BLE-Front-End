@@ -4,18 +4,17 @@ import {
   Button,
   Drawer,
   Grid2 as Grid,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
-import { lazy, useEffect, useState } from 'react';
+import { lazy, useEffect, useMemo, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import { useAlarmCategoryList, useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { useLocationHierarchy } from 'src/hooks/useBuilding';
 import { UpdateFilter } from 'src/store/apps/crud/alarmTrigger';
 import { defaultAlarmSettingFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -30,6 +29,24 @@ const AutocompleteFilter = lazy(
   () => import('src/layouts/full/horizontal/navbar/AutocompleteFilter'),
 );
 
+import { MenuItem } from '@mui/material';
+
+export const TIME_RANGE_OPTIONS = [
+  { label: 'Show All', value: 'all' },
+  { label: 'Today (Daily)', value: 'daily' },
+  { label: 'Yesterday', value: 'yesterday' },
+  { label: 'This Week', value: 'weekly' },
+  { label: 'Last Week', value: 'last_week' },
+  { label: 'This Month', value: 'monthly' },
+  { label: 'Last Month', value: 'last_month' },
+  { label: 'This Year', value: 'yearly' },
+  { label: 'Last Year', value: 'last_year' },
+  { label: 'Last 7 Days', value: 'last_7_days' },
+  { label: 'Last 30 Days', value: 'last_30_days' },
+  { label: 'Last 90 Days', value: 'last_90_days' },
+  { label: 'Custom Range', value: 'custom' },
+];
+
 const AlarmTriggeredFilter = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
@@ -42,15 +59,17 @@ const AlarmTriggeredFilter = () => {
     alarms.some((a) => normal(a?.alarmCategory) === name && a?.isEnabled);
 
   // --- Redux data ---
-  const buildingList = useAllBuilding().data ?? [];
-  const floorList = useAllFloors().data ?? [];
-  const floorplanList = useAllFloorplans().data ?? [];
   const alarmCategoryList = useAlarmCategoryList(defaultAlarmSettingFilter).data?.data ?? [];
 
   const alarmFilter = useSelector(
     (state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter,
   );
   //   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+
+  const getTimeRangeValue = (val?: string | null) => {
+    if (val === null) return 'all';
+    return val || 'daily';
+  };
 
   // --- Local filter state (only FloorId matters for API) ---
   const [appliedFilter, setAppliedFilter] = useState({
@@ -59,6 +78,9 @@ const AlarmTriggeredFilter = () => {
     FloorplanId: alarmFilter.filters?.floorplanId ?? [],
     Action: alarmFilter.filters?.action ?? [],
     Alarm: alarmFilter.filters?.alarm ?? [],
+    TimeRange: getTimeRangeValue(alarmFilter.filters?.timeRange ?? alarmFilter.timeRange),
+    Timezone: alarmFilter.filters?.timezone || 'Asia/Jakarta',
+    IncludeUnresolved: alarmFilter.filters?.includeUnresolved ?? true,
 
     dateFilters: {
       TriggerTime: {
@@ -76,6 +98,9 @@ const AlarmTriggeredFilter = () => {
     floorplanId: normalize(alarmFilter.filters?.floorplanId ?? []),
     action: normalize(alarmFilter.filters?.action ?? []),
     alarm: normalize(alarmFilter.filters?.alarm ?? []),
+    timeRange: getTimeRangeValue(alarmFilter.filters?.timeRange ?? alarmFilter.timeRange),
+    timezone: alarmFilter.filters?.timezone || 'Asia/Jakarta',
+    includeUnresolved: alarmFilter.filters?.includeUnresolved ?? true,
     TriggerTime: {
       DateFrom: alarmFilter.dateFilters?.TriggerTime?.DateFrom ?? null,
       DateTo: alarmFilter.dateFilters?.TriggerTime?.DateTo ?? null,
@@ -88,6 +113,9 @@ const AlarmTriggeredFilter = () => {
     floorplanId: normalize(appliedFilter.FloorplanId ?? []),
     action: normalize(appliedFilter.Action ?? []),
     alarm: normalize(appliedFilter.Alarm ?? []),
+    timeRange: appliedFilter.TimeRange,
+    timezone: appliedFilter.Timezone,
+    includeUnresolved: appliedFilter.IncludeUnresolved,
     TriggerTime: {
       DateFrom: normalizeDate(appliedFilter.dateFilters.TriggerTime.DateFrom),
       DateTo: normalizeDate(appliedFilter.dateFilters.TriggerTime.DateTo),
@@ -104,6 +132,18 @@ const AlarmTriggeredFilter = () => {
     label: formatLabel(key),
     value: key,
   }));
+  const { data: hierarchyTree = [] } = useLocationHierarchy();
+
+  const floorList = useMemo(() => {
+    const list: { id: string; name: string; buildingId: string }[] = [];
+    for (const b of hierarchyTree) {
+      for (const f of b.floors ?? []) {
+        list.push({ id: f.id, name: f.name, buildingId: b.id });
+      }
+    }
+    return list;
+  }, [hierarchyTree]);
+
   // --- Locked initial (for stable AutocompleteFilter) ---
   const [lockedInitial, setLockedInitial] = useState<{
     BuildingId: string[];
@@ -129,6 +169,9 @@ const AlarmTriggeredFilter = () => {
       FloorplanId: filters.floorplanId ?? [],
       Action: filters.action ?? [],
       Alarm: filters.alarm ?? [],
+      TimeRange: getTimeRangeValue(filters.timeRange ?? alarmFilter.timeRange),
+      Timezone: filters.timezone || 'Asia/Jakarta',
+      IncludeUnresolved: filters.includeUnresolved ?? true,
     }));
 
     // lock initial for AutocompleteFilter
@@ -146,7 +189,7 @@ const AlarmTriggeredFilter = () => {
         MaskedAreaId: [],
       });
     }
-  }, [alarmFilter.filters, floorList, lockedInitial]);
+  }, [alarmFilter.filters, alarmFilter.timeRange, floorList, lockedInitial]);
 
   // --- Drawer controls ---
   const handleClickOpen = () => {
@@ -193,21 +236,31 @@ const AlarmTriggeredFilter = () => {
 
   // --- Apply & Reset ---
   const handleApplyFilter = () => {
+    const isCustom = appliedFilter.TimeRange === 'custom';
+    const computedTimeRange = appliedFilter.TimeRange === 'all' ? null : appliedFilter.TimeRange;
     dispatch(
       UpdateFilter({
         Start: 0,
+        timeRange: computedTimeRange,
         filters: {
           ...alarmFilter.filters,
+          timeRange: computedTimeRange,
+          timezone: appliedFilter.Timezone || 'Asia/Jakarta',
           buildingId: appliedFilter.BuildingId,
           floorId: appliedFilter.FloorId,
           floorplanId: appliedFilter.FloorplanId,
           action: appliedFilter.Action,
           alarm: appliedFilter.Alarm,
+          includeUnresolved: appliedFilter.IncludeUnresolved,
         },
         dateFilters: {
           TriggerTime: {
-            DateFrom: appliedFilter.dateFilters.TriggerTime.DateFrom?.toISOString() ?? null,
-            DateTo: appliedFilter.dateFilters.TriggerTime.DateTo?.toISOString() ?? null,
+            DateFrom: isCustom
+              ? appliedFilter.dateFilters.TriggerTime.DateFrom?.toISOString() ?? null
+              : null,
+            DateTo: isCustom
+              ? appliedFilter.dateFilters.TriggerTime.DateTo?.toISOString() ?? null
+              : null,
           },
         },
       }),
@@ -222,6 +275,9 @@ const AlarmTriggeredFilter = () => {
       FloorplanId: [],
       Action: [],
       Alarm: [],
+      TimeRange: 'daily',
+      Timezone: 'Asia/Jakarta',
+      IncludeUnresolved: true,
       dateFilters: {
         TriggerTime: {
           DateFrom: null,
@@ -233,12 +289,20 @@ const AlarmTriggeredFilter = () => {
     dispatch(
       UpdateFilter({
         Start: 0,
+        timeRange: 'daily',
         filters: {
+          ...alarmFilter.filters,
+          timeRange: 'today',
+          timezone: 'Asia/Jakarta',
           buildingId: [],
           floorId: [],
           floorplanId: [],
           action: [],
           alarm: [],
+          includeUnresolved: true,
+          // Explicitly preserve memberId and visitorId from applied filter
+          memberId: alarmFilter.filters?.memberId,
+          visitorId: alarmFilter.filters?.visitorId,
         },
         dateFilters: {
           TriggerTime: {
@@ -302,9 +366,6 @@ const AlarmTriggeredFilter = () => {
             </CustomFormLabel>
 
             <AutocompleteFilter
-              buildings={buildingList}
-              floors={floorList}
-              floorplans={floorplanList} // hide deeper levels
               maskedAreas={[]} // hide deeper levels
               initial={
                 lockedInitial ?? {
@@ -357,55 +418,120 @@ const AlarmTriggeredFilter = () => {
               renderInput={(params) => <TextField {...params} label="Action" size="small" />}
             />
           </Grid>
+          {/* Time Range Select */}
           <Grid size={12}>
-            <Box>
-              <CustomFormLabel>
-                <Typography variant="caption">Trigger Time :</Typography>
-              </CustomFormLabel>
+            <CustomFormLabel>
+              <Typography variant="caption">Time Range :</Typography>
+            </CustomFormLabel>
 
-              <Box display="flex" alignItems="center" gap={1}>
-                <DateTimePicker
-                  label="Start"
-                  value={appliedFilter.dateFilters.TriggerTime.DateFrom}
-                  onChange={(val) =>
-                    setAppliedFilter((prev) => ({
-                      ...prev,
-                      dateFilters: {
-                        ...prev.dateFilters,
-                        TriggerTime: {
-                          ...prev.dateFilters.TriggerTime,
-                          DateFrom: val,
+            <TextField
+              select
+              fullWidth
+              size="small"
+              value={appliedFilter.TimeRange}
+              onChange={(e) =>
+                setAppliedFilter((prev) => ({
+                  ...prev,
+                  TimeRange: e.target.value,
+                }))
+              }
+            >
+              {TIME_RANGE_OPTIONS.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+
+          {/* Trigger Time - Only for Custom Range */}
+          {appliedFilter.TimeRange === 'custom' && (
+            <Grid size={12}>
+              <Box>
+                <CustomFormLabel>
+                  <Typography variant="caption">Trigger Time :</Typography>
+                </CustomFormLabel>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <DateTimePicker
+                    label="Start"
+                    value={appliedFilter.dateFilters.TriggerTime.DateFrom}
+                    onChange={(val) =>
+                      setAppliedFilter((prev) => ({
+                        ...prev,
+                        dateFilters: {
+                          ...prev.dateFilters,
+                          TriggerTime: {
+                            ...prev.dateFilters.TriggerTime,
+                            DateFrom: val,
+                          },
                         },
-                      },
-                    }))
-                  }
-                  ampm={false}
-                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                />
+                      }))
+                    }
+                    ampm={false}
+                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                  />
 
-                <Typography variant="body2" sx={{ mx: 1 }}>
-                  —
-                </Typography>
+                  <Typography variant="body2" sx={{ mx: 1 }}>
+                    —
+                  </Typography>
 
-                <DateTimePicker
-                  label="End"
-                  value={appliedFilter.dateFilters.TriggerTime.DateTo}
-                  onChange={(val) =>
-                    setAppliedFilter((prev) => ({
-                      ...prev,
-                      dateFilters: {
-                        ...prev.dateFilters,
-                        TriggerTime: {
-                          ...prev.dateFilters.TriggerTime,
-                          DateTo: val,
+                  <DateTimePicker
+                    label="End"
+                    value={appliedFilter.dateFilters.TriggerTime.DateTo}
+                    onChange={(val) =>
+                      setAppliedFilter((prev) => ({
+                        ...prev,
+                        dateFilters: {
+                          ...prev.dateFilters,
+                          TriggerTime: {
+                            ...prev.dateFilters.TriggerTime,
+                            DateTo: val,
+                          },
                         },
-                      },
-                    }))
-                  }
-                  ampm={false}
-                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                />
+                      }))
+                    }
+                    ampm={false}
+                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                  />
+                </Box>
               </Box>
+            </Grid>
+          )}
+
+          {/* Include Unresolved Toggle */}
+          <Grid size={12}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                py: 1,
+                px: 1.5,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1.5,
+                bgcolor: 'background.paper',
+              }}
+            >
+              <Box>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Include Unresolved
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Include unresolved alarms in the filtered results
+                </Typography>
+              </Box>
+              <Switch
+                checked={appliedFilter.IncludeUnresolved}
+                onChange={(e) =>
+                  setAppliedFilter((prev) => ({
+                    ...prev,
+                    IncludeUnresolved: e.target.checked,
+                  }))
+                }
+                color="primary"
+              />
             </Box>
           </Grid>
         </Grid>

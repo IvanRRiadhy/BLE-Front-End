@@ -7,14 +7,11 @@ import {
   Popper,
   TextField,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
-
-import { BuildingType } from 'src/store/apps/crud/building';
-import { floorType } from 'src/store/apps/crud/floor';
-import { FloorplanType } from 'src/store/apps/crud/floorplan';
-import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
+import { useLocationHierarchy } from 'src/hooks/useBuilding';
 import { useState } from 'react';
 
 // === Type definitions ===
@@ -55,10 +52,6 @@ const parseKey = (key: string) => {
 };
 
 type Props = {
-  buildings: BuildingType[];
-  floors?: floorType[];
-  floorplans?: FloorplanType[];
-  maskedAreas?: MaskedAreaType[];
   initial?: Partial<FilterState>;
   onChangeFilter: (f: FilterState) => void;
   resetToken?: number;
@@ -68,16 +61,36 @@ type Props = {
 
 // === Component ===
 const AutocompleteFilterNew: React.FC<Props> = ({
-  buildings,
-  floors = [],
-  floorplans = [],
-  maskedAreas = [],
   initial,
   onChangeFilter,
   resetToken,
   hideSelectedAreas,
   returnAll = false,
 }) => {
+  const { data: hierarchyTree = [], isLoading } = useLocationHierarchy();
+
+  // Derive flat entity arrays from tree
+  const { buildings, floors, floorplans, maskedAreas } = React.useMemo(() => {
+    const buildings: { id: string; name: string }[] = [];
+    const floors: { id: string; name: string; buildingId: string }[] = [];
+    const floorplans: { id: string; name: string; floorId: string }[] = [];
+    const maskedAreas: { id: string; name: string; floorplanId: string }[] = [];
+
+    for (const b of hierarchyTree) {
+      buildings.push({ id: b.id, name: b.name });
+      for (const f of b.floors ?? []) {
+        floors.push({ id: f.id, name: f.name, buildingId: b.id });
+        for (const fp of f.floorplans ?? []) {
+          floorplans.push({ id: fp.id, name: fp.name, floorId: f.id });
+          for (const area of fp.areas ?? []) {
+            maskedAreas.push({ id: area.id, name: area.name, floorplanId: fp.id });
+          }
+        }
+      }
+    }
+
+    return { buildings, floors, floorplans, maskedAreas };
+  }, [hierarchyTree]);
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
@@ -85,11 +98,11 @@ const AutocompleteFilterNew: React.FC<Props> = ({
   const hasFloors = floors.length > 0;
   const hasFloorplans = floorplans.length > 0;
   const hasMaskedAreas = maskedAreas.length > 0;
-  const disabled = !buildings?.length;
+  const disabled = !buildings?.length && !isLoading;
 
   // === Build hierarchy maps ===
   const floorsByBuilding = React.useMemo(() => {
-    const m = new Map<string, floorType[]>();
+    const m = new Map<string, typeof floors>();
     for (const f of floors) {
       if (!m.has(f.buildingId)) m.set(f.buildingId, []);
       m.get(f.buildingId)!.push(f);
@@ -98,7 +111,7 @@ const AutocompleteFilterNew: React.FC<Props> = ({
   }, [floors]);
 
   const fpsByFloor = React.useMemo(() => {
-    const m = new Map<string, FloorplanType[]>();
+    const m = new Map<string, typeof floorplans>();
     for (const fp of floorplans) {
       if (!m.has(fp.floorId)) m.set(fp.floorId, []);
       m.get(fp.floorId)!.push(fp);
@@ -107,7 +120,7 @@ const AutocompleteFilterNew: React.FC<Props> = ({
   }, [floorplans]);
 
   const masByFp = React.useMemo(() => {
-    const m = new Map<string, MaskedAreaType[]>();
+    const m = new Map<string, typeof maskedAreas>();
     for (const ma of maskedAreas) {
       if (!m.has(ma.floorplanId)) m.set(ma.floorplanId, []);
       m.get(ma.floorplanId)!.push(ma);
@@ -504,6 +517,23 @@ const AutocompleteFilterNew: React.FC<Props> = ({
   }, [selectedKeys, buildings, floorsByBuilding, fpsByFloor, masByFp]);
 
   // === UI ===
+  if (isLoading) {
+    return (
+      <TextField
+        fullWidth
+        disabled
+        value="Loading location data..."
+        InputProps={{
+          startAdornment: (
+            <Box sx={{ pl: 1 }}>
+              <CircularProgress size={16} />
+            </Box>
+          ),
+        }}
+      />
+    );
+  }
+
   if (disabled) {
     return (
       <TextField

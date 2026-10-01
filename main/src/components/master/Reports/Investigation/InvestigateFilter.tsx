@@ -34,10 +34,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import { useAllVisitor } from 'src/hooks/useVisitor';
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import { useNewVisitorSession } from 'src/hooks/useVisitorSession';
 
 import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
@@ -93,10 +89,6 @@ const InvestigateFilter: React.FC<InvestigateFilterProps> = ({ onInvestigateSucc
   const { data: visitorData = [] } = useAllVisitor();
   const { data: memberData = [] } = useAllMembers();
   const { data: securityData = [] } = useAllSecuritys();
-  const { data: buildingData = [] } = useAllBuilding();
-  const { data: floorData = [] } = useAllFloors();
-  const { data: floorplanData = [] } = useAllFloorplans();
-  const { data: areaData = [] } = useAllMaskedAreas();
 
   // States
   const [selectedPersonType, setSelectedPersonType] = useState<'visitor' | 'member' | 'security'>('visitor');
@@ -781,10 +773,6 @@ const InvestigateFilter: React.FC<InvestigateFilterProps> = ({ onInvestigateSucc
               Area 
             </Typography>
             <AreaHierarchySelector
-              buildings={buildingData}
-              floors={floorData}
-              floorplans={floorplanData}
-              maskedAreas={areaData}
               value={selectedArea}
               onChange={setSelectedArea}
             />

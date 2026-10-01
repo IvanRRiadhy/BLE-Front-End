@@ -231,7 +231,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                         containerHeight={item.height ? parseInt(item.height) - 20 : 180}
                         screenSettings={miniSettings[i]}
                         activeMaskedArea={miniDisplays[i]}
-                        focusBeacon={miniDisplays[i]}
+                        focusBeacon={miniTypes[i] === 3 ? miniDisplays[i] : undefined}
                         gridNumber={grid}
                         screenNumber={i + 2}
                         screenId={miniIds[i]}
@@ -290,7 +290,7 @@ const MonitoringGrid: React.FC<MonitoringGridProps> = React.memo(
                   containerHeight={gridDimensions.height}
                   screenSettings={screenSettings[grid][idx]}
                   activeMaskedArea={screenDisplay[grid][idx]}
-                  focusBeacon={screenDisplay[grid][idx]}
+                  focusBeacon={type === 3 ? screenDisplay[grid][idx] : undefined}
                   gridNumber={grid}
                   screenNumber={idx + 1}
                   screenId={screenId[grid][idx]}

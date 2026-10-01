@@ -1,32 +1,107 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Box,
   Typography,
   Stack,
   Button,
+  IconButton,
+  Tooltip,
   CircularProgress,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import { IconDownload } from '@tabler/icons-react';
+import { IconDownload, IconRefresh, IconUser, IconMapPin } from '@tabler/icons-react';
+import { useSearchParams } from 'react-router';
 import PageContainer from 'src/components/container/PageContainer';
 import NewInvestigateFilter, {
   InvestigateFilterState,
+  PersonOption,
+  TimeRangeKey,
 } from 'src/components/master/Reports/NewInvestigate/NewInvestigateFilter';
 import NewInvestigateContent from 'src/components/master/Reports/NewInvestigate/NewInvestigateContent';
-import { usePersonOverview } from 'src/hooks/useInvestigate';
+import NewAreaInvestigateFilter, {
+  AreaInvestigateFilterState,
+  AreaOption,
+} from 'src/components/master/Reports/NewInvestigate/NewAreaInvestigateFilter';
+import NewAreaInvestigateContent from 'src/components/master/Reports/NewInvestigate/NewAreaInvestigateContent';
+import { usePersonOverview, useAreaInvestigation, AreaInvestigationTimeRange } from 'src/hooks/useInvestigate';
 import { useNewVisitorSession } from 'src/hooks/useVisitorSession';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useLocationHierarchy } from 'src/hooks/useBuilding';
 import { VisitorSessionResponseType, GetFilter } from 'src/store/apps/crud/visitorSession';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+type InvestigateMode = 'people' | 'area';
+
 const NewInvestigate: React.FC = () => {
-  // Filter state
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Lookups to resolve entities from IDs in URL params
+  const { data: members = [] } = useAllMembers();
+  const { data: visitors = [] } = useAllVisitor();
+  const { data: hierarchyTree = [] } = useLocationHierarchy();
+
+  const personOptions = useMemo<PersonOption[]>(() => {
+    const memberOpts: PersonOption[] = members.map((m: any) => ({
+      id: m.id || m.personId || '',
+      name: m.name || 'Unknown Member',
+      identityId: m.identityId || m.id || '-',
+      type: 'Member',
+      avatarUrl: m.faceImageUrl || m.faceImage || undefined,
+    }));
+
+    const visitorOpts: PersonOption[] = visitors.map((v: any) => ({
+      id: v.id || v.personId || '',
+      name: v.name || 'Unknown Visitor',
+      identityId: v.identityId || v.id || '-',
+      type: 'Visitor',
+      avatarUrl: v.faceImageUrl || v.faceImage || undefined,
+    }));
+
+    return [...memberOpts, ...visitorOpts];
+  }, [members, visitors]);
+
+  const allAreas = useMemo<AreaOption[]>(() => {
+    const areas: AreaOption[] = [];
+    for (const b of hierarchyTree) {
+      for (const f of b.floors ?? []) {
+        for (const fp of f.floorplans ?? []) {
+          for (const a of fp.areas ?? []) {
+            areas.push({
+              id: a.id,
+              name: a.name || 'Unnamed Area',
+              buildingName: b.name || '',
+              floorName: f.name || '',
+              floorplanName: fp.name || '',
+            });
+          }
+        }
+      }
+    }
+    return areas;
+  }, [hierarchyTree]);
+
+  // Read initial values from URL params
+  const paramMode = searchParams.get('mode') || searchParams.get('section');
+  const initialMode: InvestigateMode = paramMode === 'area' ? 'area' : 'people';
+
+  const [activeMode, setActiveMode] = useState<InvestigateMode>(initialMode);
+
+  // --- PEOPLE INVESTIGATION STATE ---
+  const initialPeopleTimeRange: TimeRangeKey = (searchParams.get('timeRange') as TimeRangeKey) || 'daily';
+  const initialPeopleFrom = initialPeopleTimeRange === 'custom' ? searchParams.get('from') || null : null;
+  const initialPeopleTo = initialPeopleTimeRange === 'custom' ? searchParams.get('to') || null : null;
+  const paramPersonId = searchParams.get('personId') || searchParams.get('person');
+
   const [filterState, setFilterState] = useState<InvestigateFilterState>({
     person: null,
-    timeRange: 'daily',
-    from: dayjs().startOf('day').toISOString(),
-    to: dayjs().endOf('day').toISOString(),
+    timeRange: initialPeopleTimeRange,
+    from: initialPeopleFrom,
+    to: initialPeopleTo,
   });
 
   const [isExporting, setIsExporting] = useState(false);
@@ -36,18 +111,153 @@ const NewInvestigate: React.FC = () => {
   const [visitorSessionData, setVisitorSessionData] = useState<VisitorSessionResponseType | null>(null);
   const [isVisitorSessionLoading, setIsVisitorSessionLoading] = useState(false);
 
-  // Query Hook
-  const { data, isLoading } = usePersonOverview(
+  // Query Hook for Person Overview
+  const {
+    data: personData,
+    isLoading: isPersonLoading,
+    refetch: refetchPerson,
+    isRefetching: isPersonRefetching,
+  } = usePersonOverview(
     {
       personId: filterState.person?.id || null,
-      from: filterState.from || null,
-      to: filterState.to || null,
+      timeRange: filterState.timeRange,
+      from: filterState.timeRange === 'custom' ? filterState.from || null : null,
+      to: filterState.timeRange === 'custom' ? filterState.to || null : null,
     },
     Boolean(filterState.person?.id)
   );
 
-  const handleSearch = async (newFilter: InvestigateFilterState) => {
+  // --- AREA INVESTIGATION STATE ---
+  const initialAreaTimeRange: AreaInvestigationTimeRange =
+    (searchParams.get('timeRange') as AreaInvestigationTimeRange) || 'daily';
+  const initialAreaFrom = searchParams.get('from') || null;
+  const initialAreaTo = searchParams.get('to') || null;
+  const paramAreaId = searchParams.get('areaId') || searchParams.get('area');
+
+  const [areaFilterState, setAreaFilterState] = useState<AreaInvestigateFilterState>({
+    area: null,
+    timeRange: initialAreaTimeRange,
+    from: initialAreaFrom,
+    to: initialAreaTo,
+  });
+
+  const {
+    data: areaData,
+    isLoading: isAreaLoading,
+    refetch: refetchArea,
+    isRefetching: isAreaRefetching,
+  } = useAreaInvestigation(
+    {
+      areaId: areaFilterState.area?.id || null,
+      timeRange: areaFilterState.timeRange,
+      from: areaFilterState.from,
+      to: areaFilterState.to,
+    },
+    Boolean(areaFilterState.area?.id)
+  );
+
+  // Auto-investigate flag so we only auto-trigger once per URL param match
+  const autoInvestigatedPeopleRef = useRef(false);
+  const autoInvestigatedAreaRef = useRef(false);
+
+  // Resolve person from URL params and auto investigate
+  useEffect(() => {
+    if (paramPersonId && !autoInvestigatedPeopleRef.current && personOptions.length > 0) {
+      const found = personOptions.find((p) => p.id === paramPersonId);
+      if (found) {
+        autoInvestigatedPeopleRef.current = true;
+        const newFilter: InvestigateFilterState = {
+          person: found,
+          timeRange: initialPeopleTimeRange,
+          from: initialPeopleFrom,
+          to: initialPeopleTo,
+        };
+        handleSearchPeople(newFilter);
+      }
+    }
+  }, [paramPersonId, personOptions, initialPeopleTimeRange, initialPeopleFrom, initialPeopleTo]);
+
+  // Resolve area from URL params and auto investigate
+  useEffect(() => {
+    if (paramAreaId && !autoInvestigatedAreaRef.current && allAreas.length > 0) {
+      const found = allAreas.find((a) => a.id === paramAreaId);
+      if (found) {
+        autoInvestigatedAreaRef.current = true;
+        const newFilter: AreaInvestigateFilterState = {
+          area: found,
+          timeRange: initialAreaTimeRange,
+          from: initialAreaFrom,
+          to: initialAreaTo,
+        };
+        handleSearchArea(newFilter);
+      }
+    }
+  }, [paramAreaId, allAreas, initialAreaTimeRange, initialAreaFrom, initialAreaTo]);
+
+  // Sync state back to URL params
+  const updateUrlParams = (
+    mode: InvestigateMode,
+    peopleFilter: InvestigateFilterState,
+    areaFilter: AreaInvestigateFilterState
+  ) => {
+    const params = new URLSearchParams();
+    params.set('mode', mode);
+
+    if (mode === 'people') {
+      if (peopleFilter.person?.id) {
+        params.set('personId', peopleFilter.person.id);
+      }
+      if (peopleFilter.timeRange) {
+        params.set('timeRange', peopleFilter.timeRange);
+      }
+      if (peopleFilter.timeRange === 'custom') {
+        if (peopleFilter.from) params.set('from', peopleFilter.from);
+        if (peopleFilter.to) params.set('to', peopleFilter.to);
+      }
+    } else {
+      if (areaFilter.area?.id) {
+        params.set('areaId', areaFilter.area.id);
+      }
+      if (areaFilter.timeRange) {
+        params.set('timeRange', areaFilter.timeRange);
+      }
+      if (areaFilter.timeRange === 'custom') {
+        if (areaFilter.from) params.set('from', areaFilter.from);
+        if (areaFilter.to) params.set('to', areaFilter.to);
+      }
+    }
+
+    setSearchParams(params, { replace: true });
+  };
+
+  // Busy & Generated checks per mode
+  const isPeopleBusy = isPersonLoading || isVisitorSessionLoading || isPersonRefetching;
+  const isAreaBusy = isAreaLoading || isAreaRefetching;
+  const isBusy = activeMode === 'people' ? isPeopleBusy : isAreaBusy;
+
+  const isPeopleReportGenerated = Boolean(filterState.person?.id && (personData || visitorSessionData));
+  const isAreaReportGenerated = Boolean(areaFilterState.area?.id && areaData);
+  const isReportGenerated = activeMode === 'people' ? isPeopleReportGenerated : isAreaReportGenerated;
+
+  const handleRefresh = async () => {
+    if (activeMode === 'people') {
+      if (!filterState.person?.id) {
+        toast('Please select a person to investigate first', { icon: 'ℹ️' });
+        return;
+      }
+      await Promise.all([refetchPerson(), handleSearchPeople(filterState)]);
+    } else {
+      if (!areaFilterState.area?.id) {
+        toast('Please select an area to investigate first', { icon: 'ℹ️' });
+        return;
+      }
+      await refetchArea();
+    }
+  };
+
+  const handleSearchPeople = async (newFilter: InvestigateFilterState) => {
     setFilterState(newFilter);
+    updateUrlParams('people', newFilter, areaFilterState);
 
     if (newFilter.person?.id) {
       try {
@@ -55,9 +265,6 @@ const NewInvestigate: React.FC = () => {
         const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
         const personType = (newFilter.person.type || 'Member').toLowerCase() as any;
 
-        // Movement Replay is restricted to 1 day only:
-        // If range covers today or extends past today (tomorrow, next week, etc.), use today.
-        // Only if the range strictly ends before today or starts after today and does not contain today, pick the closest bound (or to).
         const now = dayjs();
         const startDay = newFilter.from ? dayjs(newFilter.from).startOf('day') : null;
         const endDay = newFilter.to ? dayjs(newFilter.to).endOf('day') : null;
@@ -65,13 +272,10 @@ const NewInvestigate: React.FC = () => {
         let targetDay = now;
         if (startDay && endDay) {
           if (now.isAfter(endDay)) {
-            // Whole range is in the past, pick the last day of the range
             targetDay = dayjs(newFilter.to);
           } else if (now.isBefore(startDay)) {
-            // Whole range is in the future, pick start of the range
             targetDay = dayjs(newFilter.from);
           } else {
-            // Range includes today (or extends into the future across today), so use today
             targetDay = now;
           }
         } else if (endDay && now.isAfter(endDay)) {
@@ -113,14 +317,23 @@ const NewInvestigate: React.FC = () => {
     }
   };
 
+  const handleSearchArea = (newFilter: AreaInvestigateFilterState) => {
+    setAreaFilterState(newFilter);
+    updateUrlParams('area', filterState, newFilter);
+  };
+
   const handleExportPdf = async () => {
-    const exportElement = document.getElementById('investigate-full-pdf-export-content');
+    const exportId =
+      activeMode === 'people'
+        ? 'investigate-full-pdf-export-content'
+        : 'area-investigate-export-content';
+
+    const exportElement = document.getElementById(exportId);
     if (!exportElement) return;
 
     setIsExporting(true);
     try {
-      // Give charts, canvas floorplans, and SVGs time to be fully ready in visible layout
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const canvas = await html2canvas(exportElement, {
         scale: 2,
@@ -128,7 +341,6 @@ const NewInvestigate: React.FC = () => {
         allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
-        windowWidth: 1200,
         height: exportElement.scrollHeight,
       });
 
@@ -136,9 +348,9 @@ const NewInvestigate: React.FC = () => {
       const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
       const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
-      const margin = 10; // 10mm margins
-      const printableWidth = pdfWidth - margin * 2; // 190mm
-      const printableHeight = pdfHeight - margin * 2; // 277mm
+      const margin = 10;
+      const printableWidth = pdfWidth - margin * 2;
+      const printableHeight = pdfHeight - margin * 2;
 
       const canvasPageHeight = Math.floor((canvas.width * printableHeight) / printableWidth);
       const totalPages = Math.ceil(canvas.height / canvasPageHeight);
@@ -175,29 +387,46 @@ const NewInvestigate: React.FC = () => {
 
         pdf.addImage(pageImgData, 'PNG', margin, margin, printableWidth, renderHeight);
 
-        // Add page footer
         pdf.setFontSize(8);
         pdf.setTextColor(150, 150, 150);
+        const reportTitle =
+          activeMode === 'people'
+            ? `Person: ${filterState.person?.name || 'Subject'}`
+            : `Area: ${areaFilterState.area?.name || 'Area'}`;
         pdf.text(
-          `Page ${i + 1} of ${totalPages}  |  Investigation Report - ${filterState.person?.name || 'Person'}`,
+          `Page ${i + 1} of ${totalPages}  |  Investigation Report - ${reportTitle}`,
           margin,
           pdfHeight - 4
         );
       }
 
-      const personName = filterState.person?.name || 'Person';
-      pdf.save(`Investigate_Report_${personName.replace(/\s+/g, '_')}_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`);
+      const filePrefix = activeMode === 'people' ? 'Person_Investigate' : 'Area_Investigate';
+      const entityName =
+        activeMode === 'people'
+          ? (filterState.person?.name || 'Person').replace(/\s+/g, '_')
+          : (areaFilterState.area?.name || 'Area').replace(/\s+/g, '_');
+      pdf.save(`${filePrefix}_${entityName}_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
+      toast.error('Failed to generate export PDF');
     } finally {
       setIsExporting(false);
     }
   };
 
   return (
-    <PageContainer title="Investigate - Reports" description="Detailed analysis of a person's movement, access, and security events">
+    <PageContainer
+      title="Investigate - Reports"
+      description="Detailed analysis of a person's or area's movement, occupancy, access, and security events"
+    >
       {/* Header Breadcrumb & Title */}
-      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={3} spacing={2}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
+        mb={3}
+        spacing={2}
+      >
         <Box>
           <Typography variant="caption" color="text.secondary" fontWeight={600}>
             Reports &gt; Investigate
@@ -206,53 +435,156 @@ const NewInvestigate: React.FC = () => {
             Investigate
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Detailed analysis of a person's movement, access, and security events
+            {activeMode === 'people'
+              ? "Detailed analysis of a person's movement, access, and security events"
+              : 'Real-time occupancy, floorplan positioning, access compliance, and incident history for areas'}
           </Typography>
         </Box>
 
-        {/* Export Report PDF Button */}
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={isExporting ? <CircularProgress size={18} color="inherit" /> : <IconDownload size={18} />}
-            disabled={isExporting}
-            onClick={handleExportPdf}
-            sx={{
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 600,
-              bgcolor: '#1877F2',
-              '&:hover': { bgcolor: '#1164D9' },
-            }}
+        {/* Actions: Refresh & Export PDF Buttons */}
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Tooltip
+            title={
+              (activeMode === 'people' && filterState.person?.id) ||
+              (activeMode === 'area' && areaFilterState.area?.id)
+                ? 'Refresh investigation data'
+                : 'Select a target to refresh'
+            }
           >
-            {isExporting ? 'Exporting PDF...' : 'Export PDF'}
-          </Button>
-        </Box>
+            <span>
+              <IconButton
+                onClick={handleRefresh}
+                disabled={isBusy || (activeMode === 'people' ? !filterState.person?.id : !areaFilterState.area?.id)}
+                color="primary"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: '8px',
+                  bgcolor: 'background.paper',
+                  p: '9px',
+                }}
+              >
+                {isBusy ? <CircularProgress size={18} color="inherit" /> : <IconRefresh size={18} />}
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Tooltip title={!isReportGenerated ? 'Generate an investigation report first to export' : ''}>
+            <span>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={isExporting ? <CircularProgress size={18} color="inherit" /> : <IconDownload size={18} />}
+                disabled={isExporting || isBusy || !isReportGenerated}
+                onClick={handleExportPdf}
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  bgcolor: '#1877F2',
+                  '&:hover': { bgcolor: '#1164D9' },
+                }}
+              >
+                {isExporting ? 'Exporting PDF...' : 'Export PDF'}
+              </Button>
+            </span>
+          </Tooltip>
+        </Stack>
       </Stack>
 
-      {/* Filter Component */}
-      <NewInvestigateFilter onSearch={handleSearch} isLoading={isLoading || isVisitorSessionLoading} />
+      {/* Mode Switcher Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs
+          value={activeMode}
+          onChange={(_, newMode) => {
+            const mode = newMode as InvestigateMode;
+            setActiveMode(mode);
+            updateUrlParams(mode, filterState, areaFilterState);
+          }}
+          sx={{
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '15px',
+              minHeight: 44,
+              px: 3,
+            },
+          }}
+        >
+          <Tab
+            value="people"
+            label="People Investigation"
+            icon={<IconUser size={18} />}
+            iconPosition="start"
+          />
+          <Tab
+            value="area"
+            label="Area Investigation"
+            icon={<IconMapPin size={18} />}
+            iconPosition="start"
+          />
+        </Tabs>
+      </Box>
 
-      {/* Content View */}
-      {(isLoading || isVisitorSessionLoading) && !data && !visitorSessionData ? (
-        <Stack alignItems="center" justifyContent="center" py={8} spacing={2}>
-          <CircularProgress size={40} />
-          <Typography variant="body2" color="text.secondary">
-            Retrieving investigation data...
-          </Typography>
-        </Stack>
-      ) : (
-        <NewInvestigateContent
-          data={data}
-          isLoading={isLoading}
-          visitorSessionData={visitorSessionData}
-          isVisitorSessionLoading={isVisitorSessionLoading}
-          selectedPerson={filterState.person}
-          fromDate={filterState.from}
-          toDate={filterState.to}
-          isExporting={isExporting}
-        />
+      {/* SECTION 1: PEOPLE INVESTIGATION */}
+      {activeMode === 'people' && (
+        <>
+          <NewInvestigateFilter
+            onSearch={handleSearchPeople}
+            isLoading={isPeopleBusy}
+            initialValue={filterState}
+          />
+
+          {isPeopleBusy && !personData && !visitorSessionData ? (
+            <Stack alignItems="center" justifyContent="center" py={8} spacing={2}>
+              <CircularProgress size={40} />
+              <Typography variant="body2" color="text.secondary">
+                Retrieving investigation data...
+              </Typography>
+            </Stack>
+          ) : (
+            <NewInvestigateContent
+              data={personData}
+              isLoading={isPersonLoading}
+              visitorSessionData={visitorSessionData}
+              isVisitorSessionLoading={isVisitorSessionLoading}
+              selectedPerson={filterState.person}
+              fromDate={filterState.from}
+              toDate={filterState.to}
+              isExporting={isExporting}
+            />
+          )}
+        </>
+      )}
+
+      {/* SECTION 2: AREA INVESTIGATION */}
+      {activeMode === 'area' && (
+        <>
+          <NewAreaInvestigateFilter
+            onSearch={handleSearchArea}
+            isLoading={isAreaBusy}
+            initialValue={areaFilterState}
+          />
+
+          {isAreaBusy && !areaData ? (
+            <Stack alignItems="center" justifyContent="center" py={8} spacing={2}>
+              <CircularProgress size={40} />
+              <Typography variant="body2" color="text.secondary">
+                Retrieving area investigation data...
+              </Typography>
+            </Stack>
+          ) : (
+            <NewAreaInvestigateContent
+              data={areaData}
+              isLoading={isAreaLoading}
+              selectedArea={areaFilterState.area}
+              isExporting={isExporting}
+              timeRange={areaFilterState.timeRange}
+              fromDate={areaFilterState.from}
+              toDate={areaFilterState.to}
+            />
+          )}
+        </>
       )}
     </PageContainer>
   );

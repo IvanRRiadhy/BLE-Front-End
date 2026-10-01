@@ -20,9 +20,6 @@ const FloorplanFilter = () => {
   const [open, setOpen] = useState(false);
   const [resetToken, setResetToken] = useState(0);
 
-  // --- Redux data ---
-  const buildingList = useSelector((state: RootState) => state.buildingReducer.buildingAll);
-  const floorList = useSelector((state: RootState) => state.floorReducer.floorAll);
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
 
   // --- Local filter state (only FloorId matters for API) ---
@@ -38,35 +35,20 @@ const FloorplanFilter = () => {
     MaskedAreaId: string[];
   } | null>(null);
 
-  // --- Fetch Data ---
-  // useEffect(() => {
-  //   dispatch(fetchBuildings());
-  //   dispatch(fetchFloors());
-  // }, [dispatch]);
-
   // --- Sync filters + lock initial ---
   useEffect(() => {
     const currentFloorIds = floorplanFilter.filters?.FloorId ?? [];
     setAppliedFilter({ FloorId: currentFloorIds });
 
     if (currentFloorIds.length > 0 && !lockedInitial) {
-      // resolve parent buildings for the selected floors
-      const buildingIds = Array.from(
-        new Set(
-          floorList
-            .filter((f) => currentFloorIds.includes(f.id))
-            .map((f) => f.buildingId),
-        ),
-      );
-
       setLockedInitial({
-        BuildingId: buildingIds,
+        BuildingId: [],
         FloorId: currentFloorIds,
         FloorplanId: [],
         MaskedAreaId: [],
       });
     }
-  }, [floorplanFilter.filters, lockedInitial, floorList]);
+  }, [floorplanFilter.filters, lockedInitial]);
 
   // --- Drawer controls ---
   const handleClickOpen = () => {
@@ -162,8 +144,6 @@ const handleAreaChange = (filter: {
             </CustomFormLabel>
 
             <AutocompleteFilter
-              buildings={buildingList}
-              floors={floorList}
               floorplans={[]}       // hide deeper levels
               maskedAreas={[]}      // hide deeper levels
               initial={

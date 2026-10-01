@@ -16,6 +16,7 @@ import { floorType } from 'src/store/apps/crud/floor';
 import { FloorplanType } from 'src/store/apps/crud/floorplan';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { useState } from 'react';
+import { useLocationHierarchy } from 'src/hooks/useBuilding';
 
 // === Type definitions ===
 type DisplayTree = Map<
@@ -55,7 +56,7 @@ const parseKey = (key: string) => {
 };
 
 type Props = {
-  buildings: BuildingType[];
+  buildings?: BuildingType[];
   floors?: floorType[];
   floorplans?: FloorplanType[];
   maskedAreas?: MaskedAreaType[];
@@ -68,16 +69,57 @@ type Props = {
 
 // === Component ===
 const AutocompleteFilter: React.FC<Props> = ({
-  buildings,
-  floors = [],
-  floorplans = [],
-  maskedAreas = [],
+  buildings: propBuildings,
+  floors: propFloors,
+  floorplans: propFloorplans,
+  maskedAreas: propMaskedAreas,
   initial,
   onChangeFilter,
   resetToken,
   hideSelectedAreas,
   returnAll = false,
 }) => {
+  const { data: hierarchyTree = [], isLoading: hierarchyLoading } = useLocationHierarchy();
+
+  // Derive flat entity arrays from location hierarchy tree if not explicitly passed as props
+  const {
+    treeBuildings,
+    treeFloors,
+    treeFloorplans,
+    treeMaskedAreas,
+  } = React.useMemo(() => {
+    const treeBuildings: any[] = [];
+    const treeFloors: any[] = [];
+    const treeFloorplans: any[] = [];
+    const treeMaskedAreas: any[] = [];
+
+    for (const b of hierarchyTree) {
+      treeBuildings.push({ id: b.id, name: b.name });
+      for (const f of b.floors ?? []) {
+        treeFloors.push({ id: f.id, name: f.name, buildingId: b.id });
+        for (const fp of f.floorplans ?? []) {
+          treeFloorplans.push({ id: fp.id, name: fp.name, floorId: f.id, buildingId: b.id });
+          for (const area of fp.areas ?? []) {
+            treeMaskedAreas.push({
+              id: area.id,
+              name: area.name,
+              floorplanId: fp.id,
+              floorId: f.id,
+              buildingId: b.id,
+            });
+          }
+        }
+      }
+    }
+
+    return { treeBuildings, treeFloors, treeFloorplans, treeMaskedAreas };
+  }, [hierarchyTree]);
+
+  const buildings = propBuildings !== undefined ? propBuildings : treeBuildings;
+  const floors = propFloors !== undefined ? propFloors : treeFloors;
+  const floorplans = propFloorplans !== undefined ? propFloorplans : treeFloorplans;
+  const maskedAreas = propMaskedAreas !== undefined ? propMaskedAreas : treeMaskedAreas;
+
   const [open, setOpen] = React.useState(false);
   const [clickAwayEnabled, setClickAwayEnabled] = useState(false);
   const [query, setQuery] = React.useState('');
@@ -91,11 +133,11 @@ const AutocompleteFilter: React.FC<Props> = ({
   const hasFloors = floors.length > 0;
   const hasFloorplans = floorplans.length > 0;
   const hasMaskedAreas = maskedAreas.length > 0;
-  const disabled = !buildings?.length;
+  const disabled = !buildings?.length && (propBuildings !== undefined || !hierarchyLoading);
 
   // === Build hierarchy maps ===
   const floorsByBuilding = React.useMemo(() => {
-    const m = new Map<string, floorType[]>();
+    const m = new Map<string, typeof floors>();
     for (const f of floors) {
       if (!m.has(f.buildingId)) m.set(f.buildingId, []);
       m.get(f.buildingId)!.push(f);
@@ -104,7 +146,7 @@ const AutocompleteFilter: React.FC<Props> = ({
   }, [floors]);
 
   const fpsByFloor = React.useMemo(() => {
-    const m = new Map<string, FloorplanType[]>();
+    const m = new Map<string, typeof floorplans>();
     for (const fp of floorplans) {
       if (!m.has(fp.floorId)) m.set(fp.floorId, []);
       m.get(fp.floorId)!.push(fp);
@@ -113,7 +155,7 @@ const AutocompleteFilter: React.FC<Props> = ({
   }, [floorplans]);
 
   const masByFp = React.useMemo(() => {
-    const m = new Map<string, MaskedAreaType[]>();
+    const m = new Map<string, typeof maskedAreas>();
     for (const ma of maskedAreas) {
       if (!m.has(ma.floorplanId)) m.set(ma.floorplanId, []);
       m.get(ma.floorplanId)!.push(ma);

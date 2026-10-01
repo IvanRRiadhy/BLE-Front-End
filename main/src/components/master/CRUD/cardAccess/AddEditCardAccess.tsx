@@ -32,7 +32,6 @@ import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Stor
 import toast from 'react-hot-toast';
 import { CardAccessType } from 'src/store/apps/crud/cardAccess';
 import { defaultCardAccessForm } from 'src/store/apps/defaultForm';
-import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
 import { TimeBlockType, TimeGroupType } from 'src/store/apps/crud/timeGroup';
 import AreaHierarchySelector, { SelectedNode } from 'src/components/shared/AreaHierarchySelector';
 
@@ -40,12 +39,9 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 // React Query hooks
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllBuilding } from 'src/hooks/useBuilding';
 import { useAllTimeGroups } from 'src/hooks/useTimeGroup';
 import { useAddCardAccess, useEditCardAccess } from 'src/hooks/useCardAccess';
+import { useLocationHierarchy } from 'src/hooks/useBuilding';
 
 interface FormType {
   type?: string;
@@ -65,11 +61,28 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
 
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
-  // React Query hooks for data fetching
-  const { data: maskedAreas = [] } = useAllMaskedAreas();
-  const { data: floors = [] } = useAllFloors();
-  const { data: floorplans = [] } = useAllFloorplans();
-  const { data: buildings = [] } = useAllBuilding();
+  // Derive flat data from hierarchy tree for onChange logic
+  const { data: hierarchyTree = [] } = useLocationHierarchy();
+  const { maskedAreas, floorplans, floors, buildings } = React.useMemo(() => {
+    const buildings: { id: string; name: string }[] = [];
+    const floors: { id: string; name: string; buildingId: string }[] = [];
+    const floorplans: { id: string; name: string; floorId: string }[] = [];
+    const maskedAreas: { id: string; name: string; floorplanId: string }[] = [];
+    for (const b of hierarchyTree) {
+      buildings.push({ id: b.id, name: b.name });
+      for (const f of b.floors ?? []) {
+        floors.push({ id: f.id, name: f.name, buildingId: b.id });
+        for (const fp of f.floorplans ?? []) {
+          floorplans.push({ id: fp.id, name: fp.name, floorId: f.id });
+          for (const area of fp.areas ?? []) {
+            maskedAreas.push({ id: area.id, name: area.name, floorplanId: fp.id });
+          }
+        }
+      }
+    }
+    return { maskedAreas, floorplans, floors, buildings };
+  }, [hierarchyTree]);
+
   const { data: timeGroup = [] } = useAllTimeGroups();
 
   // React Query mutations
@@ -138,40 +151,6 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
     setFormData((prev) => ({ ...prev, [id || name]: value }));
   };
 
-  // 1️⃣ Floorplans that actually have masked areas
-  const floorplanIdsWithArea = React.useMemo(
-    () => new Set(maskedAreas.map((ma) => ma.floorplanId)),
-    [maskedAreas],
-  );
-
-  // 2️⃣ Floors that have at least one valid floorplan
-  const floorIdsWithArea = React.useMemo(
-    () =>
-      new Set(floorplans.filter((fp) => floorplanIdsWithArea.has(fp.id)).map((fp) => fp.floorId)),
-    [floorplans, floorplanIdsWithArea],
-  );
-
-  // 3️⃣ Buildings that have at least one valid floor
-  const buildingIdsWithArea = React.useMemo(
-    () => new Set(floors.filter((f) => floorIdsWithArea.has(f.id)).map((f) => f.buildingId)),
-    [floors, floorIdsWithArea],
-  );
-
-  // 4️⃣ Final filtered data
-  const filteredFloorplans = React.useMemo(
-    () => floorplans.filter((fp) => floorplanIdsWithArea.has(fp.id)),
-    [floorplans, floorplanIdsWithArea],
-  );
-
-  const filteredFloors = React.useMemo(
-    () => floors.filter((f) => floorIdsWithArea.has(f.id)),
-    [floors, floorIdsWithArea],
-  );
-
-  const filteredBuildings = React.useMemo(
-    () => buildings.filter((b) => buildingIdsWithArea.has(b.id)),
-    [buildings, buildingIdsWithArea],
-  );
 
   return (
     <>
@@ -260,10 +239,6 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
               {formData.accessScope === 'Specific' && (
                 <>
                   <AreaHierarchySelector
-                    buildings={filteredBuildings}
-                    floors={filteredFloors}
-                    floorplans={filteredFloorplans}
-                    maskedAreas={maskedAreas}
                     value={selectedAreaNode}
                     multiple={true}
                     highlightedAreaIds={formData.maskedAreaIds ?? []}
@@ -346,8 +321,10 @@ const AddEditCardAccess = ({ type, cardAccess }: FormType) => {
                         const ma = maskedAreas.find((m) => m.id === id);
                         if (!ma) return null;
 
-                        const floor = floors.find((f) => f.id === ma.floorId);
                         const floorplan = floorplans.find((fp) => fp.id === ma.floorplanId);
+                        const floor = floorplan
+                          ? floors.find((f) => f.id === floorplan.floorId)
+                          : null;
                         const building = floor
                           ? buildings.find((b) => b.id === floor.buildingId)
                           : null;

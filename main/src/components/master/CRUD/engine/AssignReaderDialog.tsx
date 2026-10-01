@@ -29,10 +29,6 @@ import {
   useGetAllUnasignedEngine,
   UnassignedEngineReader,
 } from 'src/hooks/useFloorplanDevice';
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import AreaHierarchySelector, {
   SelectedNode,
 } from 'src/components/shared/AreaHierarchySelector';
@@ -64,12 +60,6 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
     useGetAllUnasignedEngine(engine.id);
   const { data: unassignedReaders = [], isLoading: isLoadingUnassigned } =
     useGetAllUnasignedEngine();
-
-  // Hierarchy queries
-  const { data: buildings = [] } = useAllBuilding();
-  const { data: floors = [] } = useAllFloors();
-  const { data: floorplans = [] } = useAllFloorplans();
-  const { data: maskedAreas = [] } = useAllMaskedAreas();
 
   // Combine and deduplicate readers
   const allReaders = useMemo(() => {
@@ -319,10 +309,6 @@ const AssignReaderDialog: React.FC<Props> = ({ engine }) => {
             Select Readers to Add
           </Typography>
           <AreaHierarchySelector
-            buildings={buildings}
-            floors={floors}
-            floorplans={floorplans}
-            maskedAreas={maskedAreas}
             devices={availableDevices}
             exclusive="device"
             multiple={true}

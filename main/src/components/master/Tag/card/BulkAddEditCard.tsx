@@ -24,13 +24,9 @@ import { CardType } from 'src/store/apps/crud/card';
 import { defaultCardForm } from 'src/store/apps/defaultForm';
 import { string } from 'prop-types';
 import { useBulkAddCard, useEditCard } from 'src/hooks/useCard';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import { useAllCardAccess } from 'src/hooks/useCardAccess';
 import { CardAccessType } from 'src/store/apps/crud/cardAccess';
 import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
 
 type Props = {
   type: 'add' | 'edit';
@@ -69,47 +65,9 @@ const BulkAddEditCard = ({ type, initialData, setSelectedIds }: Props) => {
 
   const BulkAddMutation = useBulkAddCard();
   const EditMutation = useEditCard();
-  //   const { data: maskedArea = [] } = useAllMaskedAreas();
-  //   const { data: cardAccess = [] } = useAllCardAccess();
-  const buildings = useAllBuilding().data || [];
-  const floors = useAllFloors().data || [];
-  const floorplans = useAllFloorplans().data || [];
-  const areas = useAllMaskedAreas().data || [];
   const cardAccess = useAllCardAccess().data || [];
 
-  //   const maskedAreaOptions = useMemo(() => maskedArea, [maskedArea]);
   const cardAccessOptions = useMemo(() => cardAccess, [cardAccess]);
-
-  // 1️⃣ Floorplans that actually have masked areas
-  const floorplanIdsWithArea = useMemo(() => new Set(areas.map((ma) => ma.floorplanId)), [areas]);
-
-  // 2️⃣ Floors that have at least one valid floorplan
-  const floorIdsWithArea = useMemo(
-    () =>
-      new Set(floorplans.filter((fp) => floorplanIdsWithArea.has(fp.id)).map((fp) => fp.floorId)),
-    [floorplans, floorplanIdsWithArea],
-  );
-
-  // 3️⃣ Buildings that have at least one valid floor
-  const buildingIdsWithArea = useMemo(
-    () => new Set(floors.filter((f) => floorIdsWithArea.has(f.id)).map((f) => f.buildingId)),
-    [floors, floorIdsWithArea],
-  );
-
-  const filteredFloorplans = useMemo(
-    () => floorplans.filter((fp) => floorplanIdsWithArea.has(fp.id)),
-    [floorplans, floorplanIdsWithArea],
-  );
-
-  const filteredFloors = useMemo(
-    () => floors.filter((f) => floorIdsWithArea.has(f.id)),
-    [floors, floorIdsWithArea],
-  );
-
-  const filteredBuildings = useMemo(
-    () => buildings.filter((b) => buildingIdsWithArea.has(b.id)),
-    [buildings, buildingIdsWithArea],
-  );
 
   const handleClickOpen = () => {
     if (type === 'edit' && initialData && initialData.length > 0) {
@@ -169,18 +127,13 @@ const BulkAddEditCard = ({ type, initialData, setSelectedIds }: Props) => {
 
   const accessById = (id?: string) => cardAccessOptions.find((b) => b.id === id) ?? null;
 
-  const areaById = (id?: string) => areas.find((a) => a.id === id) ?? null;
-
-  const areaMap = useMemo(() => new Map(areas.map((a) => [a.id, a])), [areas]);
-
   const getAreaNode = (areaId?: string | null) => {
-    const area = areaId ? areaMap.get(areaId) : null;
-    if (!area) return null;
+    if (!areaId) return null;
 
     return {
-      type: 'area',
-      data: area,
-    } as const;
+      type: 'area' as const,
+      data: { id: areaId },
+    };
   };
 
   const getCellStyle = (rowIndex: number, key: keyof CardType) => {
@@ -487,10 +440,6 @@ const BulkAddEditCard = ({ type, initialData, setSelectedIds }: Props) => {
                       }}
                     />
                     <AreaHierarchySelector
-                      buildings={filteredBuildings}
-                      floors={filteredFloors}
-                      floorplans={filteredFloorplans}
-                      maskedAreas={areas}
                       exclusive="area"
                       value={getAreaNode(columnDefaults.registeredMaskedAreaId)}
                       onChange={(node) => {
@@ -744,10 +693,6 @@ const BulkAddEditCard = ({ type, initialData, setSelectedIds }: Props) => {
                         )}
                       </IconButton>
                       <AreaHierarchySelector
-                        buildings={filteredBuildings}
-                        floors={filteredFloors}
-                        floorplans={filteredFloorplans}
-                        maskedAreas={areas}
                         exclusive="area"
                         value={getAreaNode(row.registeredMaskedAreaId)}
                         onChange={(node) => {

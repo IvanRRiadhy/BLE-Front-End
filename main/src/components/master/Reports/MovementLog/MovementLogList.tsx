@@ -271,7 +271,7 @@ const MovementLogList = () => {
                     onChange={(e: any) => setFilterPersonId(e.target.value)}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 2 }}>
+                {/* <Grid size={{ xs: 12, sm: 2 }}>
                   <CustomTextField
                     select
                     fullWidth
@@ -284,7 +284,7 @@ const MovementLogList = () => {
                     <MenuItem value="Stay">Stay</MenuItem>
                     <MenuItem value="Lost">Lost</MenuItem>
                   </CustomTextField>
-                </Grid>
+                </Grid> */}
                 <Grid size={{ xs: 12, sm: 2 }}>
                   <CustomTextField
                     select

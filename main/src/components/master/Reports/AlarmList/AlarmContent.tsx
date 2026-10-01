@@ -21,7 +21,9 @@ import {
   CircularProgress,
   Tooltip,
   IconButton,
+  InputAdornment,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -30,7 +32,7 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { BASE_URL } from 'src/utils/axios';
+import axiosServices, { BASE_URL } from 'src/utils/axios';
 import { SelectVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { memberType, SelectMember } from 'src/store/apps/crud/member';
 import duration from 'dayjs/plugin/duration';
@@ -73,9 +75,10 @@ import { resolve } from 'path';
 import { useAlarmPlayback } from 'src/hooks/useAlarmPlayback';
 import { AlarmPlaybackDataType } from 'src/store/apps/crud/alarmPlayback';
 import AlarmPlaybackDialog from './AlarmPlaybackDialog';
-import AlarmTriggeredFilter from './AlarmFilter';
+import AlarmTriggeredFilter, { TIME_RANGE_OPTIONS } from './AlarmFilter';
 import { useMemberByID } from 'src/hooks/useMember';
 import { useVisitorByID } from 'src/hooks/useVisitor';
+import { useProfile } from 'src/hooks/useProfile';
 dayjs.extend(duration);
 
 const proximityColorMap: Record<string, string> = {
@@ -94,6 +97,8 @@ const AlarmContent = () => {
   const queryClient = useQueryClient();
   const dispatch: AppDispatch = useDispatch();
   const language = useSelector((state: RootState) => state.settings.isLanguage);
+  const { data: profile } = useProfile();
+  const canAlarmAction = Boolean(profile?.effectiveCanAlarmAction);
   
   const searchParams = new URLSearchParams(window.location.search);
   const autoAlarmSelectDone = useRef(false);
@@ -106,6 +111,12 @@ const AlarmContent = () => {
   const alarmTriggerFilter = useSelector(
     (state: RootState) => state.alarmTriggerReducer.alarmTriggerFilter,
   );
+
+  // Determine which person to display based on selectedIntruder
+  const [currentPerson, setCurrentPerson] = useState<VisitorType | memberType | null>(null);
+  const [personType, setPersonType] = useState<'Visitor' | 'Member' | null>(null);
+  const [personId, setPersonId] = useState<string | null>(null);
+
   // 🔹 Per-category infinite queries
   const baseFilter = alarmTriggerFilter;
 
@@ -136,10 +147,56 @@ const AlarmContent = () => {
     );
   }, [hasActionFilter, selectedActions]);
 
-  const enableActive = !hasActionFilter || activeActionsToQuery.length > 0;
-  const enableOnGoing = !hasActionFilter || onGoingActionsToQuery.length > 0;
+  // Brief active filter badges for the header
+  const activeFilterBadges = useMemo(() => {
+    const badges: { label: string; value: string }[] = [];
+    const currentTimeRange = baseFilter.filters?.timeRange ?? baseFilter.timeRange;
+    if (currentTimeRange !== undefined) {
+      if (currentTimeRange === null || currentTimeRange === 'all') {
+        badges.push({ label: 'Time', value: 'Show All' });
+      } else {
+        const match = TIME_RANGE_OPTIONS.find((opt) => opt.value === currentTimeRange);
+        badges.push({ label: 'Time', value: match ? match.label : currentTimeRange });
+      }
+    }
+
+    if (baseFilter.filters?.alarm && baseFilter.filters.alarm.length > 0) {
+      badges.push({
+        label: 'Category',
+        value:
+          baseFilter.filters.alarm.length === 1
+            ? baseFilter.filters.alarm[0]
+            : `${baseFilter.filters.alarm.length} selected`,
+      });
+    }
+
+    if (baseFilter.filters?.action && baseFilter.filters.action.length > 0) {
+      badges.push({
+        label: 'Action',
+        value:
+          baseFilter.filters.action.length === 1
+            ? baseFilter.filters.action[0]
+            : `${baseFilter.filters.action.length} selected`,
+      });
+    }
+
+    if (baseFilter.filters?.floorId && baseFilter.filters.floorId.length > 0) {
+      badges.push({
+        label: 'Floor',
+        value: `${baseFilter.filters.floorId.length} selected`,
+      });
+    }
+
+    return badges;
+  }, [baseFilter]);
+
+  const isViewingPerson = Boolean(currentPerson);
+
+  const enableActive = !isViewingPerson && (!hasActionFilter || activeActionsToQuery.length > 0);
+  const enableOnGoing = !isViewingPerson && (!hasActionFilter || onGoingActionsToQuery.length > 0);
   const enableCleared =
-    !hasActionFilter || (clearedActionsToQuery !== undefined && clearedActionsToQuery.length > 0);
+    !isViewingPerson &&
+    (!hasActionFilter || (clearedActionsToQuery !== undefined && clearedActionsToQuery.length > 0));
 
   const {
     data: activeData,
@@ -196,6 +253,7 @@ const AlarmContent = () => {
       ...baseFilter,
       filters: {
         ...baseFilter.filters,
+        includeUnresolved: false,
         isActive: false,
         action:
           clearedActionsToQuery && clearedActionsToQuery.length > 0
@@ -209,19 +267,43 @@ const AlarmContent = () => {
     { enabled: enableCleared },
   );
 
-  const isRefreshing = isFetchingActive || isFetchingOnGoing || isFetchingCleared;
+  // 🔹 Dedicated infinite query when viewing a specific person (no active/non-active restriction)
+  const {
+    data: personData,
+    isLoading: isLoadingPerson,
+    hasNextPage: hasNextPerson,
+    fetchNextPage: fetchNextPerson,
+    isFetchingNextPage: isFetchingNextPerson,
+    refetch: refetchPerson,
+    isFetching: isFetchingPerson,
+  } = useInfiniteAlarmTriggerList(
+    {
+      ...baseFilter,
+      // Keep filters intact without forcing isActive: true or isActive: false
+    },
+    50,
+    { enabled: isViewingPerson },
+  );
+
+  const isRefreshing =
+    isFetchingActive || isFetchingOnGoing || isFetchingCleared || isFetchingPerson;
 
   const handleRefresh = async () => {
     await queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list-infinite'] });
-    refetchActive();
-    refetchOnGoing();
-    refetchCleared();
+    if (isViewingPerson) {
+      refetchPerson();
+    } else {
+      refetchActive();
+      refetchOnGoing();
+      refetchCleared();
+    }
   };
 
-  // 🔹 Intersection observers per category column
+  // 🔹 Intersection observers per category column + person view
   const { ref: activeRef, inView: activeInView } = useInView();
   const { ref: onGoingRef, inView: onGoingInView } = useInView();
   const { ref: clearedRef, inView: clearedInView } = useInView();
+  const { ref: personRef, inView: personInView } = useInView();
 
   useEffect(() => {
     if (activeInView && hasNextActive && !isFetchingNextActive) fetchNextActive();
@@ -235,23 +317,31 @@ const AlarmContent = () => {
     if (clearedInView && hasNextCleared && !isFetchingNextCleared) fetchNextCleared();
   }, [clearedInView, hasNextCleared, isFetchingNextCleared, fetchNextCleared]);
 
+  useEffect(() => {
+    if (personInView && hasNextPerson && !isFetchingNextPerson) fetchNextPerson();
+  }, [personInView, hasNextPerson, isFetchingNextPerson, fetchNextPerson]);
+
   // 🔹 Flat arrays per category
   const activeAlarm = activeData?.pages.flatMap((p) => p.data) ?? [];
   const onGoingAlarm = onGoingData?.pages.flatMap((p) => p.data) ?? [];
   const clearedAlarm = clearedData?.pages.flatMap((p) => p.data) ?? [];
+  const personAlarm = personData?.pages.flatMap((p) => p.data) ?? [];
 
-  // Combined for auto-select from URL param
-  const alarmTriggerData = [...activeAlarm, ...onGoingAlarm, ...clearedAlarm];
+  // 🔹 Total filtered counts from API
+  const activeCount = activeData?.pages?.[0]?.recordsFiltered ?? activeAlarm.length;
+  const onGoingCount = onGoingData?.pages?.[0]?.recordsFiltered ?? onGoingAlarm.length;
+  const clearedCount = clearedData?.pages?.[0]?.recordsFiltered ?? clearedAlarm.length;
+  const personCount = personData?.pages?.[0]?.recordsFiltered ?? personAlarm.length;
+
+  // Combined for auto-select from URL param or general usage
+  const alarmTriggerData = isViewingPerson
+    ? personAlarm
+    : [...activeAlarm, ...onGoingAlarm, ...clearedAlarm];
 
   const { data: securityData = [], isLoading: isLoadingSecurity } = useAllSecurityLookup();
   // const [selectedSecurity, setSelectedSecurity] = useState<memberType | null>(null);
 
   // const [alarmTimeline, setAlarmTimeline] = useState<AlarmTimelineType | null>(null);
-
-  // Determine which person to display based on selectedIntruder
-  const [currentPerson, setCurrentPerson] = useState<VisitorType | memberType | null>(null);
-  const [personType, setPersonType] = useState<'Visitor' | 'Member' | null>(null);
-  const [personId, setPersonId] = useState<string | null>(null);
 
   //UseQuery Mutation
   const assignActionMutation = useAssignActionAlarmTriggerByID();
@@ -304,11 +394,12 @@ const AlarmContent = () => {
         dispatch(
           UpdateFilter({
             ...alarmTriggerFilter,
-            Length: 999,
+            Start: 0,
             filters: {
               ...alarmTriggerFilter.filters,
               visitorId: [selectedVisitor.id],
               memberId: undefined,
+              isActive: undefined,
             },
           }),
         );
@@ -318,10 +409,12 @@ const AlarmContent = () => {
         dispatch(
           UpdateFilter({
             ...alarmTriggerFilter,
+            Start: 0,
             filters: {
               ...alarmTriggerFilter.filters,
               memberId: [selectedMember.id],
               visitorId: undefined,
+              isActive: undefined,
             },
           }),
         );
@@ -485,9 +578,9 @@ const AlarmContent = () => {
       console.log('Set personId for Member:', alarm.memberId);
     }
     // await handleFetchTimeline(alarm.id);
-    // ✅ Only call API if action is "Idle"
-    if (alarm.action?.toLowerCase() !== 'idle') {
-      console.log("Not IDLE", alarm);
+    // ✅ Only call API if action is "Idle" and user has effectiveCanAlarmAction permission
+    if (!canAlarmAction || alarm.action?.toLowerCase() !== 'idle') {
+      console.log('Bypassing acknowledge or Not IDLE', { canAlarmAction, alarm });
       setOpenActionDialog(true);
       return;
     }
@@ -611,6 +704,49 @@ const AlarmContent = () => {
     }
   };
 
+  // Search by Incident Code
+  const [searchIncidentCode, setSearchIncidentCode] = useState('');
+  const [isSearchingIncident, setIsSearchingIncident] = useState(false);
+
+  const handleSearchIncidentCode = async (codeToSearch?: string) => {
+    const code = (codeToSearch ?? searchIncidentCode).trim();
+    if (!code) {
+      toast.error('Please enter an Incident Code to search');
+      return;
+    }
+
+    try {
+      setIsSearchingIncident(true);
+      const res = await axiosServices.post('/api/AlarmTriggers/filter', {
+        Draw: 1,
+        Start: 0,
+        Length: 10,
+        SortColumn: 'TriggerTime',
+        SortDir: 'desc',
+        SearchValue: code,
+        filters: {},
+        dateFilters: {},
+      });
+
+      const items: AlarmTriggerType[] = res.data?.collection?.data ?? [];
+      const exactOrFirst =
+        items.find((item) => item.incidentCode?.toLowerCase() === code.toLowerCase()) ??
+        items[0];
+
+      if (!exactOrFirst) {
+        toast.error(`No alarm found for incident code: "${code}"`);
+        return;
+      }
+
+      await handleOpenAlarmWithAcknowledge(exactOrFirst);
+    } catch (err) {
+      console.error('Failed to search incident code:', err);
+      toast.error('Error searching incident code');
+    } finally {
+      setIsSearchingIncident(false);
+    }
+  };
+
   // 🔹 Category data is now derived from per-category infinite queries above
 
   const AlarmCard = ({ alarmTrigger }: { alarmTrigger: AlarmTriggerType }) => {
@@ -731,6 +867,13 @@ const AlarmContent = () => {
             label={alarmTrigger.action}
           />
         </Grid>
+
+        {/* Incident Code */}
+        {alarmTrigger.incidentCode && (
+          <Typography fontWeight={600} fontSize="0.75rem" color="primary.main">
+            {alarmTrigger.incidentCode}
+          </Typography>
+        )}
 
         {/* Time Range */}
         <Typography fontWeight={400} fontSize="0.75rem" color="text.secondary">
@@ -1014,7 +1157,7 @@ const AlarmContent = () => {
         >
           <Stack direction="row" spacing={1} alignItems="center">
             <Typography variant="h5" fontWeight="bold">
-              Alarm Triggered
+              Alarm Triggered {isViewingPerson ? `(${personCount})` : ''}
             </Typography>
             <Tooltip title="Refresh Alarm Data">
               <IconButton
@@ -1037,7 +1180,82 @@ const AlarmContent = () => {
             </Tooltip>
           </Stack>
 
-          <AlarmTriggeredFilter />
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="nowrap">
+            {/* Brief active filters summary chips */}
+            {activeFilterBadges.length > 0 && (
+              <Stack
+                direction="row"
+                spacing={0.75}
+                alignItems="center"
+                sx={{
+                  display: { xs: 'none', lg: 'flex' },
+                  maxWidth: { lg: 320, xl: 450 },
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {activeFilterBadges.map((badge, idx) => (
+                  <Chip
+                    key={idx}
+                    label={`${badge.label}: ${badge.value}`}
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    sx={{
+                      fontSize: '0.72rem',
+                      height: 24,
+                      borderColor: 'primary.light',
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark' ? 'rgba(93, 135, 255, 0.12)' : 'primary.light',
+                      color: 'primary.main',
+                      fontWeight: 600,
+                    }}
+                  />
+                ))}
+              </Stack>
+            )}
+
+            <TextField
+              size="small"
+              placeholder="Search Incident Code (e.g. INC-...)"
+              value={searchIncidentCode}
+              onChange={(e) => setSearchIncidentCode(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSearchIncidentCode();
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    {isSearchingIncident ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : (
+                      <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                    )}
+                  </InputAdornment>
+                ),
+                sx: {
+                  height: 36,
+                  fontSize: '0.85rem',
+                  bgcolor: 'background.paper',
+                  width: { xs: 180, sm: 240, md: 280 },
+                },
+              }}
+            />
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => handleSearchIncidentCode()}
+              disabled={isSearchingIncident || !searchIncidentCode.trim()}
+              sx={{ height: 36, px: 2 }}
+            >
+              Search
+            </Button>
+            <AlarmTriggeredFilter />
+          </Stack>
         </Box>
 
         {/* ================= 3 COLUMN MODE ================= */}
@@ -1061,7 +1279,7 @@ const AlarmContent = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} mb={1}>
-                Active Alarm ({activeAlarm.length}{hasNextActive ? '+' : ''})
+                Active Alarm ({activeCount})
               </Typography>
 
               <Box
@@ -1102,7 +1320,7 @@ const AlarmContent = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} mb={1}>
-                On-Going Alarm ({onGoingAlarm.length}{hasNextOnGoing ? '+' : ''})
+                On-Going Alarm ({onGoingCount})
               </Typography>
 
               <Box
@@ -1143,7 +1361,7 @@ const AlarmContent = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} mb={1}>
-                Cleared Alarm ({clearedAlarm.length}{hasNextCleared ? '+' : ''})
+                Cleared Alarm ({clearedCount})
               </Typography>
 
               <Box
@@ -1183,13 +1401,40 @@ const AlarmContent = () => {
               minHeight: 0,
             }}
           >
-            <Grid container spacing={3}>
-              {alarmTriggerData.map((alarmTrigger) => (
-                <Grid key={alarmTrigger.id} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
-                  <AlarmCard alarmTrigger={alarmTrigger} />
+            {isLoadingPerson && personAlarm.length === 0 ? (
+              <Grid container spacing={3}>
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <Grid key={i} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
+                    <Box sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
+                      <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
+                      <Skeleton variant="text" width="70%" height={22} />
+                      <Skeleton variant="text" width="50%" height={18} />
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <>
+                <Grid container spacing={3}>
+                  {alarmTriggerData.map((alarmTrigger) => (
+                    <Grid key={alarmTrigger.id} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
+                      <AlarmCard alarmTrigger={alarmTrigger} />
+                    </Grid>
+                  ))}
+                  {isFetchingNextPerson &&
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <Grid key={`fetch-skeleton-${i}`} size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
+                        <Box sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
+                          <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
+                          <Skeleton variant="text" width="70%" height={22} />
+                          <Skeleton variant="text" width="50%" height={18} />
+                        </Box>
+                      </Grid>
+                    ))}
                 </Grid>
-              ))}
-            </Grid>
+                {hasNextPerson && <div ref={personRef} style={{ height: '20px' }} />}
+              </>
+            )}
           </Box>
         )}
       </Box>
@@ -1209,9 +1454,20 @@ const AlarmContent = () => {
             px: 5,
           }}
         >
-          <Typography variant="h4" fontWeight={700}>
-            Alarm Detail
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1.5}>
+            <Typography variant="h4" fontWeight={700}>
+              Alarm Detail
+            </Typography>
+            {selectedAlarmTrigger?.incidentCode && (
+              <Chip
+                label={selectedAlarmTrigger.incidentCode}
+                size="small"
+                variant="outlined"
+                color="primary"
+                sx={{ fontWeight: 600 }}
+              />
+            )}
+          </Box>
 
           {selectedAlarmTrigger && (
             <Chip
@@ -1304,6 +1560,13 @@ const AlarmContent = () => {
                         ) : null}
                       </Box>
                     </Grid>
+
+                    {'incidentCode' in selectedAlarmTrigger && selectedAlarmTrigger?.incidentCode && (
+                      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={field}>Incident Code</Typography>
+                        <Typography sx={value}>{selectedAlarmTrigger.incidentCode}</Typography>
+                      </Grid>
+                    )}
 
                     {'floorName' in selectedAlarmTrigger &&
                       'buildingName' in selectedAlarmTrigger && (
@@ -1508,7 +1771,7 @@ const AlarmContent = () => {
                   )}
                   {/* Alarm Attachments */}
                   {incidentAttachments.length > 0 && (
-                    <Box width="65%">
+                    <Box width="65%" mt={3}>
                       <Typography fontWeight={600} mb={1}>
                         Investigation Attachments
                       </Typography>
@@ -1592,8 +1855,8 @@ const AlarmContent = () => {
             )}
           </Box>
 
-          {/* If alarm is inactive */}
-          {selectedAlarmTrigger?.action.toLocaleLowerCase() === 'acknowledged' && (
+          {/* If alarm is inactive and user has canAlarmAction permission */}
+          {canAlarmAction && selectedAlarmTrigger?.action.toLocaleLowerCase() === 'acknowledged' && (
             <>
               <Divider />
               <Box mt={3}>
@@ -1706,7 +1969,7 @@ const AlarmContent = () => {
               Close
             </Button>
 
-            {selectedAlarmTrigger?.action.toLowerCase() === 'acknowledged' && (
+            {canAlarmAction && selectedAlarmTrigger?.action.toLowerCase() === 'acknowledged' && (
               <>
                 <Button
                   variant="outlined"
@@ -1732,7 +1995,7 @@ const AlarmContent = () => {
               </>
             )}
 
-            {selectedAlarmTrigger?.action.toLowerCase() === 'doneinvestigated' && (
+            {canAlarmAction && selectedAlarmTrigger?.action.toLowerCase() === 'doneinvestigated' && (
               <Button
                 variant="contained"
                 color="primary"

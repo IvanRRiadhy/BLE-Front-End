@@ -14,6 +14,7 @@ import {
   AlarmTimelineType,
   NearestSecurityType,
 } from 'src/store/apps/crud/alarmTrigger';
+export type { AlarmTriggerType, IntruderType, GetFilter, AlarmTimelineType, NearestSecurityType };
 import { RootState, useSelector } from 'src/store/Store';
 
 // -----------------------------------------------------------------------------
@@ -336,10 +337,21 @@ export function useAcceptInvestigate() {
 export function useInvestigateAlarmTrigger() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, result, note }: { id: string; result: string; note: string }) => {
+    mutationFn: async ({
+      id,
+      result,
+      note,
+      attachments,
+    }: {
+      id: string;
+      result: string;
+      note: string;
+      attachments?: attachmentType[];
+    }) => {
       const res = await axiosServices.put(`${API_URL}${id}/done-investigated`, {
         investigatedResult: result,
         InvestigationNotes: note,
+        attachments: attachments || [],
       });
       return res.data;
     },

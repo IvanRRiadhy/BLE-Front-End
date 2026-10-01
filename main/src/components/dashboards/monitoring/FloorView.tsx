@@ -660,6 +660,7 @@ const FloorView: React.FC<{
   useEffect(() => {
     if (prevFloorplanRef.current !== activeFloorplan) {
       prevFloorplanRef.current = activeFloorplan;
+      lastSwitchedRef.current = null;
       if (!isFollowActive) {
         setShowOtherBeacons(true);
       }
@@ -717,9 +718,13 @@ const FloorView: React.FC<{
 
   // Monitor beacon movement for floorplan changes
   useEffect(() => {
+    // Only the screen with follow mode actively assigned should track & switch floorplans
     if (!focusBeacon || !gridNumber || !screenNumber) return;
+    if (thisScreen?.display?.displayType !== 3) return;
 
-    let to: string | null = null;
+    let newestBeacon: any = null;
+    let newestTime = 0;
+
     for (const arr of Object.values(beaconsByTopic)) {
       const beaconList = Array.isArray(arr)
         ? arr
@@ -733,30 +738,37 @@ const FloorView: React.FC<{
           (b.cardNumber && String(b.cardNumber) === String(focusBeacon));
         if (!sameBeacon) continue;
 
-        const explicitTo = b.toFloorplanId ?? b.toFlooplanId ?? null;
-        if (explicitTo) {
-          to = explicitTo;
-          break;
-        }
-        if (b.TransM && typeof b.TransM === 'string') {
-          const m = b.TransM.match(/to floorplan\s+([0-9A-Fa-f-]{36})/i);
-          if (m) {
-            to = m[1];
-            break;
-          }
-        }
-        if (b.floorplanId && b.floorplanId.toLowerCase() !== activeFloorplan?.toLowerCase()) {
-          to = b.floorplanId;
-          break;
+        const beaconTime = b.lastSeen || (b.time ? new Date(b.time).getTime() : 0);
+        if (beaconTime >= newestTime) {
+          newestTime = beaconTime;
+          newestBeacon = b;
         }
       }
-      if (to) break;
+    }
+
+    if (!newestBeacon) return;
+
+    let to: string | null = null;
+    const explicitTo = newestBeacon.toFloorplanId ?? newestBeacon.toFlooplanId ?? null;
+    if (explicitTo) {
+      to = explicitTo;
+    } else if (newestBeacon.TransM && typeof newestBeacon.TransM === 'string') {
+      const m = newestBeacon.TransM.match(/to floorplan\s+([0-9A-Fa-f-]{36})/i);
+      if (m) {
+        to = m[1];
+      }
+    } else if (
+      newestBeacon.floorplanId &&
+      newestBeacon.floorplanId.toLowerCase() !== activeFloorplan?.toLowerCase()
+    ) {
+      to = newestBeacon.floorplanId;
     }
 
     if (to && to.toLowerCase() !== activeFloorplan?.toLowerCase()) {
+      console.log('to floorplan', to);
       handleFloorplanChange(to);
     }
-  }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, handleFloorplanChange]);
+  }, [focusBeacon, beaconsByTopic, activeFloorplan, gridNumber, screenNumber, thisScreen?.display?.displayType, handleFloorplanChange]);
 
   // Cancel following
   const layoutState = useSelector((state: RootState) => state.layoutReducer);
@@ -859,7 +871,7 @@ const isBoundaryActive = isActive('boundary');
             Monitoring Dashboard
           </Typography>
           <Typography variant="h6" fontStyle="bold" fontWeight={900} mt={0.5}>
-            Please select a Grid
+            Please select a Floorplan
           </Typography>
         </Grid>
       </Grid>

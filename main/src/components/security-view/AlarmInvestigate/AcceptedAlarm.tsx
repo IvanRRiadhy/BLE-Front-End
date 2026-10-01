@@ -14,10 +14,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  IconButton,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import UploadIcon from '@mui/icons-material/Upload';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useAlarmAttachmentSend, useInvestigateAlarmTrigger } from 'src/hooks/useAlarmTrigger';
+import { useInvestigateAlarmTrigger } from 'src/hooks/useAlarmTrigger';
 import { SecurityAlarmLogItem } from './AlarmInvestigation';
 import { MenuSelect } from 'mui-tiptap';
 import { investigationResultType } from 'src/types/crud/input';
@@ -25,12 +28,42 @@ import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import { dispatch, RootState, useSelector } from 'src/store/Store';
 import { SetFocusAlarm } from 'src/store/apps/tracking/Beacon';
 import { useUploadCDN } from 'src/hooks/usePatrolCase';
+import { getConfig } from 'src/config';
 
 interface AcceptedAlarmViewProps {
   alarm: SecurityAlarmLogItem;
   onBack: () => void;
   onAccept: (alarm: SecurityAlarmLogItem) => void;
 }
+
+const IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+  'image/gif',
+];
+
+const VIDEO_TYPES = [
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/x-matroska',
+  'video/mkv',
+  'video/x-msvideo',
+  'video/avi',
+  'video/msvideo',
+  'video/3gpp',
+];
+
+const DOC_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
+const ALLOWED_TYPES = [...IMAGE_TYPES, ...VIDEO_TYPES, ...DOC_TYPES];
 
 const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
   const [investigationNotes, setInvestigationNotes] = useState('');
@@ -43,8 +76,7 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
   const [openAttachmentDialog, setOpenAttachmentDialog] = useState(false);
 
   const InvestigateMutation = useInvestigateAlarmTrigger();
-  const uploadMutation = useUploadCDN(); // same as PatrolCase
-  const sendAttachmentMutation = useAlarmAttachmentSend();
+  const uploadMutation = useUploadCDN();
 
   const handleSubmit = () => {
     if (!investigationResult) {
@@ -57,17 +89,24 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
       return;
     }
 
+    const formattedAttachments = attachments.map((att) => ({
+      fileUrl: att.fileUrl || '',
+      fileType: att.fileType || 'Image',
+    }));
+
     InvestigateMutation.mutate(
       {
         id: alarm.id,
-        result: investigationResult, // API expects only result
+        result: investigationResult,
         note: investigationNotes,
+        attachments: formattedAttachments,
       },
       {
         onSuccess: () => {
           toast.success('Investigation submitted successfully');
           setInvestigationNotes('');
           setInvestigationResult('');
+          setAttachments([]);
           dispatch(SetFocusAlarm(null)); // Clear focus alarm after submission
           onBack();
         },
@@ -79,10 +118,15 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
   };
 
   const handleFileUpload = async (file: File) => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'video/mp4'];
+    const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+    const isAllowedExt = [
+      '.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.gif',
+      '.mp4', '.webm', '.mov', '.mkv', '.avi', '.3gp',
+      '.pdf', '.doc', '.docx',
+    ].includes(ext);
 
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Only JPG, PNG, or MP4 allowed');
+    if (!ALLOWED_TYPES.includes(file.type) && !isAllowedExt) {
+      toast.error('File type not supported. Please upload an allowed image, video, or document.');
       return;
     }
 
@@ -96,15 +140,8 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
       const uploaded = res?.collection?.data?.[0];
       if (!uploaded) return;
 
-      // 2️⃣ Update local state (preview)
+      // 2️⃣ Update local state (attachments)
       setAttachments((prev) => [...prev, uploaded]);
-
-      // 3️⃣ Send to Alarm API
-      await sendAttachmentMutation.mutateAsync({
-        id: alarm.id,
-        attachments: [uploaded], // send only new OR whole array (depends API)
-      });
-
       toast.success('Attachment uploaded successfully');
     } catch (err) {
       console.error(err);
@@ -114,14 +151,23 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
 
   const getCdnUrl = (url?: string) => {
     if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `https://ble-cdn.app.bio-experience.com${url}`;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    let cdnBase = '';
+    try {
+      cdnBase = getConfig()?.CDN_URL || '';
+    } catch {
+      cdnBase = '';
+    }
+    const cleanBase = cdnBase.replace(/\/+$/, '');
+    const cleanPath = url.replace(/^\/+/, '');
+    return cleanBase ? `${cleanBase}/${cleanPath}` : url;
   };
+
   const isImage = (att: any) =>
     att?.mimeType?.startsWith('image') || /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');
 
   const isVideo = (att: any) =>
-    att?.mimeType?.startsWith('video') || /\.(mp4|webm|ogg)$/i.test(att?.fileUrl || '');
+    att?.mimeType?.startsWith('video') || /\.(mp4|webm|ogg|mov|mkv|avi|3gp)$/i.test(att?.fileUrl || '');
 
   return (
     <Box sx={{ p: 2, textAlign: 'center' }}>
@@ -222,11 +268,17 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
             </Typography>
 
             <Box>
-              <Button component="label" variant="outlined" disabled={uploadMutation.isPending}>
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<UploadIcon />}
+                disabled={uploadMutation.isPending}
+              >
                 Upload Attachment
                 <input
                   hidden
                   type="file"
+                  accept={ALLOWED_TYPES.join(',')}
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
                       handleFileUpload(e.target.files[0]);
@@ -242,12 +294,11 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
                 {attachments.map((att, idx) => (
                   <Chip
                     key={idx}
-                    label={att.fileType}
+                    label={att.fileType || 'Attachment'}
                     clickable
                     onClick={() => {
                       setSelectedAttachment({ ...att, index: idx });
                       setOpenAttachmentDialog(true);
-                      console.log('att', att);
                     }}
                     color={att.fileType === 'Video' ? 'secondary' : 'primary'}
                     size="small"
@@ -262,7 +313,7 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
               )}
             </Box>
 
-            <Stack direction="row" spacing={2}>
+            <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
               {!isAccepted && (
                 <Button variant="outlined" fullWidth onClick={onBack}>
                   Back
@@ -287,11 +338,16 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Attachment Preview</DialogTitle>
+        <DialogTitle display="flex" justifyContent="space-between" alignItems="center">
+          Attachment Preview
+          <IconButton onClick={() => setOpenAttachmentDialog(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
-        <DialogContent>
+        <DialogContent dividers>
           {selectedAttachment && (
-            <Box display="flex" justifyContent="center">
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ minHeight: 200 }}>
               {/* IMAGE */}
               {isImage(selectedAttachment) && (
                 <Box
@@ -335,6 +391,22 @@ const AcceptedAlarm = ({ alarm, onBack, onAccept }: AcceptedAlarmViewProps) => {
 
         <DialogActions>
           <Button onClick={() => setOpenAttachmentDialog(false)}>Close</Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => {
+              if (!selectedAttachment) return;
+
+              setAttachments((prev) =>
+                prev.filter((_, i) => i !== selectedAttachment.index),
+              );
+
+              setOpenAttachmentDialog(false);
+              setSelectedAttachment(null);
+            }}
+          >
+            Delete Attachment
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

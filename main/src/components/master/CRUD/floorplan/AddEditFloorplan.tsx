@@ -30,12 +30,10 @@ import toast from 'react-hot-toast';
 import { defaultFloorplanForm } from 'src/store/apps/defaultForm';
 import { EngineType, fetchEngines } from 'src/store/apps/crud/engine';
 import { useAddFloorplan, useEditFloorplan } from 'src/hooks/useFloorplan';
-import { useAllFloors } from 'src/hooks/useFloor';
 import { useAllEngines } from 'src/hooks/useEngine';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import { useUploadCDN } from 'src/hooks/usePatrolCase';
 import AreaHierarchySelector, { SelectedNode } from 'src/components/shared/AreaHierarchySelector';
-import { useAllBuilding } from 'src/hooks/useBuilding';
 
 interface FormType {
   type?: string;
@@ -80,14 +78,7 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
   //   // console.log(formData);
   // }, [dispatch]);
 
-  const { data: floorData = [], isLoading: floorLoading } = useAllFloors();
-  const { data: buildingData = [] } = useAllBuilding();
   const { data: engineData = [], isLoading: engineLoading } = useAllEngines();
-
-  const filteredBuildings = React.useMemo(() => {
-    const buildingIdsWithFloors = new Set(floorData.map((f) => f.buildingId));
-    return buildingData.filter((b) => buildingIdsWithFloors.has(b.id));
-  }, [buildingData, floorData]);
 
   const handleClickOpen = () => {
     setFormErrors({});
@@ -310,10 +301,8 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
 
   const selectedFloorNode = React.useMemo<SelectedNode>(() => {
     if (!formData.floorId) return null;
-    const floor = floorData.find((f) => f.id === formData.floorId);
-    if (!floor) return null;
-    return { type: 'floor', data: floor };
-  }, [formData.floorId, floorData]);
+    return { type: 'floor', data: { id: formData.floorId } };
+  }, [formData.floorId]);
 
   const engineOptions = engineData.map((e) => ({
     label: e.name,
@@ -390,10 +379,6 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
               {/* <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel> */}
               <CustomFormLabel htmlFor="floor-id">Floor</CustomFormLabel>
               <AreaHierarchySelector
-                buildings={filteredBuildings}
-                floors={floorData}
-                floorplans={[]}
-                maskedAreas={[]}
                 value={selectedFloorNode}
                 onChange={(val: SelectedNode) => {
                   const id = val?.data?.id ?? '';

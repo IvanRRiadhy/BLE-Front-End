@@ -14,6 +14,7 @@ import {
   FormControl,
   Select,
   CircularProgress,
+  Chip,
 } from '@mui/material';
 import {
   IconDownload,
@@ -33,10 +34,6 @@ import TrackingReportSinglePerson from 'src/components/master/Reports/TrackingRe
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 
 import { useVisitorSession } from 'src/hooks/useVisitorSession';
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useAllMembers } from 'src/hooks/useMember';
 import { OldGetFilter } from 'src/store/apps/crud/visitorSession';
@@ -50,10 +47,6 @@ const TrackingReport: React.FC = () => {
   const { mutate: fetchVisitorSession, data: sessionData, isPending: isLoading } = useVisitorSession();
 
   // Data Hooks for Filters
-  const buildingList = useAllBuilding().data ?? [];
-  const floorList = useAllFloors().data ?? [];
-  const floorplanList = useAllFloorplans().data ?? [];
-  const maskedAreaList = useAllMaskedAreas().data ?? [];
   const visitorList = useAllVisitor().data ?? [];
   const memberList = useAllMembers().data ?? [];
 
@@ -114,17 +107,25 @@ const TrackingReport: React.FC = () => {
 
   // Formatted Visitor / Member Autocomplete Options
   const visitorOptions = useMemo(() => {
-    return visitorList.map((v: any) => ({
-      id: v.id,
-      name: v.name || v.visitorName || 'Unknown Visitor',
-    }));
+    return visitorList
+      .filter((v: any) => Boolean(v?.name || v?.visitorName))
+      .map((v: any) => ({
+        id: v.id,
+        name: v.name || v.visitorName || '',
+        personId: v.identityId || v.personId || '',
+        cardNumber: v.cardNumber || v.cardId || '',
+      }));
   }, [visitorList]);
 
   const memberOptions = useMemo(() => {
-    return memberList.map((m: any) => ({
-      id: m.id,
-      name: m.name || m.memberName || 'Unknown Member',
-    }));
+    return memberList
+      .filter((m: any) => Boolean(m?.name || m?.memberName))
+      .map((m: any) => ({
+        id: m.id,
+        name: m.name || m.memberName || '',
+        personId: m.identityId || (m.personId && !m.personId.includes('-') ? m.personId : '') || '',
+        cardNumber: m.cardNumber || m.bleCardNumber || m.cardId || '',
+      }));
   }, [memberList]);
 
   // Selected Person Detail override (when clicking Person Detail from row three-dots menu)
@@ -533,10 +534,6 @@ const TrackingReport: React.FC = () => {
 
                   <Suspense fallback={<Typography variant="caption">Loading location tree...</Typography>}>
                     <AutocompleteFilter
-                      buildings={buildingList}
-                      floors={floorList}
-                      floorplans={floorplanList}
-                      maskedAreas={maskedAreaList}
                       initial={appliedAreaFilter}
                       onChangeFilter={setAppliedAreaFilter}
                       resetToken={resetToken}
@@ -578,16 +575,55 @@ const TrackingReport: React.FC = () => {
                       </Typography>
                     </CustomFormLabel>
                     <Autocomplete
+                      multiple
                       size="small"
                       options={visitorOptions}
                       getOptionLabel={(option) => option?.name || ''}
                       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                      value={visitorOptions.find((o) => selectedVisitorIds.includes(o.id)) || null}
-                      onChange={(_, newValue) => {
-                        setSelectedVisitorIds(newValue ? [newValue.id] : []);
+                      filterOptions={(options, { inputValue }) => {
+                        const search = inputValue.trim().toLowerCase();
+                        if (!search) return options;
+                        return options.filter((option) =>
+                          (option.name && option.name.toLowerCase().includes(search)) ||
+                          (option.personId && option.personId.toLowerCase().includes(search)) ||
+                          (option.cardNumber && option.cardNumber.toLowerCase().includes(search))
+                        );
                       }}
+                      value={visitorOptions.filter((o) => selectedVisitorIds.includes(o.id))}
+                      onChange={(_, newValues) => {
+                        setSelectedVisitorIds(newValues.map((v) => v.id));
+                      }}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip
+                            {...getTagProps({ index })}
+                            key={option.id}
+                            label={option.name}
+                            size="small"
+                          />
+                        ))
+                      }
+                      renderOption={(props, option) => (
+                        <li {...props} key={option.id}>
+                          <Box sx={{ width: '100%' }}>
+                            <Typography variant="body2" fontWeight={600}>
+                              {option.name}
+                            </Typography>
+                            {(option.personId || option.cardNumber) && (
+                              <Typography variant="caption" color="text.secondary">
+                                {[
+                                  option.personId ? `ID: ${option.personId}` : null,
+                                  option.cardNumber ? `Card: ${option.cardNumber}` : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' • ')}
+                              </Typography>
+                            )}
+                          </Box>
+                        </li>
+                      )}
                       renderInput={(params) => (
-                        <TextField {...params} placeholder="Search & select visitor..." size="small" />
+                        <TextField {...params} placeholder={selectedVisitorIds.length === 0 ? "Search & select visitor..." : ""} size="small" />
                       )}
                     />
                   </Box>
@@ -601,16 +637,55 @@ const TrackingReport: React.FC = () => {
                       </Typography>
                     </CustomFormLabel>
                     <Autocomplete
+                      multiple
                       size="small"
                       options={memberOptions}
                       getOptionLabel={(option) => option?.name || ''}
                       isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                      value={memberOptions.find((o) => selectedMemberIds.includes(o.id)) || null}
-                      onChange={(_, newValue) => {
-                        setSelectedMemberIds(newValue ? [newValue.id] : []);
+                      filterOptions={(options, { inputValue }) => {
+                        const search = inputValue.trim().toLowerCase();
+                        if (!search) return options;
+                        return options.filter((option) =>
+                          (option.name && option.name.toLowerCase().includes(search)) ||
+                          (option.personId && option.personId.toLowerCase().includes(search)) ||
+                          (option.cardNumber && option.cardNumber.toLowerCase().includes(search))
+                        );
                       }}
+                      value={memberOptions.filter((o) => selectedMemberIds.includes(o.id))}
+                      onChange={(_, newValues) => {
+                        setSelectedMemberIds(newValues.map((m) => m.id));
+                      }}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip
+                            {...getTagProps({ index })}
+                            key={option.id}
+                            label={option.name}
+                            size="small"
+                          />
+                        ))
+                      }
+                      renderOption={(props, option) => (
+                        <li {...props} key={option.id}>
+                          <Box sx={{ width: '100%' }}>
+                            <Typography variant="body2" fontWeight={600}>
+                              {option.name}
+                            </Typography>
+                            {(option.personId || option.cardNumber) && (
+                              <Typography variant="caption" color="text.secondary">
+                                {[
+                                  option.personId ? `ID: ${option.personId}` : null,
+                                  option.cardNumber ? `Card: ${option.cardNumber}` : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' • ')}
+                              </Typography>
+                            )}
+                          </Box>
+                        </li>
+                      )}
                       renderInput={(params) => (
-                        <TextField {...params} placeholder="Search & select member..." size="small" />
+                        <TextField {...params} placeholder={selectedMemberIds.length === 0 ? "Search & select member..." : ""} size="small" />
                       )}
                     />
                   </Box>

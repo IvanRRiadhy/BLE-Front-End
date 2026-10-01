@@ -200,6 +200,18 @@ export const BeaconSlice = createSlice({
       beacons.forEach((beacon: any) => {
         if (!beacon.beaconId) return;
 
+        // Immediately delete this beacon from any other floorplan/topic
+        Object.keys(state.beaconsByTopic).forEach((otherTopic) => {
+          if (otherTopic.toLowerCase() !== topic.toLowerCase()) {
+            if (state.beaconsByTopic[otherTopic]?.[beacon.beaconId]) {
+              delete state.beaconsByTopic[otherTopic][beacon.beaconId];
+            }
+            if (state.allBeacons[otherTopic]?.[beacon.beaconId]) {
+              delete state.allBeacons[otherTopic][beacon.beaconId];
+            }
+          }
+        });
+
         const storedBeacon: StoredBeacon = {
           ...beacon,
           dmac: beacon.beaconId,
@@ -225,13 +237,23 @@ export const BeaconSlice = createSlice({
 
         groupedByFloorplan[fid].forEach((beacon: any) => {
           if (!beacon.beaconId) return;
-          // if (beacon.beaconId === "BC5729191EAB") {
-          //   console.log("people_tracking/tracking/C926D20B-A746-4492-9924-EB7EEE76305C/indoor/799CACEB-3D2F-44A1-AFF1-02140841B458/C80085A7-9CF1-414D-AA37-D5EC2C3CA45F/3529C3E6-5F4A-4E72-B813-81B603DA32CC/2317AC0F-ADA7-48D3-889D-803987E0E10B/BC5729191EAB", beacon)
-          // }
+
+          // Immediately delete this beacon from any other floorplan/topic
+          Object.keys(state.beaconsByTopic).forEach((otherTopic) => {
+            if (otherTopic.toLowerCase() !== fid.toLowerCase()) {
+              if (state.beaconsByTopic[otherTopic]?.[beacon.beaconId]) {
+                delete state.beaconsByTopic[otherTopic][beacon.beaconId];
+              }
+              if (state.allBeacons[otherTopic]?.[beacon.beaconId]) {
+                delete state.allBeacons[otherTopic][beacon.beaconId];
+              }
+            }
+          });
+
           const storedBeacon: StoredBeacon = {
             ...beacon,
             dmac: beacon.beaconId,
-            lastSeen: beacon.time,
+            lastSeen: beacon.time || now,
           };
 
           state.beaconsByTopic[fid][beacon.beaconId] = storedBeacon;

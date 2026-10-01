@@ -35,10 +35,6 @@ import {
 import { fetchCard, CardType } from 'src/store/apps/crud/card';
 import { defaultAlarmRecordFilter, defaultTrackingTransFilter } from 'src/store/apps/defaultForm';
 import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
-import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
-import { fetchFloors, floorType } from 'src/store/apps/crud/floor';
-import { fetchFloorplan, FloorplanType } from 'src/store/apps/crud/floorplan';
-import { fetchMaskedAreas, MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 
 const VisitorContent = () => {
   const { t } = useTranslation();
@@ -95,16 +91,6 @@ const VisitorContent = () => {
   const filteredCard: CardType | undefined = allCard.find(
     (card: CardType) => visitorDetail?.bleCardNumber === card.dmac,
   );
-  const buildings = useSelector(
-    (state: RootState) => state.buildingReducer.buildingAll,
-  ) as BuildingType[];
-  const floors = useSelector((state: RootState) => state.floorReducer.floorAll) as floorType[];
-  const floorplans = useSelector(
-    (state: RootState) => state.floorplanReducer.floorplanAll,
-  ) as FloorplanType[];
-  const maskedAreas = useSelector(
-    (state: RootState) => state.maskedAreaReducer.maskedAreaAll,
-  ) as MaskedAreaType[];
 
   // Pagination
   const [page, setPage] = useState(0);
@@ -192,11 +178,6 @@ const VisitorContent = () => {
   useEffect(() => {
     if (didInit.current) return;
     didInit.current = true;
-
-    if (!buildings.length) dispatch(fetchBuildings());
-    if (!floors.length) dispatch(fetchFloors());
-    if (!floorplans.length) dispatch(fetchFloorplan());
-
   }, []);
 
   useEffect(() => {
@@ -392,10 +373,6 @@ const VisitorContent = () => {
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <AutocompleteFilter
-              buildings={buildings}
-              floors={floors}
-              floorplans={floorplans}
-              maskedAreas={maskedAreas}
               initial={stableInitial.current}
               onChangeFilter={handleAreaFilterChange}
               hideSelectedAreas

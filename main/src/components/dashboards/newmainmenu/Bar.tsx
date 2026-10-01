@@ -2,30 +2,17 @@ import { Box, useTheme, Tooltip } from '@mui/material';
 import Chart from 'react-apexcharts';
 import { useMemo, useEffect, useRef, useState } from 'react';
 
-import { useAllAlarmCategory } from 'src/hooks/AlarmSetting/useAlarmCategory';
 import { useAlarmByArea } from 'src/hooks/useDashboard';
 import { useSelector } from 'src/store/Store';
 import { formatAbbreviatedNumber } from 'src/utils/numberAbbreviation';
-
-/* ---------------- Filter ---------------- */
-
-const defaultFilter = {
-  timeRange: 'daily',
-  floorplanMaskedAreaId: null,
-  operatorName: null,
-  visitorId: null,
-  buildingId: null,
-  floorId: null,
-};
 
 /* ---------------- Component ---------------- */
 
 const Bar: React.FC = () => {
   const theme = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);  
-  const { data: alarmCategories = [] } = useAllAlarmCategory();
   const dashboardFilter = useSelector((state: any) => state.customizer.dashboardFilter);
-  const { data: alarmByArea, isLoading } = useAlarmByArea(dashboardFilter);
+  const { data: alarmByArea } = useAlarmByArea(dashboardFilter);
 
   const [tooltipState, setTooltipState] = useState<{
     open: boolean;
@@ -52,37 +39,36 @@ const Bar: React.FC = () => {
     // X-axis categories (area names)
     const categories = areas.map((a: any) => a.name);
 
-    // Collect all unique alarm category names
-    const categorySet = new Set<string>();
+    // Map each unique category name to its color from the series response
+    const categoryColorMap = new Map<string, string>();
     areas.forEach((area: any) => {
-      area.series.forEach((s: any) => {
-        categorySet.add(s.name);
+      area.series?.forEach((s: any) => {
+        if (s.name && !categoryColorMap.has(s.name)) {
+          categoryColorMap.set(s.name, s.color || '#999999');
+        }
       });
     });
 
-    const categoryNames = Array.from(categorySet);
+    const categoryNames = Array.from(categoryColorMap.keys());
 
     // Build stacked series (one per alarm category)
     const series = categoryNames.map((categoryName) => {
-      const color =
-        alarmCategories.find(
-          (c: any) => c.alarmCategory === categoryName
-        )?.alarmColor ?? '#999999';
+      const color = categoryColorMap.get(categoryName) ?? '#999999';
 
       return {
         name: categoryName,
         color,
         data: areas.map((area: any) => {
-          const found = area.series.find(
+          const found = area.series?.find(
             (s: any) => s.name === categoryName
           );
-          return found ? found.data[0] : 0;
+          return found && Array.isArray(found.data) ? found.data[0] ?? 0 : 0;
         }),
       };
     });
 
     return { categories, series };
-  }, [alarmByArea, alarmCategories]);
+  }, [alarmByArea]);
 
   // Handle MUI Tooltip on X-axis label hover via event delegation
   useEffect(() => {

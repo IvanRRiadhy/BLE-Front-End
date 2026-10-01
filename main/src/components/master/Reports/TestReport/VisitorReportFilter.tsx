@@ -25,10 +25,6 @@ import toast from 'react-hot-toast';
 import AreaHierarchySelector from 'src/components/shared/AreaHierarchySelector';
 import VisitorReportDialog from './VisitorReportDialog';
 
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useAllMembers } from 'src/hooks/useMember';
 import { memberType } from 'src/store/apps/crud/member';
@@ -57,11 +53,6 @@ export type SelectedNode =
   | null;
 
 const VisitorReportFilter = () => {
-  /* ===================== DATA ===================== */
-  const buildings = useAllBuilding().data || [];
-  const floors = useAllFloors().data || [];
-  const floorplans = useAllFloorplans().data || [];
-  const areas = useAllMaskedAreas().data || [];
   const visitors = useAllVisitor().data || [];
   const members = useAllMembers().data || [];
   const securitys = useAllSecuritys().data || [];
@@ -69,17 +60,17 @@ const VisitorReportFilter = () => {
   const personOptions: PersonOption[] = [
     ...visitors.map((v) => ({
       id: v.id,
-      name: v.name,
+      name: v.name || '',
       type: 'visitor' as const,
     })),
     ...members.map((m) => ({
       id: m.id,
-      name: m.name,
+      name: m.name || '',
       type: 'member' as const,
     })),
     ...securitys.map((s) => ({
       id: s.id,
-      name: s.name,
+      name: s.name || '',
       type: 'security' as const,
     })),
   ];
@@ -314,10 +305,6 @@ const VisitorReportFilter = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <AreaHierarchySelector
               multiple
-              buildings={buildings}
-              floors={floors}
-              floorplans={floorplans}
-              maskedAreas={areas}
               value={selectedAreas}
               onChange={setSelectedAreas}
             />

@@ -1,17 +1,33 @@
-import { uniqueId } from 'lodash';
+import { useProfile } from 'src/hooks/useProfile';
 
-const Menuitems= [
+export interface MonitoringMenuItem {
+  id: string;
+  title: string;
+  href: string;
+}
+
+export const useMonitoringMenuItems = (): MonitoringMenuItem[] => {
+  const { data: profile } = useProfile();
+  const canMonitoringConfig = Boolean(
+    profile?.effectiveCanCreateMonitoringConfig || profile?.effectiveCanUpdateMonitoringConfig
+  );
+
+  return [
     {
-        id: uniqueId(),
-        title: 'Viewer',
-        href: '/dashboards/monitoring/viewer',
-
+      id: 'monitoring-viewer',
+      title: 'Viewer',
+      href: '/dashboards/monitoring/viewer',
     },
-    {
-        id: uniqueId(),
-        title: 'Configuration',
-        href: '/dashboards/monitoring/config',
-    },
-]
+    ...(canMonitoringConfig
+      ? [
+          {
+            id: 'monitoring-config',
+            title: 'Configuration',
+            href: '/dashboards/monitoring/config',
+          },
+        ]
+      : []),
+  ];
+};
 
-export default Menuitems;
+export default useMonitoringMenuItems;

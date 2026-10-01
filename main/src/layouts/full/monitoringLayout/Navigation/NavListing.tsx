@@ -1,4 +1,4 @@
-import Menudata from './Menudata';
+import useMonitoringMenuItems from './Menudata';
 import { useLocation } from 'react-router';
 import { Box, List, Theme, useMediaQuery } from '@mui/material';
 import { useSelector } from 'src/store/Store';
@@ -6,7 +6,7 @@ import MonitorNavItem from './MonitorNavItem';
 import { RootState } from 'src/store/Store';
 
 const NavListing = ({ pathDirect }: { pathDirect: string }) => {
-
+  const menuItems = useMonitoringMenuItems();
   const customizer = useSelector((state: RootState) => state.customizer);
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const hideMenu = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
@@ -14,7 +14,7 @@ const NavListing = ({ pathDirect }: { pathDirect: string }) => {
   return (
     <Box>
       <List sx={{ p: 0, display: 'flex', gap: '3px', zIndex: '100' }}>
-        {Menudata.map((item) => {
+        {menuItems.map((item) => {
           return (
             <MonitorNavItem
               item={item}

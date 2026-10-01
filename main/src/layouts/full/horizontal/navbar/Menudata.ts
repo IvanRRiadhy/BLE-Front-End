@@ -40,6 +40,7 @@ import {
 } from '@tabler/icons-react';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 import { RootState, useSelector } from 'src/store/Store';
+import { useProfile } from 'src/hooks/useProfile';
 
 export interface MenuItemType {
   id?: string;
@@ -57,6 +58,11 @@ export interface MenuItemType {
 }
 
 export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] => {
+  const { data: profile } = useProfile();
+  const canMonitoringConfig =
+    Boolean(profile?.effectiveCanCreateMonitoringConfig || profile?.effectiveCanUpdateMonitoringConfig);
+  // const canAlarmAction = Boolean(profile?.effectiveCanAlarmAction);
+
   // 🔹 Determine active alarms
   const alarms = Array.isArray(alarmSettings) ? alarmSettings : [];
   const normalize = (v: any) => (typeof v === 'string' ? v.toLowerCase() : '');
@@ -98,13 +104,17 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
               key: ['core.monitoring', 'core.tracking'],
               href: '/dashboards/monitoring/viewer',
             },
-            {
-              id: 'monitoring-config',
-              title: 'Configuration',
-              icon: IconPoint,
-              key: ['core.monitoring', 'core.tracking'],
-              href: '/dashboards/monitoring/config',
-            },
+            ...(canMonitoringConfig
+              ? [
+                  {
+                    id: 'monitoring-config',
+                    title: 'Configuration',
+                    icon: IconPoint,
+                    key: ['core.monitoring', 'core.tracking'],
+                    href: '/dashboards/monitoring/config',
+                  },
+                ]
+              : []),
           ],
         },
         {
@@ -317,13 +327,17 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
       ],
     },
 
-    {
-      id: 'nav-alarm-list',
-      title: 'Alarm List',
-      icon: IconBellExclamation,
-      href: '/alarm/alarmlist/',
-      key: ['module.alarm'],
-    },
+    // ...(canAlarmAction
+    //   ? [
+          {
+            id: 'nav-alarm-list',
+            title: 'Alarm List',
+            icon: IconBellExclamation,
+            href: '/alarm/alarmlist/',
+            key: ['module.alarm'],
+          },
+      //   ]
+      // : []),
 
     {
       id: 'nav-report',
@@ -382,7 +396,7 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
         },
         {
           id: 'report-movement',
-          title: 'Movement Log',
+          title: 'Live Movement Log',
           icon: IconActivity,
           href: '/report/movementlog/',
           key: ['core.reporting', 'core.monitoring'],
@@ -410,7 +424,7 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
   const roleAccessRules: Record<string, string[]> = {
     System: ['*'],
     SuperAdmin: ['*', '!/master/application'],
-    PrimaryAdmin: ['/dashboards/', '/report/', '/visitor/visitorinvitation'],
+    PrimaryAdmin: ['/dashboards/', '/report/', '/visitor/visitorinvitation', '/alarm/alarmlist/'],
     Primary: ['/dashboards/monitoring'],
     Secondary: ['/my-visit/'],
     UserCreated: ['/my-visit/'],

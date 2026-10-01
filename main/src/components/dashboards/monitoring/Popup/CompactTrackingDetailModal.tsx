@@ -40,12 +40,12 @@ import { usePersonOverview } from 'src/hooks/useInvestigate';
 interface CompactTrackingDetailModalProps {
   open: boolean;
   onClose: () => void;
-  personId?: string;
-  personName?: string;
-  personType?: string;
-  faceImage?: string;
-  bleNumber?: string;
-  cardNumber?: string;
+  personId?: string | null;
+  personName?: string | null;
+  personType?: string | null;
+  faceImage?: string | null;
+  bleNumber?: string | null;
+  cardNumber?: string | null;
 }
 
 const CompactTrackingDetailModal: React.FC<CompactTrackingDetailModalProps> = ({
@@ -82,7 +82,7 @@ const CompactTrackingDetailModal: React.FC<CompactTrackingDetailModalProps> = ({
   const incidentSummary = data?.incidentSummary;
   const timeline = data?.chronologicalTimeline || [];
 
-  const displayName = info?.name || personName;
+  const displayName = info?.name || personName || undefined;
   const displayType = info?.personType || personType;
   const avatarUrl = info?.faceImage ? `${BASE_URL}${info.faceImage}` : faceImage ? `${BASE_URL}${faceImage}` : undefined;
 
@@ -309,7 +309,7 @@ const CompactTrackingDetailModal: React.FC<CompactTrackingDetailModalProps> = ({
                     </Typography>
                   </Stack>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 4 }}>
+                {/* <Grid size={{ xs: 12, sm: 4 }}>
                   <Stack direction="row" spacing={1} alignItems="center">
                     <IconClock size={18} color={theme.palette.text.secondary} />
                     <Typography variant="body2" color="text.secondary">
@@ -319,7 +319,7 @@ const CompactTrackingDetailModal: React.FC<CompactTrackingDetailModalProps> = ({
                       {currentState?.lastSeenTime ? dayjs(currentState.lastSeenTime).format('ddd, DD MMM YYYY, HH:mm:ss') : '-'}
                     </Typography>
                   </Stack>
-                </Grid>
+                </Grid> */}
               </Grid>
             </Paper>
 

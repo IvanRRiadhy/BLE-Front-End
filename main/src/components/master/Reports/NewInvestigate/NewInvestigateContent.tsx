@@ -28,6 +28,10 @@ import {
   InputAdornment,
   Tooltip,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   darken,
   lighten,
 } from '@mui/material';
@@ -55,6 +59,8 @@ import {
   IconEye,
   IconCopy,
   IconRoute,
+  IconX,
+  IconExternalLink,
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
@@ -68,11 +74,11 @@ import InvestigateContent from 'src/components/master/Reports/Investigation/Inve
 import { VisitorSessionResponseType } from 'src/store/apps/crud/visitorSession';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
 import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
-import { useAllMembers } from 'src/hooks/useMember';
-import { useAllVisitor } from 'src/hooks/useVisitor';
 import { MaskedAreaType } from 'src/store/apps/crud/maskedArea';
 import { safeParseAreaShape } from 'src/utils/isJsonObject';
-import { toLocalDate, formatOrRawTime } from 'src/utils/time';
+import { formatOrRawTime } from 'src/utils/time';
+import { useAllMembers } from 'src/hooks/useMember';
+import { useAllVisitor } from 'src/hooks/useVisitor';
 
 const AREA_COLORS = ['#1877F2', '#36B37E', '#FFAB00', '#FF5630', '#6554C0', '#00B8D9'];
 
@@ -493,17 +499,24 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   const currentBeaconX = currentCenter?.x ?? (stageWidth * 0.45);
   const currentBeaconY = currentCenter?.y ?? (stageHeight * 0.45);
 
+  // Helper to parse localized datetime strings without shifting timezones
+  const parseLocalEpoch = (ts?: string | null): number => {
+    if (!ts) return NaN;
+    const str = String(ts).trim();
+    // Strip trailing 'Z' or 'z' because the backend timestamps are already localized
+    const cleanStr = str.endsWith('Z') || str.endsWith('z') ? str.slice(0, -1) : str;
+    const ms = dayjs(cleanStr).valueOf();
+    return isNaN(ms) ? NaN : ms;
+  };
+
   // Filtered time boundaries (ms)
   const filterMinTime = useMemo(() => {
     if (fromDate) {
-      const ms = dayjs(fromDate).valueOf();
+      const ms = parseLocalEpoch(fromDate);
       if (!isNaN(ms)) return ms;
     }
     if (data?.stayDurationAnalysis?.firstDetected) {
-      const str = String(data.stayDurationAnalysis.firstDetected).trim();
-      const ms = str.endsWith('Z') || str.endsWith('z')
-        ? dayjs(toLocalDate(str)!).valueOf()
-        : dayjs(str).valueOf();
+      const ms = parseLocalEpoch(data.stayDurationAnalysis.firstDetected);
       if (!isNaN(ms)) return ms;
     }
     return undefined;
@@ -511,14 +524,11 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
 
   const filterMaxTime = useMemo(() => {
     if (toDate) {
-      const ms = dayjs(toDate).valueOf();
+      const ms = parseLocalEpoch(toDate);
       if (!isNaN(ms)) return ms;
     }
     if (data?.stayDurationAnalysis?.lastDetected) {
-      const str = String(data.stayDurationAnalysis.lastDetected).trim();
-      const ms = str.endsWith('Z') || str.endsWith('z')
-        ? dayjs(toLocalDate(str)!).valueOf()
-        : dayjs(str).valueOf();
+      const ms = parseLocalEpoch(data.stayDurationAnalysis.lastDetected);
       if (!isNaN(ms)) return ms;
     }
     return undefined;
@@ -541,23 +551,14 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
       const item = timeline[i];
       const nextItem = timeline[i + 1];
 
-      const parseTs = (ts?: string | null): number => {
-        if (!ts) return NaN;
-        const str = String(ts).trim();
-        if (str.endsWith('Z') || str.endsWith('z')) {
-          return toLocalDate(str)?.getTime() ?? NaN;
-        }
-        return dayjs(str).valueOf();
-      };
-
-      const rawStart = parseTs(item.timestamp);
-      const rawEnd = nextItem ? parseTs(nextItem.timestamp) : new Date().getTime();
+      const rawStart = parseLocalEpoch(item.timestamp);
+      const rawEnd = nextItem ? parseLocalEpoch(nextItem.timestamp) : new Date().getTime();
 
       if (isNaN(rawStart) || isNaN(rawEnd)) continue;
 
       let startTime = rawStart;
       let endTime = rawEnd;
-
+      
       // Clamp to user filtered boundaries so chart data cannot exceed filter range
       if (filterMinTime !== undefined) {
         startTime = Math.max(startTime, filterMinTime);
@@ -565,7 +566,6 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
       if (filterMaxTime !== undefined) {
         endTime = Math.min(endTime, filterMaxTime);
       }
-
       if (endTime > startTime) {
         const locLower = (item.location || '').toLowerCase();
         const titleLower = (item.title || '').toLowerCase();
@@ -588,26 +588,67 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
 
     // Preserve the exact order and colors from areaBreakdown
     const breakdownNames = breakdown.map((b) => b.areaName);
-    const seriesList: { name: string; data: { x: string; y: [number, number] }[] }[] = [];
+    
+    // In ApexCharts rangeBar, when someone stays continuously in the same area across transitions,
+    // adjacent or overlapping intervals should be merged so it forms a single continuous block.
+    const mergeIntervals = (intervals: { x: string; y: [number, number] }[]) => {
+      if (intervals.length <= 1) return intervals;
+      const sorted = [...intervals].sort((a, b) => a.y[0] - b.y[0]);
+      const merged: { x: string; y: [number, number] }[] = [];
+      let current = sorted[0];
 
-    breakdown.forEach((b) => {
-      seriesList.push({
-        name: b.areaName,
-        data: grouped[b.areaName] || [],
+      for (let i = 1; i < sorted.length; i++) {
+        const next = sorted[i];
+        // If current and next overlap or touch within 2 minutes (120,000ms), merge them
+        if (next.y[0] <= current.y[1] + 120_000) {
+          current = {
+            x: current.x,
+            y: [current.y[0], Math.max(current.y[1], next.y[1])],
+          };
+        } else {
+          merged.push(current);
+          current = next;
+        }
+      }
+      merged.push(current);
+      return merged;
+    };
+
+    const allSegments: { x: string; y: [number, number]; fillColor?: string }[] = [];
+
+    breakdown.forEach((b, idx) => {
+      const rawSegs = grouped[b.areaName] || [];
+      const segs = mergeIntervals(rawSegs);
+      const color = AREA_COLORS[idx % AREA_COLORS.length];
+      segs.forEach((s) => {
+        allSegments.push({
+          x: s.x,
+          y: s.y,
+          fillColor: color,
+        });
       });
     });
 
-    // Also append any other areas detected that were not in areaBreakdown
     Object.keys(grouped).forEach((areaName) => {
       if (!breakdownNames.includes(areaName)) {
-        seriesList.push({
-          name: areaName,
-          data: grouped[areaName],
+        const rawSegs = grouped[areaName] || [];
+        const segs = mergeIntervals(rawSegs);
+        segs.forEach((s) => {
+          allSegments.push({
+            x: s.x,
+            y: s.y,
+            fillColor: '#9e9e9e',
+          });
         });
       }
     });
 
-    return seriesList;
+    return [
+      {
+        name: 'Presence',
+        data: allSegments,
+      },
+    ];
   }, [data?.chronologicalTimeline, data?.stayDurationAnalysis?.areaBreakdown, filterMinTime, filterMaxTime]);
 
   const presenceTimelineOptions: ApexCharts.ApexOptions = useMemo(() => {
@@ -693,17 +734,34 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
         min: filterMinTime,
         max: filterMaxTime,
         labels: {
-          datetimeFormatter: {
-            year: 'yyyy',
-            month: "MMM 'yy",
-            day: 'MMM d',
-            hour: 'HH:mm',
+          datetimeUTC: false,
+          formatter: (val) => {
+            const num = Number(val);
+            if (isNaN(num)) return '';
+            return dayjs(num).format('HH:mm');
           },
         },
       },
       legend: { show: false },
       tooltip: {
-        x: { format: 'MMM d, HH:mm' },
+        x: {
+          format: 'MMM D, HH:mm',
+        },
+        custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+          const item = w?.config?.series?.[seriesIndex]?.data?.[dataPointIndex];
+          if (!item) return '';
+          const areaName = item.x || w?.config?.series?.[seriesIndex]?.name || '';
+          const startVal = item.y?.[0];
+          const endVal = item.y?.[1];
+          const startStr = startVal ? dayjs(startVal).format('MMM D, HH:mm') : '';
+          const endStr = endVal ? dayjs(endVal).format('MMM D, HH:mm') : '';
+          return `
+            <div style="padding: 10px 14px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.5; color: #1e293b;">
+              <div style="font-weight: 700; color: #0284c7; margin-bottom: 4px;">${areaName}:</div>
+              <div style="color: #64748b; font-weight: 500;">${areaName}: ${startStr} – ${endStr}</div>
+            </div>
+          `;
+        },
       },
       grid: {
         borderColor: theme.palette.divider,
@@ -791,6 +849,87 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
 
   // Timeline List
   const chronologicalTimelineList = data?.chronologicalTimeline || [];
+
+  // Chronological Timeline Search & Filter state
+  const [timelineSearchQuery, setTimelineSearchQuery] = useState('');
+  const [timelineSelectedArea, setTimelineSelectedArea] = useState('ALL');
+  const [timelineTimeFrom, setTimelineTimeFrom] = useState('');
+  const [timelineTimeTo, setTimelineTimeTo] = useState('');
+
+  // Extract distinct areas available in the timeline
+  const timelineAvailableAreas = useMemo(() => {
+    const set = new Set<string>();
+    chronologicalTimelineList.forEach((item) => {
+      if (item.location && item.location.trim()) {
+        set.add(item.location.trim());
+      }
+    });
+    // Also include areas from areaBreakdown
+    areaBreakdownList.forEach((a) => {
+      if (a.areaName && a.areaName.trim()) {
+        set.add(a.areaName.trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, [chronologicalTimelineList, areaBreakdownList]);
+
+  // Filtered timeline with global chronological index preserved
+  const filteredChronologicalTimeline = useMemo(() => {
+    const q = timelineSearchQuery.trim().toLowerCase();
+    const areaFilter = timelineSelectedArea;
+
+    return chronologicalTimelineList
+      .map((item, globalIdx) => ({ item, globalIdx }))
+      .filter(({ item }) => {
+        // 1. Text Search (title, description, location)
+        if (q) {
+          const matchTitle = item.title?.toLowerCase().includes(q);
+          const matchDesc = item.description?.toLowerCase().includes(q);
+          const matchLoc = item.location?.toLowerCase().includes(q);
+          if (!matchTitle && !matchDesc && !matchLoc) {
+            return false;
+          }
+        }
+
+        // 2. Area Filter
+        if (areaFilter !== 'ALL') {
+          const loc = (item.location || '').toLowerCase();
+          const targetArea = areaFilter.toLowerCase();
+          if (!loc.includes(targetArea)) {
+            return false;
+          }
+        }
+
+        // 3. Time Filter
+        if (timelineTimeFrom || timelineTimeTo) {
+          const rawStr = String(item.timestamp || '').trim();
+          const cleanStr = rawStr.endsWith('Z') || rawStr.endsWith('z') ? rawStr.slice(0, -1) : rawStr;
+          const itemTime = dayjs(cleanStr);
+          if (itemTime.isValid()) {
+            if (timelineTimeFrom) {
+              const [fH, fM] = timelineTimeFrom.split(':').map(Number);
+              const itemMinutes = itemTime.hour() * 60 + itemTime.minute();
+              const fromMinutes = fH * 60 + (fM || 0);
+              if (itemMinutes < fromMinutes) return false;
+            }
+            if (timelineTimeTo) {
+              const [tH, tM] = timelineTimeTo.split(':').map(Number);
+              const itemMinutes = itemTime.hour() * 60 + itemTime.minute();
+              const toMinutes = tH * 60 + (tM || 0);
+              if (itemMinutes > toMinutes) return false;
+            }
+          }
+        }
+
+        return true;
+      });
+  }, [
+    chronologicalTimelineList,
+    timelineSearchQuery,
+    timelineSelectedArea,
+    timelineTimeFrom,
+    timelineTimeTo,
+  ]);
 
   // Computed Area Visits list dynamically derived from API response
   const areaVisitsList = useMemo(() => {
@@ -1253,6 +1392,38 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
     return sortedCardHistory.slice(start, start + cardHistoryRowsPerPage);
   }, [sortedCardHistory, cardHistoryPage, cardHistoryRowsPerPage]);
 
+  // Alarm list navigation & confirmation dialog state
+  const [confirmAlarmOpen, setConfirmAlarmOpen] = useState(false);
+  const [targetAlarmUrl, setTargetAlarmUrl] = useState<string>('');
+
+  const buildAlarmListUrl = (alarm: any) => {
+    const params = new URLSearchParams();
+    const alarmId = alarm?.alarmTriggerId || alarm?.alarmId || alarm?.id;
+    if (alarmId) params.set('alarmTriggerId', String(alarmId));
+    
+    // Determine visitorId or memberId from alarm, personInfo, or selectedPerson
+    const vId = alarm?.visitorId || (selectedPerson?.type === 'Visitor' ? selectedPerson.id : undefined);
+    const mId = alarm?.memberId ||  (selectedPerson?.type === 'Member' ? selectedPerson.id : undefined);
+    
+    if (vId) params.set('visitorId', String(vId));
+    if (mId) params.set('memberId', String(mId));
+    
+    return `/alarm/alarmlist?${params.toString()}`;
+  };
+
+  const openAlarmInNewTab = (url: string) => {
+    const newWindow = window.open(url, '_blank');
+    if (newWindow) {
+      newWindow.focus();
+    }
+  };
+
+  const handlePromptOpenAlarm = (alarm: any) => {
+    const url = buildAlarmListUrl(alarm);
+    setTargetAlarmUrl(url);
+    setConfirmAlarmOpen(true);
+  };
+
   if (!selectedPerson && !data && !visitorSessionData) {
     return (
       <Card
@@ -1711,13 +1882,13 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                 </Box>
 
                 {/* Custom Legend */}
-                {presenceTimelineSeries.length > 0 && (
+                {areaBreakdownList.length > 0 && (
                   <Stack direction="row" spacing={2} justifyContent="flex-start" mt={1} flexWrap="wrap">
-                    {presenceTimelineSeries.map((s, idx) => (
-                      <Stack key={s.name || idx} direction="row" spacing={1} alignItems="center">
+                    {areaBreakdownList.map((row, idx) => (
+                      <Stack key={row.areaId || idx} direction="row" spacing={1} alignItems="center">
                         <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: AREA_COLORS[idx % AREA_COLORS.length] }} />
                         <Typography variant="caption" fontWeight={600}>
-                          {s.name}
+                          {row.areaName}
                         </Typography>
                       </Stack>
                     ))}
@@ -1883,119 +2054,234 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                   }}
                 >
                   <Box mb={2} sx={{ flexShrink: 0 }}>
-                    <Typography variant="h6" fontWeight={700} color="text.primary">
-                      Chronological Timeline
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1} mb={0.5}>
+                      <Typography variant="h6" fontWeight={700} color="text.primary">
+                        Chronological Timeline
+                      </Typography>
+                      {(timelineSearchQuery || timelineSelectedArea !== 'ALL' || timelineTimeFrom || timelineTimeTo) && (
+                        <Button
+                          size="small"
+                          color="inherit"
+                          onClick={() => {
+                            setTimelineSearchQuery('');
+                            setTimelineSelectedArea('ALL');
+                            setTimelineTimeFrom('');
+                            setTimelineTimeTo('');
+                          }}
+                          startIcon={<IconX size={14} />}
+                          sx={{ fontSize: '11px', textTransform: 'none', py: 0.2, px: 1, minHeight: 0 }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" display="block" mb={1.5}>
                       Complete history of movement and security events
                     </Typography>
+
+                    {/* Timeline Search & Filter Controls */}
+                    <Stack spacing={1}>
+                      <TextField
+                        size="small"
+                        placeholder="Search timeline event or location..."
+                        value={timelineSearchQuery}
+                        onChange={(e) => setTimelineSearchQuery(e.target.value)}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <IconSearch size={16} />
+                            </InputAdornment>
+                          ),
+                          endAdornment: timelineSearchQuery ? (
+                            <InputAdornment position="end">
+                              <IconButton size="small" onClick={() => setTimelineSearchQuery('')}>
+                                <IconX size={14} />
+                              </IconButton>
+                            </InputAdornment>
+                          ) : undefined,
+                          sx: { borderRadius: '8px', fontSize: '13px' },
+                        }}
+                      />
+
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        <TextField
+                          select
+                          size="small"
+                          label="Area"
+                          value={timelineSelectedArea}
+                          onChange={(e) => setTimelineSelectedArea(e.target.value)}
+                          sx={{ flex: 1 }}
+                          InputProps={{ sx: { borderRadius: '8px', fontSize: '12px' } }}
+                          InputLabelProps={{ sx: { fontSize: '12px' } }}
+                        >
+                          <MenuItem value="ALL">All Areas</MenuItem>
+                          {timelineAvailableAreas.map((areaName) => (
+                            <MenuItem key={areaName} value={areaName} sx={{ fontSize: '12px' }}>
+                              {areaName}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+
+                        <TextField
+                          size="small"
+                          label="From"
+                          type="time"
+                          value={timelineTimeFrom}
+                          onChange={(e) => setTimelineTimeFrom(e.target.value)}
+                          InputLabelProps={{ shrink: true, sx: { fontSize: '12px' } }}
+                          InputProps={{ sx: { borderRadius: '8px', fontSize: '12px' } }}
+                          sx={{ width: { xs: '100%', sm: 110 } }}
+                        />
+
+                        <TextField
+                          size="small"
+                          label="To"
+                          type="time"
+                          value={timelineTimeTo}
+                          onChange={(e) => setTimelineTimeTo(e.target.value)}
+                          InputLabelProps={{ shrink: true, sx: { fontSize: '12px' } }}
+                          InputProps={{ sx: { borderRadius: '8px', fontSize: '12px' } }}
+                          sx={{ width: { xs: '100%', sm: 110 } }}
+                        />
+                      </Stack>
+                    </Stack>
                   </Box>
 
                   <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', pr: 1 }}>
-                  <Stack
-                    spacing={2.5}
-                    sx={{
-                      position: 'relative',
-                      pl: 3,
-                      py: 0.5,
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        left: 8,
-                        top: 8,
-                        bottom: 8,
-                        width: 2,
-                        bgcolor: 'divider',
-                      },
-                    }}
-                  >
-                    {chronologicalTimelineList.map((item, idx) => {
-                      const isAlarm = item.badge === 'Danger' || item.eventType === 'ALARM';
-                      const isPrimary = item.badge === 'Primary' || item.eventType === 'CURRENT_POSITION';
-                      const nodeColor = isAlarm ? '#D32F2F' : isPrimary ? '#1877F2' : '#00C853';
-                      const badgeBg = isAlarm ? '#FFEBEE' : isPrimary ? '#E8F2FE' : '#E6F4EA';
-                      const badgeTextColor = isAlarm ? '#D32F2F' : isPrimary ? '#1877F2' : '#00C853';
-                      // Format date and time according to current language
-                      let dateStr = '';
-                      let timeStr = '18:28';
-                      if (item.timestamp) {
-                        const parsedDate = toLocalDate(item.timestamp);
-                        if (parsedDate && !isNaN(parsedDate.getTime())) {
-                          const d = dayjs(parsedDate).locale(currentLang);
-                          dateStr = d.format('ddd, DD MMM YYYY');
-                          timeStr = d.format('HH:mm');
-                        } else {
-                          const d = dayjs(item.timestamp).locale(currentLang);
-                          if (d.isValid()) {
-                            dateStr = d.format('ddd, DD MMM YYYY');
-                            timeStr = d.format('HH:mm');
-                          } else {
-                            timeStr = String(item.timestamp);
+                    {filteredChronologicalTimeline.length === 0 ? (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                          minHeight: 180,
+                          color: 'text.secondary',
+                          textAlign: 'center',
+                          px: 2,
+                        }}
+                      >
+                        <Typography variant="body2" fontWeight={600} mb={0.5}>
+                          No timeline events match the filter
+                        </Typography>
+                        <Typography variant="caption">
+                          Try adjusting your search terms, area selection, or time range.
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Stack
+                        spacing={2.5}
+                        sx={{
+                          position: 'relative',
+                          pl: 3,
+                          py: 0.5,
+                        }}
+                      >
+                        {filteredChronologicalTimeline.map(({ item, globalIdx }, localIdx) => {
+                          const isAlarm = item.badge === 'Danger' || item.eventType === 'ALARM';
+                          const isPrimary = item.badge === 'Primary' || item.eventType === 'CURRENT_POSITION';
+                          const nodeColor = isAlarm ? '#D32F2F' : isPrimary ? '#1877F2' : '#00C853';
+                          const badgeBg = isAlarm ? '#FFEBEE' : isPrimary ? '#E8F2FE' : '#E6F4EA';
+                          const badgeTextColor = isAlarm ? '#D32F2F' : isPrimary ? '#1877F2' : '#00C853';
+
+                          // Determine if this item is connected to the next visible item in global order
+                          const nextEntry = filteredChronologicalTimeline[localIdx + 1];
+                          const isConnectedToNext = Boolean(nextEntry && nextEntry.globalIdx === globalIdx + 1);
+
+                          // Format date and time according to current language
+                          let dateStr = '';
+                          let timeStr = '18:28';
+                          if (item.timestamp) {
+                            const rawStr = String(item.timestamp).trim();
+                            const cleanStr = rawStr.endsWith('Z') || rawStr.endsWith('z') ? rawStr.slice(0, -1) : rawStr;
+                            const d = dayjs(cleanStr).locale(currentLang);
+                            if (d.isValid()) {
+                              dateStr = d.format('ddd, DD MMM YYYY');
+                              timeStr = d.format('HH:mm');
+                            } else {
+                              timeStr = rawStr;
+                            }
                           }
-                        }
-                      }
 
-                      return (
-                        <Box key={idx} sx={{ position: 'relative' }}>
-                          {/* Node Dot */}
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              left: -24,
-                              top: 2,
-                              width: 14,
-                              height: 14,
-                              borderRadius: '50%',
-                              bgcolor: nodeColor,
-                              border: '3px solid #fff',
-                              boxShadow: 1,
-                            }}
-                          />
-
-                          <Grid container spacing={1.5} alignItems="flex-start">
-                            <Grid size={{ xs: 12, sm: 4 }}>
-                              <Typography variant="caption" fontWeight={700} color="text.primary" display="block" sx={{ lineHeight: 1.25 }}>
-                                {timeStr}
-                              </Typography>
-                              {dateStr && (
-                                <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '11px', mt: 0.25, lineHeight: 1.2 }}>
-                                  {dateStr}
-                                </Typography>
+                          return (
+                            <Box key={localIdx} sx={{ position: 'relative' }}>
+                              {/* Connecting vertical line to next node only if connected in global timeline */}
+                              {isConnectedToNext && (
+                                <Box
+                                  sx={{
+                                    position: 'absolute',
+                                    left: -18,
+                                    top: 16,
+                                    bottom: -20,
+                                    width: 2,
+                                    bgcolor: 'divider',
+                                    zIndex: 0,
+                                  }}
+                                />
                               )}
-                            </Grid>
 
-                            <Grid size={{ xs: 8, sm: 5.5 }}>
-                              <Typography variant="body2" fontWeight={700} color="text.primary">
-                                {item.title}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary" display="block">
-                                {item.description}
-                              </Typography>
-                              <Typography variant="caption" fontWeight={600} color="text.primary">
-                                {item.location}
-                              </Typography>
-                            </Grid>
-
-                            <Grid size={{ xs: 4, sm: 2.5 }} sx={{ textAlign: 'right' }}>
-                              <Chip
-                                label={item.badge}
-                                size="small"
+                              {/* Node Dot */}
+                              <Box
                                 sx={{
-                                  height: 20,
-                                  bgcolor: badgeBg,
-                                  color: badgeTextColor,
-                                  fontWeight: 700,
-                                  fontSize: '10px',
-                                  borderRadius: '10px',
+                                  position: 'absolute',
+                                  left: -24,
+                                  top: 2,
+                                  width: 14,
+                                  height: 14,
+                                  borderRadius: '50%',
+                                  bgcolor: nodeColor,
+                                  border: '3px solid #fff',
+                                  boxShadow: 1,
+                                  zIndex: 1,
                                 }}
                               />
-                            </Grid>
-                          </Grid>
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </Box>
+
+                              <Grid container spacing={1.5} alignItems="flex-start">
+                                <Grid size={{ xs: 12, sm: 4 }}>
+                                  <Typography variant="caption" fontWeight={700} color="text.primary" display="block" sx={{ lineHeight: 1.25 }}>
+                                    {timeStr}
+                                  </Typography>
+                                  {dateStr && (
+                                    <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '11px', mt: 0.25, lineHeight: 1.2 }}>
+                                      {dateStr}
+                                    </Typography>
+                                  )}
+                                </Grid>
+
+                                <Grid size={{ xs: 8, sm: 5.5 }}>
+                                  <Typography variant="body2" fontWeight={700} color="text.primary">
+                                    {item.title}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {item.description}
+                                  </Typography>
+                                  <Typography variant="caption" fontWeight={600} color="text.primary">
+                                    {item.location}
+                                  </Typography>
+                                </Grid>
+
+                                <Grid size={{ xs: 4, sm: 2.5 }} sx={{ textAlign: 'right' }}>
+                                  <Chip
+                                    label={item.badge}
+                                    size="small"
+                                    sx={{
+                                      height: 20,
+                                      bgcolor: badgeBg,
+                                      color: badgeTextColor,
+                                      fontWeight: 700,
+                                      fontSize: '10px',
+                                      borderRadius: '10px',
+                                    }}
+                                  />
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          );
+                        })}
+                      </Stack>
+                    )}
+                  </Box>
               </Card>
             </Box>
           </Grid>
@@ -2237,7 +2523,18 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                             );
 
                             return (
-                              <TableRow key={row.areaId || row.id || actualIdx}>
+                              <TableRow
+                                key={row.areaId || row.id || actualIdx}
+                                hover
+                                onClick={() => {
+                                  if (isAlarmTriggered) {
+                                    handlePromptOpenAlarm(row);
+                                  }
+                                }}
+                                sx={{
+                                  cursor: isAlarmTriggered ? 'pointer' : 'default',
+                                }}
+                              >
                                 <TableCell>{actualIdx + 1}</TableCell>
                                 <TableCell sx={{ fontWeight: 600 }}>{areaName}</TableCell>
                                 <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
@@ -2247,8 +2544,16 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                                 <TableCell>{durationStr}</TableCell>
                                 <TableCell>
                                   {isAlarmTriggered ? (
-                                    <Tooltip title={row.reason || (row.alarmCategory ? `Alarm: ${row.alarmCategory}` : 'Alarm Triggered')}>
-                                      <IconButton size="small" color="error" sx={{ bgcolor: '#FFEBEE', p: 0.5 }}>
+                                    <Tooltip title={row.reason || (row.alarmCategory ? `Alarm: ${row.alarmCategory} - Open in Alarm List` : 'Alarm Triggered - Open in Alarm List')}>
+                                      <IconButton
+                                        size="small"
+                                        color="error"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handlePromptOpenAlarm(row);
+                                        }}
+                                        sx={{ bgcolor: '#FFEBEE', p: 0.5, '&:hover': { bgcolor: '#FFCDD2' } }}
+                                      >
                                         <IconBell size={16} />
                                       </IconButton>
                                     </Tooltip>
@@ -3376,20 +3681,33 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                         Reason
                       </TableSortLabel>
                     </TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {sortedBreaches.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                      <TableCell colSpan={8} align="center" sx={{ py: 3, color: 'text.secondary' }}>
                         No unauthorized access breaches recorded
                       </TableCell>
                     </TableRow>
                   ) : (
                     pagedBreaches.map((row: any, idx: number) => {
                       const actualIdx = breachesPage * breachesRowsPerPage + idx;
+                      const hasAlarm = Boolean(row.alarmTriggered || row.hasAlarm || row.alarm || row.alarmCategory || row.alarmTriggerId || row.alarmId);
                       return (
-                        <TableRow key={row.areaId || actualIdx}>
+                        <TableRow
+                          key={row.areaId || actualIdx}
+                          hover
+                          onClick={() => {
+                            if (hasAlarm) {
+                              handlePromptOpenAlarm(row);
+                            }
+                          }}
+                          sx={{
+                            cursor: hasAlarm ? 'pointer' : 'default',
+                          }}
+                        >
                           <TableCell>{actualIdx + 1}</TableCell>
                           <TableCell sx={{ fontWeight: 600 }}>{row.areaName || row.area || '-'}</TableCell>
                           <TableCell sx={{ color: 'text.secondary', fontSize: '12px' }}>
@@ -3408,6 +3726,25 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                           </TableCell>
                           <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.alarmCategory || '-'}</TableCell>
                           <TableCell sx={{ fontSize: '12px', color: 'text.secondary' }}>{row.reason || '-'}</TableCell>
+                          <TableCell>
+                            {hasAlarm ? (
+                              <Tooltip title="Open in Alarm List">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePromptOpenAlarm(row);
+                                  }}
+                                  sx={{ bgcolor: '#FFEBEE', p: 0.5, '&:hover': { bgcolor: '#FFCDD2' } }}
+                                >
+                                  <IconBell size={16} />
+                                </IconButton>
+                              </Tooltip>
+                            ) : (
+                              '-'
+                            )}
+                          </TableCell>
                         </TableRow>
                       );
                     })
@@ -3890,29 +4227,49 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
                             {formatOrRawTime(row.acknowledgedTime)}
                           </TableCell>
                           <TableCell>
-                            <Tooltip title={isSelected ? 'Currently selected' : 'View incident detail & location'}>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedAlarmId(rowId);
-                                  const target = document.getElementById('incident-detail-section');
-                                  if (target) {
-                                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                  }
-                                }}
-                                sx={{
-                                  color: isSelected ? '#FFFFFF' : '#1877F2',
-                                  bgcolor: isSelected ? '#1877F2' : '#F1F5F9',
-                                  boxShadow: isSelected ? '0 2px 6px rgba(24, 119, 242, 0.35)' : 'none',
-                                  '&:hover': {
-                                    bgcolor: isSelected ? '#1565C0' : '#E2E8F0',
-                                  },
-                                }}
-                              >
-                                <IconEye size={16} />
-                              </IconButton>
-                            </Tooltip>
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <Tooltip title={isSelected ? 'Currently selected' : 'View incident detail & location'}>
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedAlarmId(rowId);
+                                    const target = document.getElementById('incident-detail-section');
+                                    if (target) {
+                                      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }
+                                  }}
+                                  sx={{
+                                    color: isSelected ? '#FFFFFF' : '#1877F2',
+                                    bgcolor: isSelected ? '#1877F2' : '#F1F5F9',
+                                    boxShadow: isSelected ? '0 2px 6px rgba(24, 119, 242, 0.35)' : 'none',
+                                    '&:hover': {
+                                      bgcolor: isSelected ? '#1565C0' : '#E2E8F0',
+                                    },
+                                  }}
+                                >
+                                  <IconEye size={16} />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Open in Alarm List">
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePromptOpenAlarm(row);
+                                  }}
+                                  sx={{
+                                    color: '#D32F2F',
+                                    bgcolor: '#FFEBEE',
+                                    '&:hover': {
+                                      bgcolor: '#FFCDD2',
+                                    },
+                                  }}
+                                >
+                                  <IconExternalLink size={16} />
+                                </IconButton>
+                              </Tooltip>
+                            </Stack>
                           </TableCell>
                         </TableRow>
                       );
@@ -3947,14 +4304,37 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
             {/* Incident Detail */}
             <Grid size={{ xs: 12, md: isExporting ? 12 : 6 }}>
               <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%' }}>
-                <Box mb={2}>
-                  <Typography variant="h6" fontWeight={700} color="text.primary">
-                    Incident Detail
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Detailed information about the selected incident
-                  </Typography>
-                </Box>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Box>
+                    <Typography variant="h6" fontWeight={700} color="text.primary">
+                      Incident Detail
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Detailed information about the selected incident
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    startIcon={<IconExternalLink size={16} />}
+                    disabled={!primaryAlarm}
+                    onClick={() => {
+                      if (primaryAlarm) {
+                        const url = buildAlarmListUrl(primaryAlarm);
+                        openAlarmInNewTab(url);
+                      }
+                    }}
+                    sx={{
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      fontSize: '12px',
+                    }}
+                  >
+                    Open in Alarm List
+                  </Button>
+                </Stack>
 
                 {/* Banner Alert */}
                 <Box sx={{ bgcolor: primaryAlarm ? '#FFF5F5' : '#F8FAFC', border: '1px solid', borderColor: primaryAlarm ? '#FFCDD2' : 'divider', borderRadius: '12px', p: 2, mb: 2.5 }}>
@@ -5757,6 +6137,47 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           </Card>
         </Box>
       </Box>
+
+      {/* Confirmation Dialog for opening Alarm List in New Tab */}
+      <Dialog
+        open={confirmAlarmOpen}
+        onClose={() => setConfirmAlarmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '16px', p: 1 },
+        }}
+      >
+        <DialogTitle fontWeight={700}>Open Alarm List in New Tab?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            You are about to navigate to the Alarm List for this incident in a new browser tab. Do you want to proceed?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ pb: 1.5, px: 2 }}>
+          <Button
+            onClick={() => setConfirmAlarmOpen(false)}
+            color="inherit"
+            sx={{ textTransform: 'none', fontWeight: 600 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<IconExternalLink size={16} />}
+            onClick={() => {
+              if (targetAlarmUrl) {
+                openAlarmInNewTab(targetAlarmUrl);
+              }
+              setConfirmAlarmOpen(false);
+            }}
+            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
+          >
+            Open in New Tab
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 };

@@ -9,7 +9,6 @@ import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
-import { fetchBuildings } from 'src/store/apps/crud/building';
 import { UpdateFilter } from 'src/store/apps/crud/floor';
 import { defaultFloorFilter } from 'src/store/apps/defaultForm';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
@@ -20,7 +19,6 @@ const FloorFilter = () => {
   const [open, setOpen] = useState(false);
   const [resetToken, setResetToken] = useState(0);
 
-  const buildingList = useSelector((state: RootState) => state.buildingReducer.buildingAll);
   const floorFilter = useSelector((state: RootState) => state.floorReducer.floorFilter);
 
   // Local copy of filters
@@ -34,11 +32,7 @@ const FloorFilter = () => {
     MaskedAreaId: string[];
   } | null>(null);
 
-  // --- Fetch + Sync ---
-  useEffect(() => {
-    dispatch(fetchBuildings());
-  }, [dispatch]);
-
+  // --- Sync with Redux ---
   useEffect(() => {
     setAppliedFilter(floorFilter.filters);
 
@@ -141,7 +135,6 @@ const FloorFilter = () => {
             </CustomFormLabel>
 
             <AutocompleteFilter
-              buildings={buildingList}
               floors={[]}                // disable deeper levels
               floorplans={[]}
               maskedAreas={[]}

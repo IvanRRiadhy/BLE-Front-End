@@ -115,9 +115,13 @@ export const defaultAlarmTriggerFilter: AlarmTriggerFilter = {
   SortColumn: 'TriggerTime',
   SortDir: 'desc',
   SearchValue: '',
-  // timeRange: 'daily',
+  timeRange: 'daily',
   dateFilters: {},
-  filters: {},
+  filters: {
+    timeRange: 'today',
+    timezone: 'Asia/Jakarta',
+    includeUnresolved: true,
+  },
 };
 //endregion
 

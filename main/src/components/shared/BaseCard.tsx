@@ -12,13 +12,13 @@ type Props = {
 };
 
 const BaseCard = ({ title, children }: Props) => {
-  const customizer = useSelector((state: RootState) => state.customizer);
+  const settings = useSelector((state: RootState) => state.settings);
 
   return (
     <Card
       sx={{ padding: 0 }}
-      elevation={customizer.isCardShadow ? 9 : 0}
-      variant={!customizer.isCardShadow ? 'outlined' : undefined}
+      elevation={settings.isCardShadow ? 9 : 0}
+      variant={!settings.isCardShadow ? 'outlined' : undefined}
     >
       <CardHeader title={title} />
       <Divider />

@@ -6,6 +6,7 @@ import { RootState, useSelector } from 'src/store/Store';
 const Building_API_URL = '/api/MstBuilding/';
 const Building_DT_URL = '/api/MstBuilding/filter/';
 const Config_URL = '/api/config-exchange/';
+const Analytic_URL = '/api/TrackingAnalytics/'
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -141,6 +142,251 @@ export function useImportBuildingConfig(){
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['building-list']});
             queryClient.invalidateQueries({queryKey: ['building-all']});
+        },
+    });
+}
+
+export interface LocationArea {
+    id: string;
+    name: string;
+    colorArea?: string;
+    restrictedStatus?: string;
+    isRestricted?: boolean;
+}
+
+export interface LocationFloorplan {
+    id: string;
+    name: string;
+    floorplanImage?: string;
+    areas?: LocationArea[];
+}
+
+export interface LocationFloor {
+    id: string;
+    name: string;
+    floorplans?: LocationFloorplan[];
+}
+
+export interface LocationBuildingNode {
+    id: string;
+    name: string;
+    floors?: LocationFloor[];
+}
+
+export function useLocationHierarchy(){
+    return useQuery({
+        queryKey: ['location-hierarchy'],
+        queryFn: async () => {
+            const response = await axiosServices.get(`${Analytic_URL}location-hierarchy/`);
+            console.log('Location hierarchy fetched successfully: ', response.data);
+            return (response.data?.collection?.data?.tree ?? []) as LocationBuildingNode[];
+        },
+    });
+}
+
+export type AreaInvestigationTimeRange = 
+    | 'daily'
+    | 'yesterday'
+    | 'weekly'
+    | 'last_week'
+    | 'monthly'
+    | 'last_month'
+    | 'yearly'
+    | 'last_year'
+    | 'last_7_days'
+    | 'last_30_days'
+    | 'last_90_days';
+
+export interface AreaInvestigationPayload {
+    areaId: string;
+    timeRange?: AreaInvestigationTimeRange;
+    from?: string | null;
+    to?: string | null;
+    timezone?: string;
+    includeTimeline?: boolean;
+    topLoiterers?: number;
+    onlyBreaches?: boolean;
+}
+
+export interface AreaInvestigationAuthorizedAccessGroup {
+    cardAccessId: string;
+    accessName: string;
+    allowedAreasCount: number;
+    isAllAccess: boolean;
+}
+
+export interface AreaInvestigationAreaInfo {
+    areaId: string;
+    areaName: string;
+    floorplanId: string;
+    floorplanName: string;
+    floorplanImage: string;
+    floorId: string;
+    floorName: string;
+    buildingId: string;
+    buildingName: string;
+    colorArea?: string;
+    restrictedStatus?: string;
+    isRestricted?: boolean;
+    authorizedAccessGroups?: AreaInvestigationAuthorizedAccessGroup[];
+}
+
+export interface AreaInvestigationActiveOccupant {
+    personId: string;
+    personName: string;
+    personType: string;
+    cardNumber: string;
+    enteredAt: string;
+    currentDwellMinutes: number;
+    currentDwellFormatted: string;
+    isAuthorized: boolean;
+    faceImage?: string | null;
+}
+
+export interface AreaInvestigationLiveState {
+    currentOccupancy: number;
+    membersCount: number;
+    visitorsCount: number;
+    securitiesCount: number;
+    hasActiveAlarm: boolean;
+    activeOccupants: AreaInvestigationActiveOccupant[];
+}
+
+export interface AreaInvestigationComplianceSummary {
+    complianceScore: number;
+    complianceStatus: string;
+    totalVisits: number;
+    authorizedVisitsCount: number;
+    unauthorizedVisitsCount: number;
+}
+
+export interface AreaInvestigationUnauthorizedBreach {
+    personId: string;
+    personName: string;
+    personType: string;
+    cardNumber: string;
+    enteredAt: string;
+    exitedAt?: string | null;
+    durationMinutes: number;
+    durationFormatted: string;
+    alarmTriggered: boolean;
+    reason: string;
+}
+
+export interface AreaInvestigationAlarm {
+    alarmId: string;
+    category: string;
+    areaName: string;
+    floorplanName: string;
+    floorplanImage: string;
+    floorName: string;
+    buildingName: string;
+    triggeredTime: string;
+    status: string;
+    alarmColor?: string;
+    acknowledgedBy?: string | null;
+    acknowledgedTime?: string | null;
+    dispatchedTo?: string | null;
+    dispatchedTime?: string | null;
+    investigatedBy?: string | null;
+    investigatedTime?: string | null;
+    investigatedResult?: string | null;
+    isCarriedOver: boolean;
+}
+
+export interface AreaInvestigationIncidentSummary {
+    totalIncidents: number;
+    activeIncidents: number;
+    triggeredInPeriod: number;
+    carriedOverIncidents: number;
+    alarms: AreaInvestigationAlarm[];
+}
+
+export interface AreaInvestigationTrafficDynamics {
+    totalUniquePeople: number;
+    totalSessions: number;
+    averageDwellMinutes: number;
+    averageDwellFormatted: string;
+    peakHour: string;
+    peakOccupancy: number;
+}
+
+export interface AreaInvestigationTopLoiterer {
+    personId: string;
+    personName: string;
+    personType: string;
+    cardNumber: string;
+    totalStayMinutes: number;
+    totalStayFormatted: string;
+    visitCount: number;
+    lastSeenAt: string;
+    isAuthorized: boolean;
+}
+
+export interface AreaInvestigationData {
+    areaInfo: AreaInvestigationAreaInfo;
+    liveState: AreaInvestigationLiveState;
+    complianceSummary: AreaInvestigationComplianceSummary;
+    unauthorizedBreaches: AreaInvestigationUnauthorizedBreach[];
+    incidentSummary: AreaInvestigationIncidentSummary;
+    trafficDynamics: AreaInvestigationTrafficDynamics;
+    topLoiterers: AreaInvestigationTopLoiterer[];
+    chronologicalTimeline: any[];
+}
+
+export interface AreaInvestigationResponse {
+    success: boolean;
+    msg: string;
+    collection: {
+        data: AreaInvestigationData;
+    };
+    code: number;
+}
+
+export function useAreaInvestigation(payload?: AreaInvestigationPayload, enabled: boolean = true) {
+    return useQuery({
+        queryKey: ['area-investigation', payload],
+        queryFn: async () => {
+            const body: AreaInvestigationPayload = {
+                timeRange: 'daily',
+                from: null,
+                to: null,
+                timezone: 'SE Asia Standard Time',
+                includeTimeline: false,
+                topLoiterers: 10,
+                onlyBreaches: false,
+                ...payload,
+            } as AreaInvestigationPayload;
+
+            const response = await axiosServices.post<AreaInvestigationResponse>(
+                `${Analytic_URL}investigation/area-overview`,
+                body    
+            );
+            return response.data?.collection?.data;
+        },
+        enabled: enabled && Boolean(payload?.areaId),
+    });
+}
+
+export function useAreaInvestigationMutation() {
+    return useMutation({
+        mutationFn: async (payload: AreaInvestigationPayload) => {
+            const body: AreaInvestigationPayload = {
+                timeRange: 'daily',
+                from: null,
+                to: null,
+                timezone: 'SE Asia Standard Time',
+                includeTimeline: false,
+                topLoiterers: 10,
+                onlyBreaches: false,
+                ...payload,
+            };
+
+            const response = await axiosServices.post<AreaInvestigationResponse>(
+                `${Analytic_URL}investigation/area-overview`,
+                body
+            );
+            return response.data?.collection?.data;
         },
     });
 }

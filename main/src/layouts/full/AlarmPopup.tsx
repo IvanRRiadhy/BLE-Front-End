@@ -32,6 +32,7 @@ import { alpha, darken, useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 import AlarmActionForm from 'src/components/shared/AlarmActionForm';
 import { useAllSecurityLookup } from 'src/hooks/useSecurityGuard';
+import { useProfile } from 'src/hooks/useProfile';
 import { memberType } from 'src/store/apps/crud/member';
 import {
   AlarmLogItem,
@@ -88,6 +89,9 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const [panelRect, setPanelRect] = useState<DOMRect | null>(null);
   const prevAlarmIdRef = useRef<string | null>(null);
   const theme = useTheme();
+  const { data: profile } = useProfile();
+  const canAlarmAction = Boolean(profile?.effectiveCanAlarmAction);
+
   // React Query mutation hook
   const assignActionMutation = useAssignActionAlarmTriggerByDMAC();
   const assignActionByIdMutation = useAssignActionAlarmTriggerByID();
@@ -326,10 +330,21 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
     alarm?.alarmStatus?.toLowerCase() === 'lowbattery' ||
     (alarm as any)?.status?.toLowerCase() === 'lowbattery';
 
+  const isBlacklist =
+    alarm?.alarmStatus?.toLowerCase() === 'blacklist' ||
+    (alarm as any)?.status?.toLowerCase() === 'blacklist' ||
+    (alarm as any)?.alarmType?.toLowerCase() === 'blacklist' ||
+    (alarm as any)?.alarm?.toLowerCase() === 'blacklist';
+
+  // Automatically critical if blacklist, otherwise use alarm.priority or fallback
+  const effectivePriority = isBlacklist
+    ? 'critical'
+    : alarm?.priority || (isLowBattery ? 'low' : 'medium');
+
   // Get priority color for the popup background
-  const priorityColor = getPriorityColor(alarm?.priority || (isLowBattery ? 'low' : 'medium'));
+  const priorityColor = getPriorityColor(effectivePriority);
   // Get chip color from alarm.color or use a default
-  const chipColor = alarm?.color || (isLowBattery ? '#c8b560' : '#2196f3');
+  const chipColor = alarm?.color || (isLowBattery ? '#c8b560' : isBlacklist ? '#dc143c' : '#2196f3');
 
   const handleBackdropClose = () => {
     // ❗ UI-only close
@@ -632,7 +647,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                         <Box display="flex" justifyContent="center" gap={2} mb={3}>
                           <Typography>Priority:</Typography>
                           <Chip
-                            label={(alarm.priority || 'low').toUpperCase()}
+                            label={effectivePriority.toUpperCase()}
                             sx={{
                               backgroundColor: priorityColor,
                               color: 'white',
@@ -658,7 +673,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                         <Box display="flex" justifyContent="center" gap={2} mb={3}>
                           <Typography>Priority:</Typography>
                           <Chip
-                            label={alarm.priority?.toUpperCase() || 'MEDIUM'}
+                            label={effectivePriority.toUpperCase()}
                             sx={{
                               backgroundColor: priorityColor,
                               color: 'white',
@@ -672,7 +687,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                     {/* ACTION BUTTON */}
                     <Box
                       onClick={() => {
-                        if (isLowBattery) {
+                        if (isLowBattery || !canAlarmAction) {
                           dispatch(ClearAlarmPopup());
                         } else {
                           setActionAnchorEl(popupRef.current);

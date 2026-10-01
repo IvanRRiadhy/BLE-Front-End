@@ -47,10 +47,7 @@ import {
 import { BASE_URL } from 'src/utils/axios';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 
-import { useAllBuilding } from 'src/hooks/useBuilding';
-import { useAllFloors } from 'src/hooks/useFloor';
-import { useAllFloorplans } from 'src/hooks/useFloorplan';
-import { useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import { useLocationHierarchy } from 'src/hooks/useBuilding';
 
 const AutocompleteFilter = lazy(
   () => import('src/layouts/full/horizontal/navbar/AutocompleteFilter'),
@@ -91,12 +88,6 @@ export type TrackingReportDetailProps = {
 };
 
 const TrackingReportDetail: React.FC<TrackingReportDetailProps> = ({ data, isLoading, isExporting, onViewPersonDetail }) => {
-  // Redux/React Query Data Hooks for AutocompleteFilter tree
-  const buildingList = useAllBuilding().data ?? [];
-  const floorList = useAllFloors().data ?? [];
-  const floorplanList = useAllFloorplans().data ?? [];
-  const maskedAreaList = useAllMaskedAreas().data ?? [];
-
   // Search & Pagination State
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
@@ -152,6 +143,32 @@ const TrackingReportDetail: React.FC<TrackingReportDetailProps> = ({ data, isLoa
   });
 
   const [resetToken, setResetToken] = useState(0);
+  const { data: hierarchyTree = [] } = useLocationHierarchy();
+
+  const { buildingList, floorList, maskedAreaList } = useMemo(() => {
+    const buildingList: { id: string; name: string }[] = [];
+    const floorList: { id: string; name: string; buildingId: string }[] = [];
+    const maskedAreaList: { id: string; name: string; areaName?: string; maskedAreaName?: string }[] = [];
+
+    for (const b of hierarchyTree) {
+      buildingList.push({ id: b.id, name: b.name });
+      for (const f of b.floors ?? []) {
+        floorList.push({ id: f.id, name: f.name, buildingId: b.id });
+        for (const fp of f.floorplans ?? []) {
+          for (const area of fp.areas ?? []) {
+            maskedAreaList.push({
+              id: area.id,
+              name: area.name,
+              areaName: area.name,
+              maskedAreaName: area.name,
+            });
+          }
+        }
+      }
+    }
+
+    return { buildingList, floorList, maskedAreaList };
+  }, [hierarchyTree]);
 
   // Helper to format date string to "Fri, 04 Sep 2026, 09:08:00"
   const formatDateStr = (dateVal?: string | null) => {
@@ -921,10 +938,6 @@ const TrackingReportDetail: React.FC<TrackingReportDetailProps> = ({ data, isLoa
 
                 <Suspense fallback={<Typography variant="caption">Loading location tree...</Typography>}>
                   <AutocompleteFilter
-                    buildings={buildingList}
-                    floors={floorList}
-                    floorplans={floorplanList}
-                    maskedAreas={maskedAreaList}
                     initial={appliedAreaFilter}
                     onChangeFilter={(f) => setAppliedAreaFilter(f)}
                     resetToken={resetToken}

@@ -25,7 +25,19 @@ export interface PersonOption {
   avatarUrl?: string;
 }
 
-export type TimeRangeKey = 'daily' | 'weekly' | 'monthly' | 'custom';
+export type TimeRangeKey =
+  | 'daily'
+  | 'yesterday'
+  | 'weekly'
+  | 'last_week'
+  | 'monthly'
+  | 'last_month'
+  | 'yearly'
+  | 'last_year'
+  | 'last_7_days'
+  | 'last_30_days'
+  | 'last_90_days'
+  | 'custom';
 
 export interface InvestigateFilterState {
   person: PersonOption | null;
@@ -37,9 +49,10 @@ export interface InvestigateFilterState {
 interface NewInvestigateFilterProps {
   onSearch: (filter: InvestigateFilterState) => void;
   isLoading?: boolean;
+  initialValue?: InvestigateFilterState;
 }
 
-const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, isLoading }) => {
+const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, isLoading, initialValue }) => {
   const { data: members = [] } = useAllMembers();
   const { data: visitors = [] } = useAllVisitor();
   // console.log("Members: ", members.length);
@@ -67,12 +80,7 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
     // Fallback default options if API is empty/loading
     if (combined.length === 0) {
       return [
-        {
-          id: '75a72602-fa2a-4073-856b-3657dcb9287a',
-          name: 'Person A',
-          identityId: '12312312',
-          type: 'Member',
-        },
+
       ];
     }
 
@@ -80,14 +88,31 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
   }, [members, visitors]);
 
   // Initial Filter State
-  const [selectedPerson, setSelectedPerson] = useState<PersonOption | null>(null);
-  const [timeRange, setTimeRange] = useState<TimeRangeKey>('daily');
+  const [selectedPerson, setSelectedPerson] = useState<PersonOption | null>(initialValue?.person || null);
+  const [timeRange, setTimeRange] = useState<TimeRangeKey>(initialValue?.timeRange || 'daily');
   const [fromDate, setFromDate] = useState<string>(
-    dayjs().startOf('day').format('YYYY-MM-DDTHH:mm')
+    initialValue?.from ? dayjs(initialValue.from).format('YYYY-MM-DDTHH:mm') : dayjs().startOf('day').format('YYYY-MM-DDTHH:mm')
   );
   const [toDate, setToDate] = useState<string>(
-    dayjs().endOf('day').format('YYYY-MM-DDTHH:mm')
+    initialValue?.to ? dayjs(initialValue.to).format('YYYY-MM-DDTHH:mm') : dayjs().endOf('day').format('YYYY-MM-DDTHH:mm')
   );
+
+  React.useEffect(() => {
+    if (initialValue) {
+      if (initialValue.person !== undefined) {
+        setSelectedPerson(initialValue.person);
+      }
+      if (initialValue.timeRange) {
+        setTimeRange(initialValue.timeRange);
+      }
+      if (initialValue.from) {
+        setFromDate(dayjs(initialValue.from).format('YYYY-MM-DDTHH:mm'));
+      }
+      if (initialValue.to) {
+        setToDate(dayjs(initialValue.to).format('YYYY-MM-DDTHH:mm'));
+      }
+    }
+  }, [initialValue]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,17 +121,8 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
     let computedTo: string | null = null;
 
     if (timeRange === 'custom') {
-      computedFrom = fromDate ? dayjs(fromDate).toISOString() : null;
-      computedTo = toDate ? dayjs(toDate).toISOString() : null;
-    } else if (timeRange === 'daily') {
-      computedFrom = dayjs().startOf('day').toISOString();
-      computedTo = dayjs().endOf('day').toISOString();
-    } else if (timeRange === 'weekly') {
-      computedFrom = dayjs().startOf('week').toISOString();
-      computedTo = dayjs().endOf('week').toISOString();
-    } else if (timeRange === 'monthly') {
-      computedFrom = dayjs().startOf('month').toISOString();
-      computedTo = dayjs().endOf('month').toISOString();
+      computedFrom = fromDate ? dayjs(fromDate).format('YYYY-MM-DDTHH:mm:ss') : null;
+      computedTo = toDate ? dayjs(toDate).format('YYYY-MM-DDTHH:mm:ss') : null;
     }
 
     onSearch({
@@ -243,9 +259,17 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
                 },
               }}
             >
-              <MenuItem value="daily">Today</MenuItem>
+              <MenuItem value="daily">Today (Daily)</MenuItem>
+              <MenuItem value="yesterday">Yesterday</MenuItem>
               <MenuItem value="weekly">This Week</MenuItem>
+              <MenuItem value="last_week">Last Week</MenuItem>
               <MenuItem value="monthly">This Month</MenuItem>
+              <MenuItem value="last_month">Last Month</MenuItem>
+              <MenuItem value="yearly">This Year</MenuItem>
+              <MenuItem value="last_year">Last Year</MenuItem>
+              <MenuItem value="last_7_days">Last 7 Days</MenuItem>
+              <MenuItem value="last_30_days">Last 30 Days</MenuItem>
+              <MenuItem value="last_90_days">Last 90 Days</MenuItem>
               <MenuItem value="custom">Custom Range</MenuItem>
             </TextField>
           </Grid>

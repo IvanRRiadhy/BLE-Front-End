@@ -1,10 +1,9 @@
 import React, { forwardRef } from 'react';
-import { Box, TextField, Paper, Popper, Typography, ClickAwayListener, Checkbox, CircularProgress } from '@mui/material';
+import { Box, TextField, Paper, Popper, Typography, ClickAwayListener, Checkbox } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
-import { useLocationHierarchy } from 'src/hooks/useBuilding';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -20,6 +19,10 @@ export type SelectedNode =
   | null;
 
 type Props = {
+  buildings: any[];
+  floors: any[];
+  floorplans: any[];
+  maskedAreas: any[];
   devices?: any[];
   value: SelectedNode | SelectedNode[];
   onChange: (v: any) => void;
@@ -30,10 +33,8 @@ type Props = {
   highlightedAreaIds?: string[];
   disabled?: boolean;
   label?: string;
-  size?: 'small' | 'medium';
   hideEmptyNodes?: boolean;
   onOpenChange?: (open: boolean) => void;
-  sx?: any;
 };
 
 const getDeviceId = (d: any) => String(d?.readerId ?? d?.id ?? d?.floorplanDeviceId ?? '');
@@ -49,6 +50,10 @@ const getNodeId = (type: NodeType, data: any) => {
 const AreaHierarchySelector: React.FC<Props> = forwardRef(
   (
     {
+      buildings,
+      floors,
+      floorplans,
+      maskedAreas,
       devices = [],
       value,
       onChange,
@@ -59,50 +64,11 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
       highlightedAreaIds,
       disabled = false,
       label = 'Area',
-      size = 'medium',
       hideEmptyNodes = false,
       onOpenChange,
-      sx,
     },
     ref,
   ) => {
-    // === Self-fetching from location hierarchy ===
-    const { data: hierarchyTree = [], isLoading: hierarchyLoading } = useLocationHierarchy();
-
-    // Derive flat arrays with parent-id references from tree
-    const { buildings, floors, floorplans, maskedAreas } = React.useMemo(() => {
-      const buildings: any[] = [];
-      const floors: any[] = [];
-      const floorplans: any[] = [];
-      const maskedAreas: any[] = [];
-
-      for (const b of hierarchyTree) {
-        buildings.push({ id: b.id, name: b.name });
-        for (const f of b.floors ?? []) {
-          floors.push({ id: f.id, name: f.name, buildingId: b.id });
-          for (const fp of f.floorplans ?? []) {
-            floorplans.push({ id: fp.id, name: fp.name, floorId: f.id, buildingId: b.id, floorplanImage: fp.floorplanImage });
-            for (const area of fp.areas ?? []) {
-              maskedAreas.push({
-                id: area.id,
-                name: area.name,
-                floorplanId: fp.id,
-                floorId: f.id,
-                buildingId: b.id,
-                floorplanName: fp.name,
-                floorName: f.name,
-                buildingName: b.name,
-                colorArea: area.colorArea,
-                restrictedStatus: area.restrictedStatus,
-                isRestricted: area.isRestricted,
-              });
-            }
-          }
-        }
-      }
-
-      return { buildings, floors, floorplans, maskedAreas };
-    }, [hierarchyTree]);
     const anchorRef = React.useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = React.useState(false);
 
@@ -194,35 +160,13 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
         return `${highlightedAreaIds.length} Items Selected`;
       }
       const singleValue = value as SelectedNode;
-      if (!singleValue) return '';
-
-      const name =
-        singleValue.data?.readerName ??
-        singleValue.data?.name ??
-        singleValue.data?.areaName ??
-        singleValue.data?.gmac;
-      if (name) return name;
-
-      const id = singleValue.data?.id ?? (singleValue.data as any);
-      if (id && typeof id === 'string') {
-        if (singleValue.type === 'area') {
-          const found = maskedAreas.find((a) => a.id === id);
-          if (found?.name) return found.name;
-        } else if (singleValue.type === 'floorplan') {
-          const found = floorplans.find((f) => f.id === id);
-          if (found?.name) return found.name;
-        } else if (singleValue.type === 'floor') {
-          const found = floors.find((f) => f.id === id);
-          if (found?.name) return found.name;
-        } else if (singleValue.type === 'building') {
-          const found = buildings.find((b) => b.id === id);
-          if (found?.name) return found.name;
-        } else if (singleValue.type === 'device') {
-          const found = devices.find((d) => getDeviceId(d) === id);
-          if (found) return getDeviceName(found);
-        }
-      }
-      return '';
+      return singleValue
+        ? singleValue.data?.readerName ??
+            singleValue.data?.name ??
+            singleValue.data?.areaName ??
+            singleValue.data?.gmac ??
+            ''
+        : '';
     })();
 
     const getDescendantAreaIds = (type: NodeType, id: string): string[] => {
@@ -643,7 +587,6 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
           <Box ref={anchorRef}>
             <TextField
               fullWidth
-              size={size}
               label={label}
               placeholder={
                 open
@@ -663,11 +606,7 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
               InputProps={{
                 startAdornment: (
                   <Box sx={{ display: 'flex', alignItems: 'center', pr: 1 }}>
-                    {hierarchyLoading ? (
-                      <CircularProgress size={16} />
-                    ) : (
-                      <IconAdjustmentsHorizontal size={16} />
-                    )}
+                    <IconAdjustmentsHorizontal size={16} />
                   </Box>
                 ),
               }}
@@ -675,7 +614,6 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
               helperText={helperText}
               sx={{
                 marginBottom: helperText ? 0.5 : 0,
-                ...sx,
               }}
             />
           </Box>

@@ -37,7 +37,7 @@ export type GetFilter = {
     SortColumn: string,
     SortDir: 'asc' | 'desc',
     SearchValue: string,
-    // timeRange: string,
+    timeRange?: string | null,
     dateFilters: {
         TriggerTime?: {
             DateFrom: string | null;
@@ -45,6 +45,8 @@ export type GetFilter = {
         }
     }
     filters: {
+        timeRange?: string | null;
+        timezone?: string;
         isActive?: boolean;
         alarm?: string[];
         buildingId?: string[];
@@ -53,6 +55,8 @@ export type GetFilter = {
         action?: string[];
         visitorId?: string[];
         memberId?: string[];
+        floorplanMaskedAreaId?: string[];
+        includeUnresolved?: boolean;
     }
 }
 
@@ -81,6 +85,7 @@ export interface AlarmTriggerType {
     floorId: string;
     floorName: string;
     id: string;
+    incidentCode?: string | null;
     idleBy: string | null;
     idleTimestamp: string | null;
     investigatedDoneAt: string | null;

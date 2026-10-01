@@ -163,7 +163,7 @@ const Maintenance = Loadable(lazy(() => import('../views/authentication/Maintena
 const roleAccessRules: Record<string, string[]> = {
   System: ['*'], // all routes
   SuperAdmin: ['*', '!/master/application'], // all except application
-  PrimaryAdmin: ['/dashboards/', '/report/', '/visitor/visitorinvitation', '/about'],
+  PrimaryAdmin: ['/dashboards/', '/report/', '/visitor/visitorinvitation', '/about', '/alarm/alarmlist/'],
   Primary: ['/dashboards/monitoring', '/security-view/', '/about'],
   Secondary: ['/my-visit/', '/about'],
   UserCreated: ['/my-visit/', '/about'],

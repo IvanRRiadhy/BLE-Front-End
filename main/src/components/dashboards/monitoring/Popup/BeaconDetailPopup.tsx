@@ -4,9 +4,11 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Divider,
   Grid2 as Grid,
@@ -21,6 +23,7 @@ import {
   IconClock,
   IconCreditCard,
   IconBroadcast,
+  IconUserOff,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { memberType } from 'src/store/apps/crud/member';
@@ -34,7 +37,11 @@ import {
 } from 'src/store/apps/monitoring/layout';
 import { publishMQTT } from 'src/store/apps/tracking/MQTT';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { useBlacklistMember } from 'src/hooks/useMember';
+import { useBlacklistVisitor } from 'src/hooks/useVisitor';
+import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import CompactTrackingDetailModal from './CompactTrackingDetailModal';
 
 type BeaconDetailPopupProps = {
@@ -89,6 +96,91 @@ const BeaconDetailPopup = ({
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [internalOpenTrackDetail, setInternalOpenTrackDetail] = useState(false);
+
+  // Blacklist state
+  const [blacklistReasonDialogOpen, setBlacklistReasonDialogOpen] = useState(false);
+  const [blacklistGuardDialogOpen, setBlacklistGuardDialogOpen] = useState(false);
+  const [blacklistReason, setBlacklistReason] = useState('');
+  const [guardCountdown, setGuardCountdown] = useState(5);
+
+  const { mutateAsync: blacklistMemberMutation, isPending: isBlacklistMemberPending } =
+    useBlacklistMember();
+  const { mutateAsync: blacklistVisitorMutation, isPending: isBlacklistVisitorPending } =
+    useBlacklistVisitor();
+
+  const isBlacklistPending = isBlacklistMemberPending || isBlacklistVisitorPending;
+
+  // Countdown timer when guard dialog is open
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (blacklistGuardDialogOpen) {
+      setGuardCountdown(5);
+      timer = setInterval(() => {
+        setGuardCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [blacklistGuardDialogOpen]);
+
+  const handleOpenBlacklistReasonDialog = () => {
+    setBlacklistReason('');
+    setBlacklistReasonDialogOpen(true);
+  };
+
+  const handleCloseBlacklistReasonDialog = () => {
+    setBlacklistReasonDialogOpen(false);
+    setBlacklistReason('');
+  };
+
+  const handleProceedToGuardDialog = () => {
+    if (!blacklistReason.trim()) {
+      toast.error('Please enter a blacklist reason');
+      return;
+    }
+    setBlacklistReasonDialogOpen(false);
+    setBlacklistGuardDialogOpen(true);
+  };
+
+  const handleCloseBlacklistGuardDialog = () => {
+    setBlacklistGuardDialogOpen(false);
+  };
+
+  const handleFinalConfirmBlacklist = async () => {
+    if (!currentPersonId) {
+      toast.error('Cannot blacklist: Missing person identifier');
+      return;
+    }
+
+    try {
+      if (personType === 'member') {
+        await blacklistMemberMutation({
+          memberId: currentPersonId,
+          blacklistReason: blacklistReason.trim(),
+        });
+        toast.success(`Member ${currentName} has been blacklisted`);
+      } else if (personType === 'visitor') {
+        await blacklistVisitorMutation({
+          visitorId: currentPersonId,
+          BlacklistReason: blacklistReason.trim(),
+        });
+        toast.success(`Visitor ${currentName} has been blacklisted`);
+      }
+      setBlacklistGuardDialogOpen(false);
+      setBlacklistReason('');
+      handleClose();
+    } catch (error) {
+      toast.error(`Failed to blacklist ${personType}`);
+      console.error(error);
+    }
+  };
 
   const appId = localStorage.getItem('applicationId') || '';
   const personType: PersonType = memberDetail ? 'member' : visitorDetail ? 'visitor' : 'security';
@@ -425,6 +517,19 @@ const BeaconDetailPopup = ({
             gap: 1.5,
           }}
         >
+          {(personType === 'member' || personType === 'visitor') && (
+            <Button
+              variant="contained"
+              color="error"
+              disableElevation
+              startIcon={<IconUserOff size={18} />}
+              onClick={handleOpenBlacklistReasonDialog}
+              sx={{ borderRadius: '8px', flex: 1 }}
+            >
+              Blacklist
+            </Button>
+          )}
+
           <Button
             variant="contained"
             color="secondary"
@@ -454,6 +559,99 @@ const BeaconDetailPopup = ({
             sx={{ borderRadius: '8px', flex: 1 }}
           >
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Blacklist Reason Dialog */}
+      <Dialog
+        open={blacklistReasonDialogOpen}
+        onClose={handleCloseBlacklistReasonDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Confirm Blacklist</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to blacklist {personType}{' '}
+            <strong>{personDetail?.name || 'this person'}</strong>?
+          </DialogContentText>
+          <Grid size={12} mt={2}>
+            <CustomTextField
+              id="blacklist-reason"
+              label="Reason"
+              multiline
+              rows={3}
+              fullWidth
+              value={blacklistReason}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBlacklistReason(e.target.value)}
+              placeholder="Please provide a reason for blacklisting..."
+            />
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button onClick={handleCloseBlacklistReasonDialog} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleProceedToGuardDialog}
+            color="error"
+            variant="contained"
+            disabled={!blacklistReason.trim()}
+          >
+            Next
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Reassurance / Guard Dialog with 5-Second Delay */}
+      <Dialog
+        open={blacklistGuardDialogOpen}
+        onClose={handleCloseBlacklistGuardDialog}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ color: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconUserOff size={22} />
+          Final Confirmation
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This action will blacklist <strong>{personDetail?.name}</strong> and immediately revoke
+            their access permissions.
+          </DialogContentText>
+          <Box
+            sx={{
+              mt: 2,
+              p: 1.5,
+              borderRadius: '8px',
+              bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
+            }}
+          >
+            <Typography variant="caption" color="text.secondary" display="block">
+              Reason:
+            </Typography>
+            <Typography variant="body2" fontWeight={500}>
+              {blacklistReason}
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button onClick={handleCloseBlacklistGuardDialog} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleFinalConfirmBlacklist}
+            color="error"
+            variant="contained"
+            disabled={guardCountdown > 0 || isBlacklistPending}
+            startIcon={isBlacklistPending ? <CircularProgress size={18} color="inherit" /> : null}
+          >
+            {isBlacklistPending
+              ? 'Blacklisting...'
+              : guardCountdown > 0
+              ? `Confirm (${guardCountdown}s)`
+              : 'Confirm Blacklist'}
           </Button>
         </DialogActions>
       </Dialog>
