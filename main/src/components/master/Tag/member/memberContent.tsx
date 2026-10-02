@@ -482,13 +482,17 @@ const MemberContent = () => {
                 <Typography color={memberDetail.isHead ? 'text.secondary' : 'inherit'}>
                   {memberDetail.isHead
                     ? 'None (Head Member)'
-                    : memberDetail.memberHead1 || '-'}
+                    : typeof (memberDetail.memberHead1 || (memberDetail as any).headMember1) === 'object'
+                    ? (memberDetail.memberHead1 || (memberDetail as any).headMember1)?.name || '-'
+                    : memberDetail.memberHead1 || (memberDetail as any).headMember1 || '-'}
                 </Typography>
                 <CustomFormLabel htmlFor="head-Member-2">Head Member 2</CustomFormLabel>
                 <Typography color={memberDetail.isHead ? 'text.secondary' : 'inherit'}>
                   {memberDetail.isHead
                     ? 'None (Head Member)'
-                    : memberDetail.memberHead2 || '-'}
+                    : typeof (memberDetail.memberHead2 || (memberDetail as any).headMember2) === 'object'
+                    ? (memberDetail.memberHead2 || (memberDetail as any).headMember2)?.name || '-'
+                    : memberDetail.memberHead2 || (memberDetail as any).headMember2 || '-'}
                 </Typography>
                 <CustomFormLabel htmlFor="status-employee">Status Employee</CustomFormLabel>
                 <Typography>{memberDetail.statusEmployee}</Typography>

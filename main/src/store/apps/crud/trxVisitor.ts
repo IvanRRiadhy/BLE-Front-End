@@ -120,9 +120,17 @@ export const TrxVisitorSlice = createSlice({
         setTrxVisitorSearch: (state, action: PayloadAction<string>) => {
             state.TrxVisitorSearch = action.payload;
         },
-        SelectTrxVisitor: (state, action: PayloadAction<string>) => {
-            const selected = state.TrxVisitors.find((visitor: TrxVisitorType) => visitor.id === action.payload);
-            state.SelectedTrxVisitor = selected || {} as TrxVisitorType;
+        SelectTrxVisitor: (state, action: PayloadAction<string | TrxVisitorType | null | undefined>) => {
+            if (!action.payload) {
+                state.SelectedTrxVisitor = {} as TrxVisitorType;
+                return;
+            }
+            if (typeof action.payload === 'string') {
+                const selected = state.TrxVisitors.find((visitor: TrxVisitorType) => visitor.id === action.payload);
+                state.SelectedTrxVisitor = selected || ({ id: action.payload } as TrxVisitorType);
+            } else {
+                state.SelectedTrxVisitor = action.payload;
+            }
         },
         UpdateFilter: (state: StateType, action: PayloadAction<Partial<GetFilter>>) => {
           state.TrxVisitorFilter = { ...state.TrxVisitorFilter, ...action.payload };

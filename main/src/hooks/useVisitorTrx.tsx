@@ -66,7 +66,8 @@ export function useTrxVisitorDetail(id: string | null) {
     queryFn: async () => {
       if (!id) throw new Error('No visitor ID provided');
       const response = await axiosServices.get(`${API_URL}${id}`);
-      return response.data.collection as TrxVisitorType;
+      const col = response.data?.collection;
+      return (col?.data ?? col) as TrxVisitorType;
     },
     enabled: !!id,
     staleTime: 30_000,

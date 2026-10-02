@@ -75,7 +75,7 @@ const VisitorList = () => {
                 active={trx.id === selectedTrxVisitor?.id}
                 trx={trx}
                 onTagClick={() => {
-                  dispatch(SelectTrxVisitor(trx.id));
+                  dispatch(SelectTrxVisitor(trx));
                 }}
               />
             ))
