@@ -92,7 +92,9 @@ export function useCheckInVisitor() {
       queryClient.invalidateQueries({ queryKey: ['trx-visitor-list'] });
       queryClient.invalidateQueries({ queryKey: ['trx-visitor-detail'] });
       queryClient.invalidateQueries({ queryKey: ['trx-visitor-all'] });
-      queryClient.invalidateQueries({ queryKey: ['cards'] });
+      queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
+      queryClient.invalidateQueries({ queryKey: ['card-list'] });
+      queryClient.invalidateQueries({ queryKey: ['card-all'] });
     },
   });
 }
@@ -110,7 +112,9 @@ export function useCheckOutVisitor() {
       queryClient.invalidateQueries({ queryKey: ['trx-visitor-list'] });
       queryClient.invalidateQueries({ queryKey: ['trx-visitor-detail'] });
       queryClient.invalidateQueries({ queryKey: ['trx-visitor-all'] });
-      queryClient.invalidateQueries({ queryKey: ['cards'] });
+      queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
+      queryClient.invalidateQueries({ queryKey: ['card-list'] });
+      queryClient.invalidateQueries({ queryKey: ['card-all'] });
     },
   });
 }

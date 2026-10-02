@@ -123,7 +123,7 @@ export const defaultAlarmTriggerFilter: AlarmTriggerFilter = {
     includeUnresolved: true,
   },
 };
-//endregion
+//#endregion
 
 //#region Blacklist
 export const defaultBlaclistForm: blacklistType = {

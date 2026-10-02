@@ -51,10 +51,11 @@ export function useEditAlarmCategory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (AlarmCategory: Partial<AlarmSettingType>) => {
-      const { id, remarks, alarmCategory, isEnabled, ...cleanData } = AlarmCategory;
+      const { id, remarks, alarmCategory, isEnabled, isEmailEnabled, ...cleanData } = AlarmCategory;
       const filteredData = {
         ...cleanData,
         isEnabled: isEnabled ? 1 : 0,
+        isEmailEnabled: isEmailEnabled ? 1 : 0,
       };
 
       const res = await axiosServices.put(`${API_URL}${id?.toUpperCase()}`, filteredData);

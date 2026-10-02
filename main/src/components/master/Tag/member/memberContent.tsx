@@ -110,6 +110,7 @@ const MemberContent = () => {
                   }
                 : oldCache,
           );
+          queryClient.invalidateQueries({ queryKey: ['member-list-infinite'] });
 
           toast.success('Member deleted successfully');
         } else {
@@ -196,26 +197,28 @@ const MemberContent = () => {
   };
 
       //Release Pop-up
-      const [selectedCardNumber, setSelectedCardNumber] = useState('');
+      const [releaseCardTarget, setReleaseCardTarget] = useState<{ id: string; cardNumber: string } | null>(null);
       const [releasePopupOpen, setReleasePopupOpen] = useState(false);
       const releaseMutation = useReleaseCard();
       //Open release pop-up
-      const handleOpenReleasePopup = (cardNumber: string) => {
-        setSelectedCardNumber(cardNumber);
+      const handleOpenReleasePopup = (card: { id?: string | null; cardNumber?: string | null }) => {
+        const id = card.id || card.cardNumber || '';
+        const cardNumber = card.cardNumber || card.id || '';
+        setReleaseCardTarget({ id, cardNumber });
         setReleasePopupOpen(true);
       };
     
       // Close release pop-up
       const handleCloseReleasePopup = () => {
         setReleasePopupOpen(false);
-        setSelectedCardNumber('');
+        setReleaseCardTarget(null);
       };
     
       // Confirm release action
       const handleConfirmRelease = async () => {
-        if (selectedCardNumber) {
+        if (releaseCardTarget?.id) {
           try {
-            await releaseMutation.mutateAsync(selectedCardNumber);
+            await releaseMutation.mutateAsync(releaseCardTarget.id);
             toast.success('Card Released');
             dispatch(SelectMemberId(''));
             queryClient.invalidateQueries({ queryKey: ['member-list-infinite'] });
@@ -403,7 +406,10 @@ const MemberContent = () => {
                         variant='contained'
                         color='info'
                         onClick={() => {
-                          handleOpenReleasePopup(memberDetail.cardNumber!)
+                          handleOpenReleasePopup({
+                            id: memberDetail.cardId,
+                            cardNumber: memberDetail.cardNumber,
+                          });
                         }}
                         sx={{
                           boxShadow: 2,
@@ -627,7 +633,7 @@ const MemberContent = () => {
               <DialogTitle>Confirm Card Release</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  Are you sure you want to release the Card <strong>{selectedCardNumber}</strong> from its user <strong>{memberDetail?.name}</strong>?
+                  Are you sure you want to release the Card <strong>{releaseCardTarget?.cardNumber}</strong> from its user <strong>{memberDetail?.name}</strong>?
                 </DialogContentText>
               </DialogContent>
               <DialogActions>

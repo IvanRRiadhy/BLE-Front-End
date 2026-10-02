@@ -166,6 +166,7 @@ export function useAddMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list-infinite'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
       queryClient.invalidateQueries({ queryKey: ['member'] });
       queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
@@ -199,6 +200,7 @@ export function useEditMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list-infinite'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
       queryClient.invalidateQueries({ queryKey: ['member'] });
       queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
@@ -221,6 +223,7 @@ export function useBlacklistMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list-infinite'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
       queryClient.invalidateQueries({ queryKey: ['member'] });
     },
@@ -236,6 +239,7 @@ export function useUnBlacklistMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list-infinite'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
       queryClient.invalidateQueries({ queryKey: ['member'] });
     },
@@ -255,6 +259,7 @@ export function useDeleteMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-list'] });
+      queryClient.invalidateQueries({ queryKey: ['member-list-infinite'] });
       queryClient.invalidateQueries({ queryKey: ['member-all'] });
       queryClient.invalidateQueries({ queryKey: ['card-unassigned'] });
       queryClient.invalidateQueries({ queryKey: ['card-all'] });

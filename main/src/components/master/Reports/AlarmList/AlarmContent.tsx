@@ -117,6 +117,16 @@ const AlarmContent = () => {
   const [personType, setPersonType] = useState<'Visitor' | 'Member' | null>(null);
   const [personId, setPersonId] = useState<string | null>(null);
 
+  // Search by Incident Code
+  const [searchIncidentCode, setSearchIncidentCode] = useState('');
+  const [isSearchingIncident, setIsSearchingIncident] = useState(false);
+  const [searchResults, setSearchResults] = useState<AlarmTriggerType[] | null>(null);
+
+  const handleClearIncidentSearch = () => {
+    setSearchIncidentCode('');
+    setSearchResults(null);
+  };
+
   // 🔹 Per-category infinite queries
   const baseFilter = alarmTriggerFilter;
 
@@ -289,6 +299,8 @@ const AlarmContent = () => {
     isFetchingActive || isFetchingOnGoing || isFetchingCleared || isFetchingPerson;
 
   const handleRefresh = async () => {
+    setSearchResults(null);
+    setSearchIncidentCode('');
     await queryClient.invalidateQueries({ queryKey: ['alarmTrigger-list-infinite'] });
     if (isViewingPerson) {
       refetchPerson();
@@ -321,17 +333,52 @@ const AlarmContent = () => {
     if (personInView && hasNextPerson && !isFetchingNextPerson) fetchNextPerson();
   }, [personInView, hasNextPerson, isFetchingNextPerson, fetchNextPerson]);
 
-  // 🔹 Flat arrays per category
-  const activeAlarm = activeData?.pages.flatMap((p) => p.data) ?? [];
-  const onGoingAlarm = onGoingData?.pages.flatMap((p) => p.data) ?? [];
-  const clearedAlarm = clearedData?.pages.flatMap((p) => p.data) ?? [];
-  const personAlarm = personData?.pages.flatMap((p) => p.data) ?? [];
+  // 🔹 Flat arrays per category (use searchResults when incident search is active)
+  const activeAlarm = useMemo(() => {
+    if (searchResults !== null) {
+      return searchResults.filter((item) => {
+        if (!item.isActive) return false;
+        const act = (item.action || '').toLowerCase();
+        return DEFAULT_ACTIVE_ACTIONS.some((a) => a.toLowerCase() === act);
+      });
+    }
+    return activeData?.pages.flatMap((p) => p.data) ?? [];
+  }, [searchResults, activeData]);
 
-  // 🔹 Total filtered counts from API
-  const activeCount = activeData?.pages?.[0]?.recordsFiltered ?? activeAlarm.length;
-  const onGoingCount = onGoingData?.pages?.[0]?.recordsFiltered ?? onGoingAlarm.length;
-  const clearedCount = clearedData?.pages?.[0]?.recordsFiltered ?? clearedAlarm.length;
-  const personCount = personData?.pages?.[0]?.recordsFiltered ?? personAlarm.length;
+  const onGoingAlarm = useMemo(() => {
+    if (searchResults !== null) {
+      return searchResults.filter((item) => {
+        if (!item.isActive) return false;
+        const act = (item.action || '').toLowerCase();
+        return DEFAULT_ONGOING_ACTIONS.some((a) => a.toLowerCase() === act);
+      });
+    }
+    return onGoingData?.pages.flatMap((p) => p.data) ?? [];
+  }, [searchResults, onGoingData]);
+
+  const clearedAlarm = useMemo(() => {
+    if (searchResults !== null) {
+      return searchResults.filter((item) => {
+        if (item.isActive) return false;
+        const act = (item.action || '').toLowerCase();
+        return DEFAULT_CLEARED_ACTIONS.some((a) => a.toLowerCase() === act);
+      });
+    }
+    return clearedData?.pages.flatMap((p) => p.data) ?? [];
+  }, [searchResults, clearedData]);
+
+  const personAlarm = useMemo(() => {
+    if (searchResults !== null) {
+      return searchResults;
+    }
+    return personData?.pages.flatMap((p) => p.data) ?? [];
+  }, [searchResults, personData]);
+
+  // 🔹 Total filtered counts from API or search results
+  const activeCount = searchResults !== null ? activeAlarm.length : (activeData?.pages?.[0]?.recordsFiltered ?? activeAlarm.length);
+  const onGoingCount = searchResults !== null ? onGoingAlarm.length : (onGoingData?.pages?.[0]?.recordsFiltered ?? onGoingAlarm.length);
+  const clearedCount = searchResults !== null ? clearedAlarm.length : (clearedData?.pages?.[0]?.recordsFiltered ?? clearedAlarm.length);
+  const personCount = searchResults !== null ? personAlarm.length : (personData?.pages?.[0]?.recordsFiltered ?? personAlarm.length);
 
   // Combined for auto-select from URL param or general usage
   const alarmTriggerData = isViewingPerson
@@ -704,10 +751,6 @@ const AlarmContent = () => {
     }
   };
 
-  // Search by Incident Code
-  const [searchIncidentCode, setSearchIncidentCode] = useState('');
-  const [isSearchingIncident, setIsSearchingIncident] = useState(false);
-
   const handleSearchIncidentCode = async (codeToSearch?: string) => {
     const code = (codeToSearch ?? searchIncidentCode).trim();
     if (!code) {
@@ -720,7 +763,7 @@ const AlarmContent = () => {
       const res = await axiosServices.post('/api/AlarmTriggers/filter', {
         Draw: 1,
         Start: 0,
-        Length: 10,
+        Length: 50,
         SortColumn: 'TriggerTime',
         SortDir: 'desc',
         SearchValue: code,
@@ -729,16 +772,22 @@ const AlarmContent = () => {
       });
 
       const items: AlarmTriggerType[] = res.data?.collection?.data ?? [];
-      const exactOrFirst =
-        items.find((item) => item.incidentCode?.toLowerCase() === code.toLowerCase()) ??
-        items[0];
 
-      if (!exactOrFirst) {
+      if (items.length === 0) {
         toast.error(`No alarm found for incident code: "${code}"`);
+        setSearchResults(null);
         return;
       }
 
-      await handleOpenAlarmWithAcknowledge(exactOrFirst);
+      // If exactly 1 item returned, open action dialog directly
+      if (items.length === 1) {
+        setSearchResults(null);
+        await handleOpenAlarmWithAcknowledge(items[0]);
+      } else {
+        // If multiple items returned, store them in searchResults to display in their respective category columns
+        setSearchResults(items);
+        toast.success(`Found ${items.length} alarms matching "${code}"`);
+      }
     } catch (err) {
       console.error('Failed to search incident code:', err);
       toast.error('Error searching incident code');
@@ -1220,7 +1269,12 @@ const AlarmContent = () => {
               size="small"
               placeholder="Search Incident Code (e.g. INC-...)"
               value={searchIncidentCode}
-              onChange={(e) => setSearchIncidentCode(e.target.value)}
+              onChange={(e) => {
+                setSearchIncidentCode(e.target.value);
+                if (!e.target.value.trim() && searchResults !== null) {
+                  setSearchResults(null);
+                }
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
@@ -1237,6 +1291,17 @@ const AlarmContent = () => {
                     )}
                   </InputAdornment>
                 ),
+                endAdornment: (searchIncidentCode || searchResults !== null) ? (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={handleClearIncidentSearch}
+                      sx={{ p: 0.5 }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
                 sx: {
                   height: 36,
                   fontSize: '0.85rem',
@@ -1254,6 +1319,17 @@ const AlarmContent = () => {
             >
               Search
             </Button>
+            {searchResults !== null && (
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="small"
+                onClick={handleClearIncidentSearch}
+                sx={{ height: 36, px: 1.5 }}
+              >
+                Clear Search
+              </Button>
+            )}
             <AlarmTriggeredFilter />
           </Stack>
         </Box>
@@ -1306,7 +1382,7 @@ const AlarmContent = () => {
                       <Skeleton variant="text" width="70%" height={22} />
                     </Box>
                   ))}
-                {hasNextActive && <div ref={activeRef} style={{ height: '20px' }} />}
+                {hasNextActive && searchResults === null && <div ref={activeRef} style={{ height: '20px' }} />}
               </Box>
             </Box>
 
@@ -1340,14 +1416,14 @@ const AlarmContent = () => {
                       </Box>
                     ))
                   : onGoingAlarm.map((a) => <AlarmCard key={a.id} alarmTrigger={a} />)}
-                {isFetchingNextOnGoing &&
+                {isFetchingNextOnGoing && searchResults === null &&
                   Array.from({ length: 2 }).map((_, i) => (
                     <Box key={i} sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
                       <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
                       <Skeleton variant="text" width="70%" height={22} />
                     </Box>
                   ))}
-                {hasNextOnGoing && <div ref={onGoingRef} style={{ height: '20px' }} />}
+                {hasNextOnGoing && searchResults === null && <div ref={onGoingRef} style={{ height: '20px' }} />}
               </Box>
             </Box>
 
@@ -1381,14 +1457,14 @@ const AlarmContent = () => {
                       </Box>
                     ))
                   : clearedAlarm.map((a) => <AlarmCard key={a.id} alarmTrigger={a} />)}
-                {isFetchingNextCleared &&
+                {isFetchingNextCleared && searchResults === null &&
                   Array.from({ length: 2 }).map((_, i) => (
                     <Box key={i} sx={{ border: '1px solid #CCC', borderRadius: 1.5, p: 1, mb: 1 }}>
                       <Skeleton variant="rectangular" height={100} sx={{ mb: 1, borderRadius: 1 }} />
                       <Skeleton variant="text" width="70%" height={22} />
                     </Box>
                   ))}
-                {hasNextCleared && <div ref={clearedRef} style={{ height: '20px' }} />}
+                {hasNextCleared && searchResults === null && <div ref={clearedRef} style={{ height: '20px' }} />}
               </Box>
             </Box>
           </Box>
@@ -1432,7 +1508,7 @@ const AlarmContent = () => {
                       </Grid>
                     ))}
                 </Grid>
-                {hasNextPerson && <div ref={personRef} style={{ height: '20px' }} />}
+                {hasNextPerson && searchResults === null && <div ref={personRef} style={{ height: '20px' }} />}
               </>
             )}
           </Box>

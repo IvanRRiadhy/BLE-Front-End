@@ -2,9 +2,10 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import { safeParseAreaShape } from 'src/utils/isJsonObject';
 
-const API_URL = '/api/TrackingAnalytics/investigation/person-overview';
-const AREA_URL ='/api/TrackingAnalytics/investigation/area-overview'
+const API_URL = '/api/TrackingAnalytics/investigation';
 
+
+//#region Person Overview
 export interface InvestigateOverviewPayload {
   personId?: string | null;
   areaId?: string | null;
@@ -149,7 +150,7 @@ export function usePersonOverview(payload?: InvestigateOverviewPayload, enabled:
         from: isCustom ? payload?.from ?? null : null,
         to: isCustom ? payload?.to ?? null : null,
       };
-      const response = await axiosServices.post<PersonOverviewResponse>(API_URL, body);
+      const response = await axiosServices.post<PersonOverviewResponse>(`${API_URL}/person-overview`, body);
       return response.data.collection.data;
     },
     enabled: enabled && Boolean(payload?.personId || payload?.areaId),
@@ -169,12 +170,14 @@ export function usePersonOverviewMutation() {
         from: isCustom ? payload?.from ?? null : null,
         to: isCustom ? payload?.to ?? null : null,
       };
-      const response = await axiosServices.post<PersonOverviewResponse>(API_URL, body);
+      const response = await axiosServices.post<PersonOverviewResponse>(`${API_URL}/person-overview`, body);
       return response.data.collection.data;
     },
   });
 }
+//#endregion
 
+//#region Area Investigation
 // ==========================================
 // Area Investigation Types & Fetchers
 // ==========================================
@@ -400,7 +403,7 @@ export function useAreaInvestigation(
     queryKey: ['investigation-area-overview', params],
     queryFn: async () => {
       const body = buildAreaInvestigationPayload(params);
-      const response = await axiosServices.post<AreaInvestigationResponse>(AREA_URL, body);
+      const response = await axiosServices.post<AreaInvestigationResponse>(`${API_URL}/area-overview`, body);
       const data = response.data.collection.data;
       if (data?.areaInfo) {
         data.areaInfo = {
@@ -419,7 +422,7 @@ export function useAreaInvestigationMutation() {
   return useMutation({
     mutationFn: async (params?: AreaInvestigationParams) => {
       const body = buildAreaInvestigationPayload(params);
-      const response = await axiosServices.post<AreaInvestigationResponse>(AREA_URL, body);
+      const response = await axiosServices.post<AreaInvestigationResponse>(`${API_URL}/area-overview`, body);
       const data = response.data.collection.data;
       if (data?.areaInfo) {
         data.areaInfo = {
@@ -431,3 +434,239 @@ export function useAreaInvestigationMutation() {
     },
   });
 }
+//#endregion
+
+//#region Global Investigation
+// ==========================================
+// Global Investigation Types & Fetchers
+// ==========================================
+export interface GlobalInvestigationRequestPayload {
+  timeRange: string;
+  areaId: string | null;
+  from: string | null;
+  to: string | null;
+  timezone: string;
+}
+
+export interface GlobalInvestigationParams {
+  timeRange?: AreaInvestigationTimeRange | string;
+  areaId?: string | null;
+  from?: string | null;
+  to?: string | null;
+  timezone?: string;
+}
+
+export interface GlobalFacilitySummary {
+  totalPeopleOnSite: number;
+  totalMembers: number;
+  totalVisitors: number;
+  totalSecurities: number;
+  activeAlarmsCount: number;
+  carriedOverAlarmsCount: number;
+  totalBreachesToday: number;
+  totalBreachesInPeriod: number;
+}
+
+export interface GlobalTopAccessViolator {
+  personId: string;
+  personName: string;
+  personType: string;
+  department: string;
+  activeCard: string;
+  faceImage?: string | null;
+  totalAlarmsTriggered: number;
+  unauthorizedAccessCount: number;
+  mostViolatedArea: string;
+  lastViolationAt: string;
+}
+
+export interface GlobalBreachHotspot {
+  areaId: string;
+  areaName: string;
+  floorName: string;
+  buildingName: string;
+  totalBreaches: number;
+  isRestrictedArea: boolean;
+  dominantAlarmCategory: string;
+}
+
+export interface GlobalRestrictedAreaOccupant {
+  personId: string;
+  personName: string;
+  personType: string;
+  cardNumber: string;
+  faceImage?: string | null;
+  areaName: string;
+  floorName: string;
+  enteredAt: string;
+  stayMinutes: number;
+  stayFormatted: string;
+  hasAccessPermission: boolean;
+  alarmStatus: string;
+}
+
+export interface GlobalOverstayVisitor {
+  visitorId: string;
+  visitorName: string;
+  cardNumber: string;
+  faceImage?: string | null;
+  hostMemberName?: string | null;
+  periodEnd: string;
+  overstayDurationMinutes: number;
+  overstayDurationFormatted: string;
+  currentArea: string;
+  status: string;
+}
+
+export interface GlobalLowBatteryCard {
+  cardId: string;
+  cardNumber: string;
+  bleCardNumber: string;
+  batteryPercentage: number;
+  assignedTo: string | null;
+  currentArea: string | null;
+}
+
+export interface GlobalInvestigationData {
+  facilitySummary: GlobalFacilitySummary;
+  topAccessViolators: GlobalTopAccessViolator[];
+  breachHotspots: GlobalBreachHotspot[];
+  currentRestrictedAreaOccupants: GlobalRestrictedAreaOccupant[];
+  overstayVisitors: GlobalOverstayVisitor[];
+  lowBatteryCardsInUse: GlobalLowBatteryCard[];
+}
+
+export interface GlobalInvestigationResponse {
+  success: boolean;
+  msg: string;
+  collection: {
+    data: GlobalInvestigationData;
+  };
+  code: number;
+}
+
+const buildGlobalInvestigationPayload = (
+  params?: GlobalInvestigationParams
+): GlobalInvestigationRequestPayload => {
+  const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
+  const isCustom = (params?.timeRange || '').toLowerCase() === 'custom';
+
+  return {
+    timeRange: params?.timeRange || 'last_30_days',
+    areaId: params?.areaId ?? null,
+    from: isCustom ? params?.from ?? null : null,
+    to: isCustom ? params?.to ?? null : null,
+    timezone: params?.timezone || deviceTimezone,
+  };
+};
+
+
+
+export function useGlobalInvestigationMutation() {
+  return useMutation({
+    mutationFn: async (params?: GlobalInvestigationParams) => {
+      const body = buildGlobalInvestigationPayload(params);
+      const response = await axiosServices.post<GlobalInvestigationResponse>(`${API_URL}/global-overview`, body);
+      return response.data.collection.data;
+    },
+  });
+}
+//#endregion
+
+//#region Co-Presence
+
+// ==========================================
+// Co-Presence Investigation Types & Fetchers
+// ==========================================
+export interface CoPresenceInvestigationParams {
+  personId?: string | null;
+  areaId?: string | null;
+  timeRange?: AreaInvestigationTimeRange | string;
+  from?: string | null;
+  to?: string | null;
+  timezone?: string;
+}
+
+export interface CoPresenceInvestigationRequestPayload {
+  personId: string | null;
+  areaId: string | null;
+  from: string | null;
+  to: string | null;
+  timeRange: string;
+  timezone: string;
+}
+
+export interface CoPresenceSession {
+  overlapStart: string;
+  overlapEnd: string;
+  sharedDurationMinutes: number;
+  sharedDurationFormatted: string;
+  isCurrentlyTogether: boolean;
+}
+
+export interface CoPresentPerson {
+  personId: string;
+  personName: string;
+  personType: string;
+  department: string | null;
+  cardNumber: string;
+  faceImage?: string | null;
+  interactionCount: number;
+  totalSharedDurationMinutes: number;
+  totalSharedDurationFormatted: string;
+  isCurrentlyTogether: boolean;
+  sessions: CoPresenceSession[];
+}
+
+export interface CoPresenceInvestigationData {
+  targetPerson: PersonOverviewInfo;
+  targetArea: AreaInvestigationAreaInfo;
+  totalCoPresentPeople: number;
+  coPresentPeople: CoPresentPerson[];
+}
+
+export interface CoPresenceInvestigationResponse {
+  success: boolean;
+  msg: string;
+  collection: {
+    data: CoPresenceInvestigationData;
+  };
+  code: number;
+}
+
+const buildCoPresenceInvestigationPayload = (
+  params?: CoPresenceInvestigationParams
+): CoPresenceInvestigationRequestPayload => {
+  const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta';
+  const isCustom = (params?.timeRange || '').toLowerCase() === 'custom';
+
+  return {
+    personId: params?.personId ?? null,
+    areaId: params?.areaId ?? null,
+    from: isCustom ? params?.from ?? null : null,
+    to: isCustom ? params?.to ?? null : null,
+    timeRange: params?.timeRange || 'daily',
+    timezone: params?.timezone || deviceTimezone,
+  };
+};
+
+export function useCoPresenceInvestigationMutation() {
+  return useMutation({
+    mutationFn: async (params?: CoPresenceInvestigationParams) => {
+      const body = buildCoPresenceInvestigationPayload(params);
+      const response = await axiosServices.post<CoPresenceInvestigationResponse>(
+        `${API_URL}/co-presence`,
+        body
+      );
+      const data = response.data.collection.data;
+      if (data?.targetArea) {
+        data.targetArea = {
+          ...data.targetArea,
+          nodes: safeParseAreaShape(data.targetArea.areaShape) as Nodes[],
+        };
+      }
+      return data;
+    },
+  });
+}
+//#endregion

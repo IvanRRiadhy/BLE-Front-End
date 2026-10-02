@@ -70,8 +70,8 @@ const TagList = () => {
     Array<{
       id: string;
       name: string;
-      bleCardNumber?: string;
-      personId?: string;
+      bleCardNumber?: string | null;
+      personId?: string | null;
       selected: boolean;
       status: 'idle' | 'loading' | 'success' | 'error';
       errorMessage?: string;

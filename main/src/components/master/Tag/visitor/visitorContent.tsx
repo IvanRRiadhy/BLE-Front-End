@@ -54,7 +54,7 @@ const VisitorContent = () => {
   const { data: freshVisitorData, isLoading, error } = useTrxVisitorDetail(trxVisitorDetail?.id);
   
   // Use fresh data from React Query if available, otherwise fall back to Redux data
-  const displayVisitorDetail =  trxVisitorDetail;
+  const displayVisitorDetail = freshVisitorData || trxVisitorDetail;
   const visitorDetail: VisitorType | undefined = displayVisitorDetail?.visitor;
 
   // Tracking History

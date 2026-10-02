@@ -208,6 +208,20 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
   const [loitererSortBy, setLoitererSortBy] = useState<'duration' | 'visits' | 'name'>('duration');
   const [loitererSortOrder, setLoitererSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Active Occupants search & sort state
+  const [occupantSearch, setOccupantSearch] = useState('');
+  const [occupantSortBy, setOccupantSortBy] = useState<'time' | 'name' | 'type'>('time');
+  const [occupantSortOrder, setOccupantSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Incidents search & sort state
+  const [incidentSearch, setIncidentSearch] = useState('');
+  const [incidentSortBy, setIncidentSortBy] = useState<'time' | 'name' | 'type' | 'category'>('time');
+  const [incidentSortOrder, setIncidentSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Occupant navigation & confirmation dialog state
+  const [confirmOccupantOpen, setConfirmOccupantOpen] = useState(false);
+  const [targetOccupant, setTargetOccupant] = useState<{ personId: string; personName?: string } | null>(null);
+
   const handleOccupantClick = (personId: string) => {
     if (!personId) return;
     const params = new URLSearchParams();
@@ -225,6 +239,11 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
     if (newWindow) {
       newWindow.focus();
     }
+  };
+
+  const handlePromptOpenOccupant = (personId: string, personName?: string) => {
+    setTargetOccupant({ personId, personName });
+    setConfirmOccupantOpen(true);
   };
 
   // Alarm list navigation & confirmation dialog state
@@ -319,6 +338,66 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
         item.location?.toLowerCase().includes(q) 
     );
   }, [timeline, historySearch]);
+
+  // Filtered and Sorted Active Occupants
+  const processedOccupants = useMemo(() => {
+    let list = [...occupants];
+    if (occupantSearch.trim()) {
+      const q = occupantSearch.toLowerCase();
+      list = list.filter(
+        (occ) =>
+          occ.personName?.toLowerCase().includes(q) ||
+          occ.cardNumber?.toLowerCase().includes(q) ||
+          occ.personType?.toLowerCase().includes(q)
+      );
+    }
+    list.sort((a, b) => {
+      let comparison = 0;
+      if (occupantSortBy === 'time') {
+        const timeA = a.enteredAt ? new Date(a.enteredAt).getTime() : 0;
+        const timeB = b.enteredAt ? new Date(b.enteredAt).getTime() : 0;
+        comparison = timeA - timeB;
+      } else if (occupantSortBy === 'name') {
+        comparison = (a.personName ?? '').localeCompare(b.personName ?? '');
+      } else if (occupantSortBy === 'type') {
+        comparison = (a.personType ?? '').localeCompare(b.personType ?? '');
+      }
+      return occupantSortOrder === 'desc' ? -comparison : comparison;
+    });
+    return list;
+  }, [occupants, occupantSearch, occupantSortBy, occupantSortOrder]);
+
+  // Filtered and Sorted Incidents / Alarms
+  const processedAlarms = useMemo(() => {
+    let list = [...alarms];
+    if (incidentSearch.trim()) {
+      const q = incidentSearch.toLowerCase();
+      list = list.filter(
+        (alarm) =>
+          alarm.personName?.toLowerCase().includes(q) ||
+          alarm.cardNumber?.toLowerCase().includes(q) ||
+          alarm.incidentCode?.toLowerCase().includes(q) ||
+          alarm.category?.toLowerCase().includes(q) ||
+          alarm.personType?.toLowerCase().includes(q)
+      );
+    }
+    list.sort((a, b) => {
+      let comparison = 0;
+      if (incidentSortBy === 'time') {
+        const timeA = a.triggeredTime ? new Date(a.triggeredTime).getTime() : 0;
+        const timeB = b.triggeredTime ? new Date(b.triggeredTime).getTime() : 0;
+        comparison = timeA - timeB;
+      } else if (incidentSortBy === 'name') {
+        comparison = (a.personName ?? '').localeCompare(b.personName ?? '');
+      } else if (incidentSortBy === 'type') {
+        comparison = (a.personType ?? '').localeCompare(b.personType ?? '');
+      } else if (incidentSortBy === 'category') {
+        comparison = (a.category ?? '').localeCompare(b.category ?? '');
+      }
+      return incidentSortOrder === 'desc' ? -comparison : comparison;
+    });
+    return list;
+  }, [alarms, incidentSearch, incidentSortBy, incidentSortOrder]);
 
   // Filtered and Sorted Top Loiterers
   const processedLoiterers = useMemo(() => {
@@ -1178,6 +1257,7 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
             }}
           >
             {/* Header with View Switcher */}
+            {/* Header with View Switcher */}
             <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
               <Stack direction="row" spacing={1} alignItems="center">
                 {centerView === 'occupants' ? (
@@ -1187,7 +1267,11 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
                 )}
                 <Typography variant="subtitle1" fontWeight={700} color="text.primary">
                   {centerView === 'occupants'
-                    ? `Active Occupants (${occupants.length})`
+                    ? occupantSearch.trim()
+                      ? `Active Occupants (${processedOccupants.length}/${occupants.length})`
+                      : `Active Occupants (${occupants.length})`
+                    : incidentSearch.trim()
+                    ? `Incidents (${processedAlarms.length}/${alarms.length})`
                     : `Incidents (${alarms.length})`}
                 </Typography>
               </Stack>
@@ -1227,13 +1311,122 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
               {/* VIEW 1: ACTIVE OCCUPANTS */}
               {centerView === 'occupants' && (
                 <>
-                  {occupants.length > 0 ? (
+                  {/* Search and Sort controls for Occupants */}
+                  <Stack spacing={1.5} mb={2}>
+                    <TextField
+                      size="small"
+                      placeholder="Search occupant by name, card, or type..."
+                      value={occupantSearch}
+                      onChange={(e) => setOccupantSearch(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <IconSearch size={14} color="#94A3B8" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          height: 32,
+                          fontSize: '12px',
+                          borderRadius: '8px',
+                          bgcolor: '#F8FAFC',
+                        },
+                      }}
+                    />
+
+                    {/* Sorting options bar */}
+                    <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                      <Typography variant="caption" color="text.secondary" fontSize="11px">
+                        Sort by:
+                      </Typography>
+                      <Stack direction="row" spacing={0.5}>
+                        <Chip
+                          label="Time"
+                          size="small"
+                          onClick={() => {
+                            if (occupantSortBy === 'time') {
+                              setOccupantSortOrder(occupantSortOrder === 'desc' ? 'asc' : 'desc');
+                            } else {
+                              setOccupantSortBy('time');
+                              setOccupantSortOrder('desc');
+                            }
+                          }}
+                          sx={{
+                            height: 22,
+                            fontSize: '10px',
+                            fontWeight: occupantSortBy === 'time' ? 700 : 500,
+                            bgcolor: occupantSortBy === 'time' ? '#EFF6FF' : '#F1F5F9',
+                            color: occupantSortBy === 'time' ? '#1877F2' : 'text.secondary',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <Chip
+                          label="Name"
+                          size="small"
+                          onClick={() => {
+                            if (occupantSortBy === 'name') {
+                              setOccupantSortOrder(occupantSortOrder === 'desc' ? 'asc' : 'desc');
+                            } else {
+                              setOccupantSortBy('name');
+                              setOccupantSortOrder('asc');
+                            }
+                          }}
+                          sx={{
+                            height: 22,
+                            fontSize: '10px',
+                            fontWeight: occupantSortBy === 'name' ? 700 : 500,
+                            bgcolor: occupantSortBy === 'name' ? '#F3E8FF' : '#F1F5F9',
+                            color: occupantSortBy === 'name' ? '#9333EA' : 'text.secondary',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <Chip
+                          label="Member / Type"
+                          size="small"
+                          onClick={() => {
+                            if (occupantSortBy === 'type') {
+                              setOccupantSortOrder(occupantSortOrder === 'desc' ? 'asc' : 'desc');
+                            } else {
+                              setOccupantSortBy('type');
+                              setOccupantSortOrder('asc');
+                            }
+                          }}
+                          sx={{
+                            height: 22,
+                            fontSize: '10px',
+                            fontWeight: occupantSortBy === 'type' ? 700 : 500,
+                            bgcolor: occupantSortBy === 'type' ? '#E6F4EA' : '#F1F5F9',
+                            color: occupantSortBy === 'type' ? '#137333' : 'text.secondary',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <Tooltip title={occupantSortOrder === 'desc' ? 'Descending' : 'Ascending'}>
+                          <Chip
+                            label={occupantSortOrder === 'desc' ? '↓' : '↑'}
+                            size="small"
+                            onClick={() => setOccupantSortOrder(occupantSortOrder === 'desc' ? 'asc' : 'desc')}
+                            sx={{
+                              height: 22,
+                              minWidth: 24,
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              bgcolor: '#F1F5F9',
+                              cursor: 'pointer',
+                            }}
+                          />
+                        </Tooltip>
+                      </Stack>
+                    </Stack>
+                  </Stack>
+
+                  {processedOccupants.length > 0 ? (
                     <Stack spacing={2}>
-                      {occupants.map((occ) => (
+                      {processedOccupants.map((occ) => (
                         <Paper
                           key={occ.personId}
                           variant="outlined"
-                          onClick={() => handleOccupantClick(occ.personId)}
+                          onClick={() => handlePromptOpenOccupant(occ.personId, occ.personName)}
                           sx={{
                             p: 1.5,
                             borderRadius: '12px',
@@ -1317,7 +1510,7 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
                     </Stack>
                   ) : (
                     <Typography variant="caption" color="text.secondary" sx={{ py: 4, display: 'block', textAlign: 'center' }}>
-                      No active occupants in this area currently
+                      {occupantSearch ? 'No matching occupants found' : 'No active occupants in this area currently'}
                     </Typography>
                   )}
                 </>
@@ -1326,9 +1519,138 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
               {/* VIEW 2: INCIDENTS */}
               {centerView === 'incidents' && (
                 <>
-                  {alarms.length > 0 ? (
+                  {/* Search and Sort controls for Incidents */}
+                  <Stack spacing={1.5} mb={2}>
+                    <TextField
+                      size="small"
+                      placeholder="Search incident by code, person, card, or category..."
+                      value={incidentSearch}
+                      onChange={(e) => setIncidentSearch(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <IconSearch size={14} color="#94A3B8" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          height: 32,
+                          fontSize: '12px',
+                          borderRadius: '8px',
+                          bgcolor: '#F8FAFC',
+                        },
+                      }}
+                    />
+
+                    {/* Sorting options bar */}
+                    <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" flexWrap="wrap">
+                      <Typography variant="caption" color="text.secondary" fontSize="11px">
+                        Sort by:
+                      </Typography>
+                      <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                        <Chip
+                          label="Time"
+                          size="small"
+                          onClick={() => {
+                            if (incidentSortBy === 'time') {
+                              setIncidentSortOrder(incidentSortOrder === 'desc' ? 'asc' : 'desc');
+                            } else {
+                              setIncidentSortBy('time');
+                              setIncidentSortOrder('desc');
+                            }
+                          }}
+                          sx={{
+                            height: 22,
+                            fontSize: '10px',
+                            fontWeight: incidentSortBy === 'time' ? 700 : 500,
+                            bgcolor: incidentSortBy === 'time' ? '#EFF6FF' : '#F1F5F9',
+                            color: incidentSortBy === 'time' ? '#1877F2' : 'text.secondary',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <Chip
+                          label="Name"
+                          size="small"
+                          onClick={() => {
+                            if (incidentSortBy === 'name') {
+                              setIncidentSortOrder(incidentSortOrder === 'desc' ? 'asc' : 'desc');
+                            } else {
+                              setIncidentSortBy('name');
+                              setIncidentSortOrder('asc');
+                            }
+                          }}
+                          sx={{
+                            height: 22,
+                            fontSize: '10px',
+                            fontWeight: incidentSortBy === 'name' ? 700 : 500,
+                            bgcolor: incidentSortBy === 'name' ? '#F3E8FF' : '#F1F5F9',
+                            color: incidentSortBy === 'name' ? '#9333EA' : 'text.secondary',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <Chip
+                          label="Member / Type"
+                          size="small"
+                          onClick={() => {
+                            if (incidentSortBy === 'type') {
+                              setIncidentSortOrder(incidentSortOrder === 'desc' ? 'asc' : 'desc');
+                            } else {
+                              setIncidentSortBy('type');
+                              setIncidentSortOrder('asc');
+                            }
+                          }}
+                          sx={{
+                            height: 22,
+                            fontSize: '10px',
+                            fontWeight: incidentSortBy === 'type' ? 700 : 500,
+                            bgcolor: incidentSortBy === 'type' ? '#E6F4EA' : '#F1F5F9',
+                            color: incidentSortBy === 'type' ? '#137333' : 'text.secondary',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <Chip
+                          label="Incident Type"
+                          size="small"
+                          onClick={() => {
+                            if (incidentSortBy === 'category') {
+                              setIncidentSortOrder(incidentSortOrder === 'desc' ? 'asc' : 'desc');
+                            } else {
+                              setIncidentSortBy('category');
+                              setIncidentSortOrder('asc');
+                            }
+                          }}
+                          sx={{
+                            height: 22,
+                            fontSize: '10px',
+                            fontWeight: incidentSortBy === 'category' ? 700 : 500,
+                            bgcolor: incidentSortBy === 'category' ? '#FFF4E5' : '#F1F5F9',
+                            color: incidentSortBy === 'category' ? '#FF7A00' : 'text.secondary',
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <Tooltip title={incidentSortOrder === 'desc' ? 'Descending' : 'Ascending'}>
+                          <Chip
+                            label={incidentSortOrder === 'desc' ? '↓' : '↑'}
+                            size="small"
+                            onClick={() => setIncidentSortOrder(incidentSortOrder === 'desc' ? 'asc' : 'desc')}
+                            sx={{
+                              height: 22,
+                              minWidth: 24,
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              bgcolor: '#F1F5F9',
+                              cursor: 'pointer',
+                            }}
+                          />
+                        </Tooltip>
+                      </Stack>
+                    </Stack>
+                  </Stack>
+
+                  {processedAlarms.length > 0 ? (
                     <Stack spacing={2}>
-                      {alarms.map((alarm, aIdx) => {
+                      {processedAlarms.map((alarm, aIdx) => {
                         const s = (alarm.status || '').toLowerCase();
                         let stageLabel = 'Warning';
                         let stageBg = '#FFF8E1';
@@ -1529,7 +1851,7 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
                     </Stack>
                   ) : (
                     <Typography variant="caption" color="text.secondary" sx={{ py: 4, display: 'block', textAlign: 'center' }}>
-                      No incidents recorded in this area
+                      {incidentSearch ? 'No matching incidents found' : 'No incidents recorded in this area'}
                     </Typography>
                   )}
                 </>
@@ -1986,6 +2308,51 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
           </Stack>
         </Grid>
       </Grid>
+
+      {/* Confirmation Dialog for redirecting to Person Investigation in New Tab */}
+      <Dialog
+        open={confirmOccupantOpen}
+        onClose={() => setConfirmOccupantOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '16px', p: 1 },
+        }}
+      >
+        <DialogTitle fontWeight={700}>Navigate to Person Investigation?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            You are about to navigate to the detailed investigation page for{' '}
+            <Typography component="span" fontWeight={600} color="text.primary">
+              {targetOccupant?.personName || 'this occupant'}
+            </Typography>{' '}
+            in a new browser tab. Do you want to proceed?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ pb: 1.5, px: 2 }}>
+          <Button
+            onClick={() => setConfirmOccupantOpen(false)}
+            color="inherit"
+            sx={{ textTransform: 'none', fontWeight: 600 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconExternalLink size={16} />}
+            onClick={() => {
+              if (targetOccupant?.personId) {
+                handleOccupantClick(targetOccupant.personId);
+              }
+              setConfirmOccupantOpen(false);
+            }}
+            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
+          >
+            Open in New Tab
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Confirmation Dialog for opening Alarm List in New Tab */}
       <Dialog

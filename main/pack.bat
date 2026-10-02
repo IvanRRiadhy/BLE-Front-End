@@ -35,7 +35,7 @@ powershell -Command "Compress-Archive -Path 'dist-package.zip', 'install-iis.bat
 echo.
 echo ==============================================================
 echo [SUCCESS] Build package ready: people_tracking_build.zip
-echo.
+echo. 
 echo Inside people_tracking_build.zip:
 echo   - dist-package.zip
 echo   - install-iis.bat
