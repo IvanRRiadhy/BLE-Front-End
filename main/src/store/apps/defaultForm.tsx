@@ -164,6 +164,8 @@ export const defaultBleReaderForm: bleReaderType = {
   forceReading: false,
   forceRadiusThreshold: 1,
   forceRadiusMeter: 5,
+  maxRssiThreshold: -20,
+  minRssiThreshold: -20,
   // engineReaderId: '',
   createdBy: '',
   createdAt: '',

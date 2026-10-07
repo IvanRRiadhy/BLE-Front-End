@@ -12,7 +12,7 @@ import {
   InputAdornment,
   MenuItem,
 } from '@mui/material';
-import { IconSearch, IconCalendar, IconUser } from '@tabler/icons-react';
+import { IconSearch, IconCalendar, IconUser, IconX } from '@tabler/icons-react';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import dayjs from 'dayjs';
@@ -48,11 +48,17 @@ export interface InvestigateFilterState {
 
 interface NewInvestigateFilterProps {
   onSearch: (filter: InvestigateFilterState) => void;
+  onReset?: () => void;
   isLoading?: boolean;
   initialValue?: InvestigateFilterState;
 }
 
-const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, isLoading, initialValue }) => {
+const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({
+  onSearch,
+  onReset,
+  isLoading,
+  initialValue,
+}) => {
   const { data: members = [] } = useAllMembers();
   const { data: visitors = [] } = useAllVisitor();
   // console.log("Members: ", members.length);
@@ -148,7 +154,7 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2} alignItems="center">
           {/* Person Autocomplete */}
-          <Grid size={{ xs: 12, md: timeRange === 'custom' ? 4 : 6 }}>
+          <Grid size={{ xs: 12, md: timeRange === 'custom' ? 3 : 5 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
               Person
             </Typography>
@@ -317,24 +323,56 @@ const NewInvestigateFilter: React.FC<NewInvestigateFilterProps> = ({ onSearch, i
             </>
           )}
 
-          {/* Submit Button */}
-          <Grid size={{ xs: 12, md: timeRange === 'custom' ? 1.5 : 2 }} sx={{ alignSelf: 'flex-end' }}>
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={isLoading || !selectedPerson}
-              sx={{
-                height: 40,
-                borderRadius: '8px',
-                textTransform: 'none',
-                fontWeight: 700,
-                bgcolor: '#1877F2',
-                '&:hover': { bgcolor: '#1166D8' },
-              }}
-            >
-              Investigate
-            </Button>
+          {/* Actions: Investigate & Clear */}
+          <Grid size={{ xs: 12, md: timeRange === 'custom' ? (selectedPerson ? 2.5 : 1.5) : (selectedPerson ? 3 : 2) }} sx={{ alignSelf: 'flex-end' }}>
+            <Stack direction="row" spacing={1}>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={isLoading || !selectedPerson}
+                sx={{
+                  height: 40,
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  bgcolor: '#1877F2',
+                  '&:hover': { bgcolor: '#1166D8' },
+                }}
+              >
+                Investigate
+              </Button>
+              {selectedPerson && onReset && (
+                <Button
+                  type="button"
+                  variant="outlined"
+                  color="inherit"
+                  onClick={() => {
+                    setSelectedPerson(null);
+                    onReset();
+                  }}
+                  disabled={isLoading}
+                  startIcon={<IconX size={16} />}
+                  sx={{
+                    height: 40,
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderColor: 'divider',
+                    color: 'text.secondary',
+                    whiteSpace: 'nowrap',
+                    px: 2,
+                    '&:hover': {
+                      borderColor: 'error.main',
+                      color: 'error.main',
+                      bgcolor: '#FEF2F2',
+                    },
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
+            </Stack>
           </Grid>
         </Grid>
       </form>

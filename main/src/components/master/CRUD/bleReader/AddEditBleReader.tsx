@@ -52,6 +52,11 @@ const AddEditBleReader = ({ type, bleReader, trigger, fixedBrandId }: FormType) 
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
+  // Raw text for the RSSI inputs so user can type freely (e.g. "-", "") before committing
+  const [rssiInput, setRssiInput] = useState<{ min: string; max: string }>({
+    min: String(defaultBleReaderForm.minRssiThreshold),
+    max: String(defaultBleReaderForm.maxRssiThreshold),
+  });
   const language = useSelector((state: RootState) => state.settings.isLanguage);
 
   const addMutation = useAddReader();
@@ -62,6 +67,62 @@ const AddEditBleReader = ({ type, bleReader, trigger, fixedBrandId }: FormType) 
   const filter = queryClient.getQueryData(['ble-reader-list']) as any;
 
   // const warningText = language === 'id' ? '' : ''
+
+  // ────────────────────────────────
+  // RSSI Threshold range (-100 .. 0)
+  // ────────────────────────────────
+  const RSSI_MIN = -100;
+  const RSSI_MAX = 0;
+  const clampRssi = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+  const rssiMinValue = Number.isFinite(Number(formData.minRssiThreshold))
+    ? Number(formData.minRssiThreshold)
+    : RSSI_MIN;
+  const rssiMaxValue = Number.isFinite(Number(formData.maxRssiThreshold))
+    ? Number(formData.maxRssiThreshold)
+    : RSSI_MAX;
+
+  // Keep the text inputs in sync whenever the committed values change
+  useEffect(() => {
+    setRssiInput({ min: String(rssiMinValue), max: String(rssiMaxValue) });
+  }, [rssiMinValue, rssiMaxValue]);
+
+  const handleRssiSliderChange = (_: Event, value: number | number[]) => {
+    if (!Array.isArray(value)) return;
+    const [min, max] = value;
+    setFormData((prev) => ({ ...prev, minRssiThreshold: min, maxRssiThreshold: max }));
+  };
+
+  const handleRssiInputChange = (key: 'min' | 'max', raw: string) => {
+    setRssiInput((prev) => ({ ...prev, [key]: raw }));
+    const num = Number(raw);
+    if (raw.trim() === '' || raw === '-' || !Number.isFinite(num)) return;
+    // Commit live only when the value is already valid; otherwise wait for blur
+    if (key === 'min' && num >= RSSI_MIN && num <= rssiMaxValue) {
+      setFormData((prev) => ({ ...prev, minRssiThreshold: num }));
+    }
+    if (key === 'max' && num <= RSSI_MAX && num >= rssiMinValue) {
+      setFormData((prev) => ({ ...prev, maxRssiThreshold: num }));
+    }
+  };
+
+  const commitRssiInput = (key: 'min' | 'max') => {
+    const num = Number(rssiInput[key]);
+    if (key === 'min') {
+      const next =
+        rssiInput.min.trim() === '' || !Number.isFinite(num)
+          ? rssiMinValue
+          : clampRssi(Math.round(num), RSSI_MIN, rssiMaxValue);
+      setFormData((prev) => ({ ...prev, minRssiThreshold: next }));
+      setRssiInput((prev) => ({ ...prev, min: String(next) }));
+    } else {
+      const next =
+        rssiInput.max.trim() === '' || !Number.isFinite(num)
+          ? rssiMaxValue
+          : clampRssi(Math.round(num), rssiMinValue, RSSI_MAX);
+      setFormData((prev) => ({ ...prev, maxRssiThreshold: next }));
+      setRssiInput((prev) => ({ ...prev, max: String(next) }));
+    }
+  };
 
   // ────────────────────────────────
   // Open dialog and initialize form
@@ -102,6 +163,16 @@ const AddEditBleReader = ({ type, bleReader, trigger, fixedBrandId }: FormType) 
       errors.pathLossExponent = 'Path Loss Exponent is required';
     if (formData.heightMeter === null || formData.heightMeter === undefined)
       errors.heightMeter = 'Height Meter is required';
+    const minRssi = Number(formData.minRssiThreshold);
+    const maxRssi = Number(formData.maxRssiThreshold);
+    if (
+      !Number.isFinite(minRssi) ||
+      !Number.isFinite(maxRssi) ||
+      minRssi < -100 ||
+      maxRssi > 0 ||
+      minRssi > maxRssi
+    )
+      errors.rssiThreshold = 'RSSI range must be between -100 and 0, with Min ≤ Max';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -298,6 +369,86 @@ const AddEditBleReader = ({ type, bleReader, trigger, fixedBrandId }: FormType) 
               </Grid>
                              
             </Grid>
+
+            {/* ────────────── RSSI Threshold Range ────────────── */}
+            <Box mb={1}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <CustomFormLabel sx={{ mt: 0 }}>RSSI Threshold (dBm)</CustomFormLabel>
+                <Tooltip
+                  title={
+                    language === 'id'
+                      ? 'Hanya sinyal dengan RSSI di antara Min dan Max yang akan diproses.'
+                      : 'Only signals with RSSI between Min and Max will be processed.'
+                  }
+                >
+                  <IconButton size="small" sx={{ p: 0 }}>
+                    <IconInfoCircle size={20} stroke={1.5} />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+              <Box sx={{ px: 1.5, mt: 1 }}>
+                <Slider
+                  value={[rssiMinValue, rssiMaxValue]}
+                  min={RSSI_MIN}
+                  max={RSSI_MAX}
+                  step={1}
+                  disableSwap
+                  onChange={handleRssiSliderChange}
+                  valueLabelDisplay="auto"
+                  getAriaLabel={(index) => (index === 0 ? 'Min RSSI' : 'Max RSSI')}
+                  marks={[
+                    { value: -100, label: '-100' },
+                    { value: -50, label: '-50' },
+                    { value: 0, label: '0' },
+                  ]}
+                />
+              </Box>
+              <Stack direction="row" spacing={2} alignItems="center" mt={1}>
+                <CustomTextField
+                  id="minRssiThreshold"
+                  label="Min"
+                  type="number"
+                  value={rssiInput.min}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleRssiInputChange('min', e.target.value)
+                  }
+                  onBlur={() => commitRssiInput('min')}
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter') commitRssiInput('min');
+                  }}
+                  fullWidth
+                  variant="outlined"
+                  inputProps={{ min: RSSI_MIN, max: rssiMaxValue, step: 1 }}
+                  error={!!formErrors.rssiThreshold}
+                />
+                <Typography variant="h6" color="text.secondary">
+                  —
+                </Typography>
+                <CustomTextField
+                  id="maxRssiThreshold"
+                  label="Max"
+                  type="number"
+                  value={rssiInput.max}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleRssiInputChange('max', e.target.value)
+                  }
+                  onBlur={() => commitRssiInput('max')}
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter') commitRssiInput('max');
+                  }}
+                  fullWidth
+                  variant="outlined"
+                  inputProps={{ min: rssiMinValue, max: RSSI_MAX, step: 1 }}
+                  error={!!formErrors.rssiThreshold}
+                />
+              </Stack>
+              {formErrors.rssiThreshold && (
+                <Typography variant="caption" color="error" mt={0.5} display="block">
+                  {formErrors.rssiThreshold}
+                </Typography>
+              )}
+            </Box>
+
             {/* ────────────── Advanced Settings ────────────── */}
             <Box mt={3} mb={1}>
               <Stack

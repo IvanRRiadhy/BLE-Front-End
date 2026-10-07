@@ -7,8 +7,9 @@ import {
   Typography,
   MenuItem,
   CircularProgress,
+  Stack,
 } from '@mui/material';
-import { IconSearch } from '@tabler/icons-react';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import AreaHierarchySelector, { SelectedNode } from 'src/components/shared/AreaHierarchySelector';
 import { AreaInvestigationTimeRange } from 'src/hooks/useInvestigate';
 import dayjs from 'dayjs';
@@ -30,12 +31,14 @@ export interface AreaInvestigateFilterState {
 
 interface NewAreaInvestigateFilterProps {
   onSearch: (filter: AreaInvestigateFilterState) => void;
+  onReset?: () => void;
   isLoading?: boolean;
   initialValue?: AreaInvestigateFilterState;
 }
 
 const NewAreaInvestigateFilter: React.FC<NewAreaInvestigateFilterProps> = ({
   onSearch,
+  onReset,
   isLoading = false,
   initialValue,
 }) => {
@@ -143,9 +146,9 @@ const NewAreaInvestigateFilter: React.FC<NewAreaInvestigateFilterProps> = ({
       }}
     >
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2} alignItems="flex-end">
+        <Grid container spacing={2} alignItems="center">
           {/* Area Selector using AreaHierarchySelector */}
-          <Grid size={{ xs: 12, md: timeRange === 'custom' ? 3.5 : 4.5 }}>
+          <Grid size={{ xs: 12, md: timeRange === 'custom' ? 3 : 5 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
               Area
             </Typography>
@@ -164,7 +167,7 @@ const NewAreaInvestigateFilter: React.FC<NewAreaInvestigateFilterProps> = ({
           </Grid>
 
           {/* Time Range Selector */}
-          <Grid size={{ xs: 12, sm: 6, md: timeRange === 'custom' ? 2 : 5.5 }}>
+          <Grid size={{ xs: 12, sm: 6, md: timeRange === 'custom' ? 2 : 4 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
               Time Range
             </Typography>
@@ -186,11 +189,11 @@ const NewAreaInvestigateFilter: React.FC<NewAreaInvestigateFilterProps> = ({
               <MenuItem value="last_week">Last Week</MenuItem>
               <MenuItem value="monthly">This Month</MenuItem>
               <MenuItem value="last_month">Last Month</MenuItem>
+              <MenuItem value="yearly">This Year</MenuItem>
+              <MenuItem value="last_year">Last Year</MenuItem>
               <MenuItem value="last_7_days">Last 7 Days</MenuItem>
               <MenuItem value="last_30_days">Last 30 Days</MenuItem>
               <MenuItem value="last_90_days">Last 90 Days</MenuItem>
-              <MenuItem value="yearly">This Year</MenuItem>
-              <MenuItem value="last_year">Last Year</MenuItem>
               <MenuItem value="custom">Custom Range</MenuItem>
             </TextField>
           </Grid>
@@ -200,7 +203,7 @@ const NewAreaInvestigateFilter: React.FC<NewAreaInvestigateFilterProps> = ({
             <>
               <Grid size={{ xs: 12, sm: 6, md: 2.25 }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
-                  From
+                  From Date
                 </Typography>
                 <TextField
                   type="datetime-local"
@@ -219,7 +222,7 @@ const NewAreaInvestigateFilter: React.FC<NewAreaInvestigateFilterProps> = ({
 
               <Grid size={{ xs: 12, sm: 6, md: 2.25 }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={600} mb={0.5} display="block">
-                  To
+                  To Date
                 </Typography>
                 <TextField
                   type="datetime-local"
@@ -238,25 +241,57 @@ const NewAreaInvestigateFilter: React.FC<NewAreaInvestigateFilterProps> = ({
             </>
           )}
 
-          {/* Investigate Button */}
-          <Grid size={{ xs: 12, md: timeRange === 'custom' ? 2 : 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={isLoading || !selectedArea}
-              startIcon={isLoading ? <CircularProgress size={18} color="inherit" /> : <IconSearch size={18} />}
-              sx={{
-                height: 40,
-                borderRadius: '8px',
-                textTransform: 'none',
-                fontWeight: 700,
-                bgcolor: '#1877F2',
-                '&:hover': { bgcolor: '#1166D8' },
-              }}
-            >
-              Investigate
-            </Button>
+          {/* Actions: Investigate & Clear */}
+          <Grid size={{ xs: 12, md: timeRange === 'custom' ? (selectedArea ? 2.5 : 1.5) : (selectedArea ? 3 : 2) }} sx={{ alignSelf: 'flex-end' }}>
+            <Stack direction="row" spacing={1}>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={isLoading || !selectedArea}
+                startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
+                sx={{
+                  height: 40,
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  bgcolor: '#1877F2',
+                  '&:hover': { bgcolor: '#1166D8' },
+                }}
+              >
+                Investigate
+              </Button>
+              {selectedArea && onReset && (
+                <Button
+                  type="button"
+                  variant="outlined"
+                  color="inherit"
+                  onClick={() => {
+                    setSelectedNode(null);
+                    onReset();
+                  }}
+                  disabled={isLoading}
+                  startIcon={<IconX size={16} />}
+                  sx={{
+                    height: 40,
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderColor: 'divider',
+                    color: 'text.secondary',
+                    whiteSpace: 'nowrap',
+                    px: 2,
+                    '&:hover': {
+                      borderColor: 'error.main',
+                      color: 'error.main',
+                      bgcolor: '#FEF2F2',
+                    },
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
+            </Stack>
           </Grid>
         </Grid>
       </form>

@@ -644,7 +644,7 @@ const AreaHierarchySelector: React.FC<Props> = forwardRef(
             <TextField
               fullWidth
               size={size}
-              label={label}
+              label={label ? label : undefined}
               placeholder={
                 open
                   ? displayLabel || 'Search building, floor, floorplan, area, device...'

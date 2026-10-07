@@ -10,7 +10,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import { IconDownload, IconRefresh, IconUser, IconMapPin } from '@tabler/icons-react';
+import { IconDownload, IconRefresh, IconUser, IconMapPin, IconX } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router';
 import PageContainer from 'src/components/container/PageContainer';
 import NewInvestigateFilter, {
@@ -24,7 +24,13 @@ import NewAreaInvestigateFilter, {
   AreaOption,
 } from 'src/components/master/Reports/NewInvestigate/NewAreaInvestigateFilter';
 import NewAreaInvestigateContent from 'src/components/master/Reports/NewInvestigate/NewAreaInvestigateContent';
-import { usePersonOverview, useAreaInvestigation, AreaInvestigationTimeRange } from 'src/hooks/useInvestigate';
+import {
+  usePersonOverview,
+  useAreaInvestigation,
+  AreaInvestigationTimeRange,
+  useGlobalInvestigation,
+  useGlobalInvestigationMutation,
+} from 'src/hooks/useInvestigate';
 import { useNewVisitorSession } from 'src/hooks/useVisitorSession';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
@@ -156,6 +162,27 @@ const NewInvestigate: React.FC = () => {
     Boolean(areaFilterState.area?.id)
   );
 
+  // --- GLOBAL INVESTIGATION (Default Overview when nothing investigated) ---
+  const deviceTimezone = useMemo(
+    () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta',
+    []
+  );
+
+  const {
+    data: globalInvestigationData,
+    isLoading: isGlobalLoading,
+    refetch: refetchGlobal,
+    isRefetching: isGlobalRefetching,
+  } = useGlobalInvestigation({
+    timeRange: 'daily',
+    from: null,
+    to: null,
+    areaId: null,
+    timezone: deviceTimezone,
+  });
+
+  const globalMutation = useGlobalInvestigationMutation();
+
   // Auto-investigate flag so we only auto-trigger once per URL param match
   const autoInvestigatedPeopleRef = useRef(false);
   const autoInvestigatedAreaRef = useRef(false);
@@ -233,22 +260,31 @@ const NewInvestigate: React.FC = () => {
   // Busy & Generated checks per mode
   const isPeopleBusy = isPersonLoading || isVisitorSessionLoading || isPersonRefetching;
   const isAreaBusy = isAreaLoading || isAreaRefetching;
-  const isBusy = activeMode === 'people' ? isPeopleBusy : isAreaBusy;
+  const isGlobalBusy = isGlobalLoading || isGlobalRefetching || globalMutation.isPending;
+  const isBusy =
+    activeMode === 'people'
+      ? (filterState.person?.id ? isPeopleBusy : isGlobalBusy)
+      : (areaFilterState.area?.id ? isAreaBusy : isGlobalBusy);
 
   const isPeopleReportGenerated = Boolean(filterState.person?.id && (personData || visitorSessionData));
   const isAreaReportGenerated = Boolean(areaFilterState.area?.id && areaData);
-  const isReportGenerated = activeMode === 'people' ? isPeopleReportGenerated : isAreaReportGenerated;
+  const isReportGenerated =
+    activeMode === 'people'
+      ? (filterState.person?.id ? isPeopleReportGenerated : Boolean(globalInvestigationData))
+      : (areaFilterState.area?.id ? isAreaReportGenerated : Boolean(globalInvestigationData));
 
   const handleRefresh = async () => {
     if (activeMode === 'people') {
       if (!filterState.person?.id) {
-        toast('Please select a person to investigate first', { icon: 'ℹ️' });
+        await refetchGlobal();
+        toast.success('Refreshed global facility overview');
         return;
       }
       await Promise.all([refetchPerson(), handleSearchPeople(filterState)]);
     } else {
       if (!areaFilterState.area?.id) {
-        toast('Please select an area to investigate first', { icon: 'ℹ️' });
+        await refetchGlobal();
+        toast.success('Refreshed global facility overview');
         return;
       }
       await refetchArea();
@@ -322,6 +358,29 @@ const NewInvestigate: React.FC = () => {
     updateUrlParams('area', filterState, newFilter);
   };
 
+  const handleResetPeople = () => {
+    const clearedFilter: InvestigateFilterState = {
+      person: null,
+      timeRange: 'daily',
+      from: null,
+      to: null,
+    };
+    setFilterState(clearedFilter);
+    setVisitorSessionData(null);
+    updateUrlParams('people', clearedFilter, areaFilterState);
+  };
+
+  const handleResetArea = () => {
+    const clearedFilter: AreaInvestigateFilterState = {
+      area: null,
+      timeRange: 'daily',
+      from: null,
+      to: null,
+    };
+    setAreaFilterState(clearedFilter);
+    updateUrlParams('area', filterState, clearedFilter);
+  };
+
   const handleExportPdf = async () => {
     const exportId =
       activeMode === 'people'
@@ -389,10 +448,13 @@ const NewInvestigate: React.FC = () => {
 
         pdf.setFontSize(8);
         pdf.setTextColor(150, 150, 150);
-        const reportTitle =
-          activeMode === 'people'
-            ? `Person: ${filterState.person?.name || 'Subject'}`
-            : `Area: ${areaFilterState.area?.name || 'Area'}`;
+        let reportTitle = 'Facility Global Overview';
+        if (activeMode === 'people' && filterState.person?.name) {
+          reportTitle = `Person: ${filterState.person.name}`;
+        } else if (activeMode === 'area' && areaFilterState.area?.name) {
+          reportTitle = `Area: ${areaFilterState.area.name}`;
+        }
+
         pdf.text(
           `Page ${i + 1} of ${totalPages}  |  Investigation Report - ${reportTitle}`,
           margin,
@@ -400,11 +462,17 @@ const NewInvestigate: React.FC = () => {
         );
       }
 
-      const filePrefix = activeMode === 'people' ? 'Person_Investigate' : 'Area_Investigate';
-      const entityName =
-        activeMode === 'people'
-          ? (filterState.person?.name || 'Person').replace(/\s+/g, '_')
-          : (areaFilterState.area?.name || 'Area').replace(/\s+/g, '_');
+      let filePrefix = 'Global_Facility_Investigation';
+      let entityName = 'Overview';
+
+      if (activeMode === 'people' && filterState.person?.id) {
+        filePrefix = 'Person_Investigate';
+        entityName = (filterState.person.name || 'Person').replace(/\s+/g, '_');
+      } else if (activeMode === 'area' && areaFilterState.area?.id) {
+        filePrefix = 'Area_Investigate';
+        entityName = (areaFilterState.area.name || 'Area').replace(/\s+/g, '_');
+      }
+
       pdf.save(`${filePrefix}_${entityName}_${dayjs().format('YYYYMMDD_HHmmss')}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -441,20 +509,56 @@ const NewInvestigate: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* Actions: Refresh & Export PDF Buttons */}
+        {/* Actions: Reset, Refresh & Export PDF Buttons */}
         <Stack direction="row" spacing={1.5} alignItems="center">
+          {Boolean(
+            (activeMode === 'people' && filterState.person?.id) ||
+            (activeMode === 'area' && areaFilterState.area?.id)
+          ) && (
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="small"
+              startIcon={<IconX size={16} />}
+              onClick={() => {
+                if (activeMode === 'people') {
+                  handleResetPeople();
+                } else {
+                  handleResetArea();
+                }
+              }}
+              sx={{
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 600,
+                borderColor: 'divider',
+                color: 'text.secondary',
+                bgcolor: 'background.paper',
+                height: 38,
+                px: 1.5,
+                '&:hover': {
+                  borderColor: 'error.main',
+                  color: 'error.main',
+                  bgcolor: '#FEF2F2',
+                },
+              }}
+            >
+              Reset Target
+            </Button>
+          )}
+
           <Tooltip
             title={
               (activeMode === 'people' && filterState.person?.id) ||
               (activeMode === 'area' && areaFilterState.area?.id)
                 ? 'Refresh investigation data'
-                : 'Select a target to refresh'
+                : 'Refresh facility overview'
             }
           >
             <span>
               <IconButton
                 onClick={handleRefresh}
-                disabled={isBusy || (activeMode === 'people' ? !filterState.person?.id : !areaFilterState.area?.id)}
+                disabled={isBusy}
                 color="primary"
                 sx={{
                   border: '1px solid',
@@ -531,6 +635,7 @@ const NewInvestigate: React.FC = () => {
         <>
           <NewInvestigateFilter
             onSearch={handleSearchPeople}
+            onReset={handleResetPeople}
             isLoading={isPeopleBusy}
             initialValue={filterState}
           />
@@ -552,6 +657,18 @@ const NewInvestigate: React.FC = () => {
               fromDate={filterState.from}
               toDate={filterState.to}
               isExporting={isExporting}
+              globalData={globalInvestigationData}
+              isGlobalLoading={isGlobalLoading}
+              onSelectPerson={(personId) => {
+                const found = personOptions.find((p) => p.id === personId);
+                if (found) {
+                  const newFilter: InvestigateFilterState = {
+                    ...filterState,
+                    person: found,
+                  };
+                  handleSearchPeople(newFilter);
+                }
+              }}
             />
           )}
         </>
@@ -562,6 +679,7 @@ const NewInvestigate: React.FC = () => {
         <>
           <NewAreaInvestigateFilter
             onSearch={handleSearchArea}
+            onReset={handleResetArea}
             isLoading={isAreaBusy}
             initialValue={areaFilterState}
           />
@@ -582,6 +700,29 @@ const NewInvestigate: React.FC = () => {
               timeRange={areaFilterState.timeRange}
               fromDate={areaFilterState.from}
               toDate={areaFilterState.to}
+              globalData={globalInvestigationData}
+              isGlobalLoading={isGlobalLoading}
+              onSelectArea={(areaId) => {
+                const found = allAreas.find((a) => a.id === areaId);
+                if (found) {
+                  const newFilter: AreaInvestigateFilterState = {
+                    ...areaFilterState,
+                    area: found,
+                  };
+                  handleSearchArea(newFilter);
+                }
+              }}
+              onSelectPerson={(personId) => {
+                const found = personOptions.find((p) => p.id === personId);
+                if (found) {
+                  setActiveMode('people');
+                  const newFilter: InvestigateFilterState = {
+                    ...filterState,
+                    person: found,
+                  };
+                  handleSearchPeople(newFilter);
+                }
+              }}
             />
           )}
         </>

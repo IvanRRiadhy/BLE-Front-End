@@ -59,6 +59,8 @@ export interface bleReaderType {
     engineId?: string,
     engine?: EngineType,
     brand?: BrandType;
+    maxRssiThreshold: number;
+    minRssiThreshold: number;
     // engineReaderId: string,
     createdBy: string,
     createdAt: string,

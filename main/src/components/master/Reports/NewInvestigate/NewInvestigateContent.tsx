@@ -34,6 +34,8 @@ import {
   DialogActions,
   darken,
   lighten,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import {
   IconClock,
@@ -61,11 +63,12 @@ import {
   IconRoute,
   IconX,
   IconExternalLink,
+  IconUsers,
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
-import { useTranslation } from 'react-i18next';
-import { PersonOverviewData } from 'src/hooks/useInvestigate';
+import { PersonOverviewData, useCoPresenceInvestigation, GlobalInvestigationData } from 'src/hooks/useInvestigate';
+import GlobalInvestigationOverview from './GlobalInvestigationOverview';
 import { PersonOption } from './NewInvestigateFilter';
 import { actionStatus, extraActionStatus, actionStatusColormap } from 'src/types/crud/input';
 import { BASE_URL } from 'src/utils/axios';
@@ -79,6 +82,7 @@ import { safeParseAreaShape } from 'src/utils/isJsonObject';
 import { formatOrRawTime } from 'src/utils/time';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllVisitor } from 'src/hooks/useVisitor';
+import { useTranslation } from 'react-i18next';
 
 const AREA_COLORS = ['#1877F2', '#36B37E', '#FFAB00', '#FF5630', '#6554C0', '#00B8D9'];
 
@@ -360,6 +364,9 @@ interface NewInvestigateContentProps {
   isExporting?: boolean;
   visitorSessionData?: VisitorSessionResponseType | null;
   isVisitorSessionLoading?: boolean;
+  globalData?: GlobalInvestigationData | null;
+  isGlobalLoading?: boolean;
+  onSelectPerson?: (personId: string) => void;
 }
 
 const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
@@ -371,6 +378,9 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   isExporting = false,
   visitorSessionData,
   isVisitorSessionLoading = false,
+  globalData,
+  isGlobalLoading = false,
+  onSelectPerson,
 }) => {
   const theme = useTheme();
   const { i18n } = useTranslation();
@@ -378,8 +388,7 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   const [activeTab, setActiveTab] = useState<'timeline' | 'movement' | 'area' | 'compliance' | 'incidents' | 'cardHistory'>('timeline');
   const [zoomLevel, setZoomLevel] = useState(1);
   const [selectedAlarmId, setSelectedAlarmId] = useState<string | null>(null);
-
-
+  const [incidentDetailCardTab, setIncidentDetailCardTab] = useState<'detail' | 'compliance'>('detail');
 
   // Data Normalization
   const personName = data?.personInfo?.name || selectedPerson?.name || '-';
@@ -1188,6 +1197,87 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
   const incidentMarkerX = incidentCenter?.x ?? (incidentStageWidth * 0.5);
   const incidentMarkerY = incidentCenter?.y ?? (incidentStageHeight * 0.5);
 
+  // Compliance (Co-Presence) View State
+  const [compliancePage, setCompliancePage] = useState(0);
+  const [complianceRowsPerPage, setComplianceRowsPerPage] = useState(5);
+  const [complianceSearch, setComplianceSearch] = useState('');
+
+  // Co-Presence Investigation Query for Incident Detail Card (Compliance View)
+  const coPresencePersonId = data?.personInfo?.personId || selectedPerson?.id || null;
+  const coPresenceAreaId = useMemo(() => {
+    if (primaryAlarm?.areaId) return primaryAlarm.areaId;
+    const alarmAreaName = primaryAlarm?.areaName || primaryAlarm?.area;
+    if (alarmAreaName && alarmAreaName !== '-') {
+      const trimmed = alarmAreaName.trim().toLowerCase();
+      const inBreakdown = (data?.stayDurationAnalysis?.areaBreakdown || []).find(
+        (b) => b.areaName?.trim().toLowerCase() === trimmed
+      );
+      if (inBreakdown?.areaId) return inBreakdown.areaId;
+      const inMasked = (allMaskedAreas || []).find(
+        (m: any) =>
+          m.name?.trim().toLowerCase() === trimmed ||
+          m.areaName?.trim().toLowerCase() === trimmed ||
+          m.maskedAreaName?.trim().toLowerCase() === trimmed
+      );
+      if (inMasked?.id) return inMasked.id;
+    }
+    return (data?.stayDurationAnalysis?.areaBreakdown || [])[0]?.areaId || null;
+  }, [primaryAlarm, data?.stayDurationAnalysis?.areaBreakdown, allMaskedAreas]);
+
+  // Calculate time parameters for Co-Presence based on selected alarm/incident date:
+  // If the alarm occurred today, use timeRange 'daily' with from: null, to: null.
+  // If any other day, set timeRange to 'custom' and from & to to the alarm's date.
+  const { coPresenceTimeRange, coPresenceFrom, coPresenceTo } = useMemo(() => {
+    const rawTime = primaryAlarm?.triggeredTime || primaryAlarm?.timestamp || primaryAlarm?.time;
+    if (rawTime) {
+      const alarmDate = dayjs(rawTime);
+      if (alarmDate.isValid()) {
+        const isToday = alarmDate.isSame(dayjs(), 'day');
+        if (!isToday) {
+          const dateStr = alarmDate.format('YYYY-MM-DD');
+          return {
+            coPresenceTimeRange: 'custom',
+            coPresenceFrom: dateStr,
+            coPresenceTo: dateStr,
+          };
+        }
+      }
+    }
+    return {
+      coPresenceTimeRange: 'daily',
+      coPresenceFrom: null,
+      coPresenceTo: null,
+    };
+  }, [primaryAlarm]);
+
+  const {
+    data: coPresenceData,
+    isLoading: isCoPresenceLoading,
+  } = useCoPresenceInvestigation(
+    {
+      personId: coPresencePersonId,
+      areaId: coPresenceAreaId,
+      from: coPresenceFrom,
+      to: coPresenceTo,
+      timeRange: coPresenceTimeRange,
+      timezone: 'Asia/Jakarta',
+    },
+    Boolean(coPresencePersonId && coPresenceAreaId && incidentDetailCardTab === 'compliance')
+  );
+
+  const filteredCoPresentPeople = useMemo(() => {
+    const list = coPresenceData?.coPresentPeople || [];
+    if (!complianceSearch.trim()) return list;
+    const q = complianceSearch.trim().toLowerCase();
+    return list.filter(
+      (p) =>
+        p.personName?.toLowerCase().includes(q) ||
+        p.department?.toLowerCase().includes(q) ||
+        p.personType?.toLowerCase().includes(q) ||
+        p.cardNumber?.toLowerCase().includes(q)
+    );
+  }, [coPresenceData?.coPresentPeople, complianceSearch]);
+
   // --- Table 1: Area Detail (activeTab === 'area') ---
   const [areaDetailSearch, setAreaDetailSearch] = useState('');
   const [areaDetailPage, setAreaDetailPage] = useState(0);
@@ -1426,42 +1516,13 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
 
   if (!selectedPerson && !data && !visitorSessionData) {
     return (
-      <Card
-        elevation={0}
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '16px',
-          p: 6,
-          textAlign: 'center',
-          bgcolor: 'background.paper',
-        }}
-      >
-        <Stack alignItems="center" justifyContent="center" spacing={2}>
-          <Box
-            sx={{
-              width: 64,
-              height: 64,
-              borderRadius: '50%',
-              bgcolor: '#E8F2FE',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1877F2',
-            }}
-          >
-            <IconUser size={32} />
-          </Box>
-          <Box>
-            <Typography variant="h5" fontWeight={700} color="text.primary" gutterBottom>
-              Select a Person to Investigate
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Choose a person from the filter above to view their detailed timeline, location, and access analysis.
-            </Typography>
-          </Box>
-        </Stack>
-      </Card>
+      <Box id="investigate-full-pdf-export-content">
+        <GlobalInvestigationOverview
+          data={globalData}
+          isLoading={isGlobalLoading}
+          onSelectPerson={onSelectPerson}
+        />
+      </Box>
     );
   }
 
@@ -4303,105 +4364,419 @@ const NewInvestigateContent: React.FC<NewInvestigateContentProps> = ({
           <Grid container spacing={2.5} id="incident-detail-section">
             {/* Incident Detail */}
             <Grid size={{ xs: 12, md: isExporting ? 12 : 6 }}>
-              <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%' }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+              <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '16px', p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2} flexWrap="wrap" gap={1}>
                   <Box>
                     <Typography variant="h6" fontWeight={700} color="text.primary">
                       Incident Detail
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Detailed information about the selected incident
+                      {incidentDetailCardTab === 'detail'
+                        ? 'Detailed information about the selected incident'
+                        : 'Co-presence compliance & contact tracing in incident area'}
                     </Typography>
                   </Box>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color="primary"
-                    startIcon={<IconExternalLink size={16} />}
-                    disabled={!primaryAlarm}
-                    onClick={() => {
-                      if (primaryAlarm) {
-                        const url = buildAlarmListUrl(primaryAlarm);
-                        openAlarmInNewTab(url);
-                      }
-                    }}
-                    sx={{
-                      borderRadius: '8px',
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      fontSize: '12px',
-                    }}
-                  >
-                    Open in Alarm List
-                  </Button>
-                </Stack>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <ToggleButtonGroup
+                      value={incidentDetailCardTab}
+                      exclusive
+                      onChange={(_, newTab) => {
+                        if (newTab) setIncidentDetailCardTab(newTab);
+                      }}
+                      size="small"
+                      sx={{
+                        bgcolor: 'action.hover',
+                        p: 0.5,
+                        borderRadius: '10px',
+                        '& .MuiToggleButton-root': {
+                          border: 0,
+                          borderRadius: '8px',
+                          px: 1.5,
+                          py: 0.5,
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          color: 'text.secondary',
+                          '&.Mui-selected': {
+                            bgcolor: 'background.paper',
+                            color: 'primary.main',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                            '&:hover': {
+                              bgcolor: 'background.paper',
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <ToggleButton value="detail">Detail</ToggleButton>
+                      <ToggleButton value="compliance">Compliance</ToggleButton>
+                    </ToggleButtonGroup>
 
-                {/* Banner Alert */}
-                <Box sx={{ bgcolor: primaryAlarm ? '#FFF5F5' : '#F8FAFC', border: '1px solid', borderColor: primaryAlarm ? '#FFCDD2' : 'divider', borderRadius: '12px', p: 2, mb: 2.5 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                      <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: primaryAlarm ? '#FFEBEE' : '#E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primaryAlarm ? '#D32F2F' : '#64748B' }}>
-                        <IconAlertTriangle size={20} />
-                      </Box>
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight={700} color={primaryAlarm ? '#D32F2F' : 'text.primary'}>
-                          {primaryAlarm ? `${(primaryAlarm.category || 'Incident').toUpperCase()} Incident` : 'No Incident Selected'}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {primaryAlarm?.reason || primaryAlarm?.description || (alarmsList.length > 0 ? 'Security incident detected by tracking engine' : 'No incidents or alarms detected in selected period')}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                    {primaryAlarm && (() => {
-                      const statusStyle = getStatusChipStyle(primaryAlarm.status);
-                      return (
-                        <Chip
-                          label={statusStyle.label}
-                          size="small"
-                          sx={{
-                            bgcolor: statusStyle.bgcolor,
-                            color: statusStyle.color,
-                            fontWeight: 600,
-                            fontSize: '11px',
-                          }}
-                        />
-                      );
-                    })()}
+                    {incidentDetailCardTab === 'detail' && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="primary"
+                        startIcon={<IconExternalLink size={16} />}
+                        disabled={!primaryAlarm}
+                        onClick={() => {
+                          if (primaryAlarm) {
+                            const url = buildAlarmListUrl(primaryAlarm);
+                            openAlarmInNewTab(url);
+                          }
+                        }}
+                        sx={{
+                          borderRadius: '8px',
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          fontSize: '12px',
+                        }}
+                      >
+                        Open in Alarm List
+                      </Button>
+                    )}
                   </Stack>
-                </Box>
-
-                {/* Metadata List */}
-                <Stack spacing={1.2}>
-                  {[
-                    { label: 'Incident ID', value: primaryAlarm?.alarmId || primaryAlarm?.id || '-', copyable: Boolean(primaryAlarm?.alarmId || primaryAlarm?.id) },
-                    { label: 'Category', value: primaryAlarm?.category || '-' },
-                    { label: 'Area', value: primaryAlarm?.areaName || primaryAlarm?.area || '-' },
-                    { label: 'Building / Floor', value: `${primaryAlarm?.buildingName || '-'} ${primaryAlarm?.floorName ? `(${primaryAlarm.floorName})` : ''}` },
-                    { label: 'Triggered Time', value: formatOrRawTime(primaryAlarm?.triggeredTime) },
-                    { label: 'Status', value: primaryAlarm?.status || '-' },
-                    { label: 'Acknowledged By', value: primaryAlarm?.acknowledgedBy || '-' },
-                    { label: 'Acknowledged Time', value: formatOrRawTime(primaryAlarm?.acknowledgedTime) },
-                    { label: 'Dispatched To', value: primaryAlarm?.dispatchedTo || '-' },
-                    { label: 'Investigated By', value: primaryAlarm?.investigatedBy || '-' },
-                    { label: 'Investigation Result', value: primaryAlarm?.investigationResult || '-' },
-                  ].map((item, idx) => (
-                    <Stack key={idx} direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 140 }}>
-                        {item.label}
-                      </Typography>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Typography variant="body2" fontWeight={item.label === 'Area' || item.label === 'Category' ? 600 : 400} color="text.primary">
-                          {item.value}
-                        </Typography>
-                        {item.copyable && (
-                          <IconButton size="small" sx={{ p: 0.2 }}>
-                            <IconCopy size={14} color="#64748B" />
-                          </IconButton>
-                        )}
-                      </Stack>
-                    </Stack>
-                  ))}
                 </Stack>
+
+                {incidentDetailCardTab === 'detail' ? (
+                  <>
+                    {/* Banner Alert */}
+                    <Box sx={{ bgcolor: primaryAlarm ? '#FFF5F5' : '#F8FAFC', border: '1px solid', borderColor: primaryAlarm ? '#FFCDD2' : 'divider', borderRadius: '12px', p: 2, mb: 2.5 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: primaryAlarm ? '#FFEBEE' : '#E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primaryAlarm ? '#D32F2F' : '#64748B' }}>
+                            <IconAlertTriangle size={20} />
+                          </Box>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={700} color={primaryAlarm ? '#D32F2F' : 'text.primary'}>
+                              {primaryAlarm ? `${(primaryAlarm.category || 'Incident').toUpperCase()} Incident` : 'No Incident Selected'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {primaryAlarm?.reason || primaryAlarm?.description || (alarmsList.length > 0 ? 'Security incident detected by tracking engine' : 'No incidents or alarms detected in selected period')}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                        {primaryAlarm && (() => {
+                          const statusStyle = getStatusChipStyle(primaryAlarm.status);
+                          return (
+                            <Chip
+                              label={statusStyle.label}
+                              size="small"
+                              sx={{
+                                bgcolor: statusStyle.bgcolor,
+                                color: statusStyle.color,
+                                fontWeight: 600,
+                                fontSize: '11px',
+                              }}
+                            />
+                          );
+                        })()}
+                      </Stack>
+                    </Box>
+
+                    {/* Metadata List */}
+                    <Stack spacing={1.2}>
+                      {[
+                        { label: 'Incident Code', value: primaryAlarm?.incidentCode ||  '-', copyable: Boolean(primaryAlarm?.incidentCode) },
+                        { label: 'Category', value: primaryAlarm?.category || '-' },
+                        { label: 'Area', value: primaryAlarm?.areaName || primaryAlarm?.area || '-' },
+                        { label: 'Building / Floor', value: `${primaryAlarm?.buildingName || '-'} ${primaryAlarm?.floorName ? `(${primaryAlarm.floorName})` : ''}` },
+                        { label: 'Triggered Time', value: formatOrRawTime(primaryAlarm?.triggeredTime) },
+                        { label: 'Status', value: primaryAlarm?.status || '-' },
+                        { label: 'Acknowledged By', value: primaryAlarm?.acknowledgedBy || '-' },
+                        { label: 'Acknowledged Time', value: formatOrRawTime(primaryAlarm?.acknowledgedTime) },
+                        { label: 'Dispatched To', value: primaryAlarm?.dispatchedTo || '-' },
+                        { label: 'Investigated By', value: primaryAlarm?.investigatedBy || '-' },
+                        { label: 'Investigation Result', value: primaryAlarm?.investigationResult || '-' },
+                      ].map((item, idx) => (
+                        <Stack key={idx} direction="row" justifyContent="space-between" alignItems="center">
+                          <Typography variant="body2" color="text.secondary" sx={{ minWidth: 140 }}>
+                            {item.label}
+                          </Typography>
+                          <Stack direction="row" spacing={0.5} alignItems="center">
+                            <Typography variant="body2" fontWeight={item.label === 'Area' || item.label === 'Category' ? 600 : 400} color="text.primary">
+                              {item.value}
+                            </Typography>
+                            {item.copyable && (
+                              <IconButton size="small" sx={{ p: 0.2 }}>
+                                <IconCopy size={14} color="#64748B" />
+                              </IconButton>
+                            )}
+                          </Stack>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </>
+                ) : (
+                  /* Compliance View (Co-Presence Investigation) */
+                  <Stack spacing={2} sx={{ flex: 1 }}>
+                    {/* Compliance Banner Summary */}
+                    <Box
+                      sx={{
+                        bgcolor: '#F0FDF4',
+                        border: '1px solid #BBF7D0',
+                        borderRadius: '12px',
+                        p: 2,
+                      }}
+                    >
+                      <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1.5}>
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          <Box
+                            sx={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: '10px',
+                              bgcolor: '#DCFCE7',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#16A34A',
+                            }}
+                          >
+                            <IconShieldCheck size={22} />
+                          </Box>
+                          <Box>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Typography variant="subtitle2" fontWeight={700} color="#15803D">
+                                Area Compliance & Co-Presence
+                              </Typography>
+                              {coPresenceData?.targetArea?.isRestricted !== undefined && (
+                                <Chip
+                                  label={coPresenceData.targetArea.isRestricted ? 'Restricted' : 'Non-Restricted'}
+                                  size="small"
+                                  sx={{
+                                    height: 20,
+                                    fontSize: '10px',
+                                    fontWeight: 700,
+                                    bgcolor: coPresenceData.targetArea.isRestricted ? '#FEE2E2' : '#E0E7FF',
+                                    color: coPresenceData.targetArea.isRestricted ? '#DC2626' : '#4338CA',
+                                  }}
+                                />
+                              )}
+                            </Stack>
+                            <Typography variant="caption" color="text.secondary">
+                              Target Area: <strong>{coPresenceData?.targetArea?.areaName || primaryAlarm?.areaName || primaryAlarm?.area || '-'}</strong>
+                              {coPresenceData?.targetArea?.buildingName ? ` • ${coPresenceData.targetArea.buildingName}` : ''}
+                              {coPresenceData?.targetArea?.floorName ? ` (${coPresenceData.targetArea.floorName})` : ''}
+                            </Typography>
+                          </Box>
+                        </Stack>
+
+                        <Stack direction="row" spacing={2} alignItems="center">
+                          <Box sx={{ textAlign: 'right' }}>
+                            <Typography variant="caption" color="text.secondary" display="block">
+                              Co-Present People
+                            </Typography>
+                            <Typography variant="h6" fontWeight={700} color="#15803D">
+                              {coPresenceData?.totalCoPresentPeople ?? coPresenceData?.coPresentPeople?.length ?? 0}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Stack>
+
+                      {/* Authorized Access Groups chips if present */}
+                      {coPresenceData?.targetArea?.authorizedAccessGroups && coPresenceData.targetArea.authorizedAccessGroups.length > 0 && (
+                        <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px dashed #BBF7D0' }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75, fontWeight: 600 }}>
+                            Authorized Access Groups:
+                          </Typography>
+                          <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap gap={0.75}>
+                            {coPresenceData.targetArea.authorizedAccessGroups.map((grp: any, idx: number) => (
+                              <Chip
+                                key={grp.cardAccessId || idx}
+                                label={grp.accessName}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  fontSize: '11px',
+                                  fontWeight: 500,
+                                  borderColor: '#86EFAC',
+                                  bgcolor: '#FFFFFF',
+                                  color: '#166534',
+                                }}
+                              />
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Filter / Search input */}
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Search co-present people by name, department, or card..."
+                        value={complianceSearch}
+                        onChange={(e) => {
+                          setComplianceSearch(e.target.value);
+                          setCompliancePage(0);
+                        }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <IconSearch size={16} color="#64748B" />
+                            </InputAdornment>
+                          ),
+                          endAdornment: complianceSearch ? (
+                            <InputAdornment position="end">
+                              <IconButton size="small" onClick={() => setComplianceSearch('')}>
+                                <IconX size={14} />
+                              </IconButton>
+                            </InputAdornment>
+                          ) : undefined,
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                          },
+                        }}
+                      />
+                    </Stack>
+
+                    {/* Table of Co-Present People */}
+                    <TableContainer sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '12px', flex: 1 }}>
+                      {isCoPresenceLoading ? (
+                        <Stack alignItems="center" justifyContent="center" py={6} spacing={1}>
+                          <CircularProgress size={28} />
+                          <Typography variant="caption" color="text.secondary">
+                            Loading co-presence data...
+                          </Typography>
+                        </Stack>
+                      ) : !coPresencePersonId || !coPresenceAreaId ? (
+                        <Stack alignItems="center" justifyContent="center" py={5} spacing={1}>
+                          <IconInfoCircle size={28} color="#94A3B8" />
+                          <Typography variant="body2" color="text.secondary">
+                            Investigation person or alarm area is not available
+                          </Typography>
+                        </Stack>
+                      ) : filteredCoPresentPeople.length === 0 ? (
+                        <Stack alignItems="center" justifyContent="center" py={5} spacing={1}>
+                          <IconUsers size={28} color="#94A3B8" />
+                          <Typography variant="body2" color="text.secondary">
+                            {complianceSearch ? 'No co-present people matched search' : 'No co-present people found in this area'}
+                          </Typography>
+                        </Stack>
+                      ) : (
+                        <Table size="small" aria-label="co-present people table">
+                          <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                            <TableRow>
+                              <TableCell sx={{ fontSize: '12px', fontWeight: 700 }}>Person</TableCell>
+                              <TableCell sx={{ fontSize: '12px', fontWeight: 700 }}>Type / Dept</TableCell>
+                              <TableCell sx={{ fontSize: '12px', fontWeight: 700 }} align="center">Interactions</TableCell>
+                              <TableCell sx={{ fontSize: '12px', fontWeight: 700 }} align="right">Shared Duration</TableCell>
+                              <TableCell sx={{ fontSize: '12px', fontWeight: 700 }} align="center">Status</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {filteredCoPresentPeople
+                              .slice(compliancePage * complianceRowsPerPage, compliancePage * complianceRowsPerPage + complianceRowsPerPage)
+                              .map((person) => {
+                                const avatarSrc = normalizeImageUrl(person.faceImage) || undefined;
+                                return (
+                                  <TableRow key={person.personId} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                    <TableCell>
+                                      <Stack direction="row" spacing={1.25} alignItems="center">
+                                        <Avatar
+                                          src={avatarSrc}
+                                          sx={{ width: 34, height: 34, bgcolor: 'primary.light', fontSize: '12px', fontWeight: 700 }}
+                                        >
+                                          {person.personName?.charAt(0) || 'P'}
+                                        </Avatar>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight={600} color="text.primary">
+                                            {person.personName}
+                                          </Typography>
+                                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
+                                            Card: {person.cardNumber || '-'}
+                                          </Typography>
+                                        </Box>
+                                      </Stack>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Typography variant="body2" fontWeight={500} color="text.primary">
+                                        {person.personType || 'Member'}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
+                                        {person.department || '-'}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                      <Chip
+                                        label={`${person.interactionCount}x`}
+                                        size="small"
+                                        sx={{
+                                          height: 22,
+                                          fontSize: '11px',
+                                          fontWeight: 600,
+                                          bgcolor: '#EEF2F6',
+                                          color: 'text.secondary',
+                                        }}
+                                      />
+                                    </TableCell>
+                                    <TableCell align="right">
+                                      <Typography variant="body2" fontWeight={600} color="text.primary">
+                                        {person.totalSharedDurationFormatted || `${person.totalSharedDurationMinutes}m`}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px' }}>
+                                        {person.totalSharedDurationMinutes} mins total
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                      <Tooltip
+                                        title={
+                                          person.isCurrentlyTogether
+                                            ? 'Currently located in the same area alongside this person'
+                                            : 'No longer in the same area; co-presence occurred earlier in this session'
+                                        }
+                                        arrow
+                                        placement="top"
+                                      >
+                                        <Chip
+                                          label={person.isCurrentlyTogether ? 'Together' : 'Separated'}
+                                          size="small"
+                                          sx={{
+                                            height: 22,
+                                            fontSize: '11px',
+                                            fontWeight: 600,
+                                            cursor: 'help',
+                                            bgcolor: person.isCurrentlyTogether ? '#DCFCE7' : '#F1F5F9',
+                                            color: person.isCurrentlyTogether ? '#15803D' : '#64748B',
+                                          }}
+                                        />
+                                      </Tooltip>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                          </TableBody>
+                        </Table>
+                      )}
+                    </TableContainer>
+
+                    {filteredCoPresentPeople.length > 0 && (
+                      <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component="div"
+                        count={filteredCoPresentPeople.length}
+                        rowsPerPage={complianceRowsPerPage}
+                        page={compliancePage}
+                        onPageChange={(_, newPage) => setCompliancePage(newPage)}
+                        onRowsPerPageChange={(e) => {
+                          setComplianceRowsPerPage(parseInt(e.target.value, 10));
+                          setCompliancePage(0);
+                        }}
+                        sx={{
+                          borderTop: '1px solid',
+                          borderColor: 'divider',
+                          '.MuiTablePagination-toolbar': { minHeight: 40, px: 1 },
+                          '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': { fontSize: '12px', mb: 0 },
+                        }}
+                      />
+                    )}
+                  </Stack>
+                )}
               </Card>
             </Grid>
 

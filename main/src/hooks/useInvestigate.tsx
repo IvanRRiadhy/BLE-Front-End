@@ -552,7 +552,7 @@ const buildGlobalInvestigationPayload = (
   const isCustom = (params?.timeRange || '').toLowerCase() === 'custom';
 
   return {
-    timeRange: params?.timeRange || 'last_30_days',
+    timeRange: params?.timeRange || 'daily',
     areaId: params?.areaId ?? null,
     from: isCustom ? params?.from ?? null : null,
     to: isCustom ? params?.to ?? null : null,
@@ -569,6 +569,19 @@ export function useGlobalInvestigationMutation() {
       const response = await axiosServices.post<GlobalInvestigationResponse>(`${API_URL}/global-overview`, body);
       return response.data.collection.data;
     },
+  });
+}
+
+export function useGlobalInvestigation(params?: GlobalInvestigationParams, enabled = true) {
+  return useQuery({
+    queryKey: ['global-investigation', params],
+    queryFn: async () => {
+      const body = buildGlobalInvestigationPayload(params);
+      const response = await axiosServices.post<GlobalInvestigationResponse>(`${API_URL}/global-overview`, body);
+      return response.data.collection.data;
+    },
+    enabled,
+    staleTime: 60 * 1000,
   });
 }
 //#endregion
@@ -667,6 +680,32 @@ export function useCoPresenceInvestigationMutation() {
       }
       return data;
     },
+  });
+}
+
+export function useCoPresenceInvestigation(
+  params?: CoPresenceInvestigationParams,
+  enabled: boolean = true
+) {
+  return useQuery({
+    queryKey: ['investigation-co-presence', params],
+    queryFn: async () => {
+      const body = buildCoPresenceInvestigationPayload(params);
+      const response = await axiosServices.post<CoPresenceInvestigationResponse>(
+        `${API_URL}/co-presence`,
+        body
+      );
+      const data = response.data.collection.data;
+      if (data?.targetArea) {
+        data.targetArea = {
+          ...data.targetArea,
+          nodes: safeParseAreaShape(data.targetArea.areaShape) as Nodes[],
+        };
+      }
+      return data;
+    },
+    enabled: enabled && Boolean(params?.personId && params?.areaId),
+    staleTime: 5_000,
   });
 }
 //#endregion

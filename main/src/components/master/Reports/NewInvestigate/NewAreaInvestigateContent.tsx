@@ -49,7 +49,8 @@ import {
 import Chart from 'react-apexcharts';
 import { Stage, Layer, Image as KonvaImage, Line, Group, Text as KonvaText } from 'react-konva';
 import useImage from 'use-image';
-import { AreaInvestigationData, AreaInvestigationAlarm, Nodes } from 'src/hooks/useInvestigate';
+import { AreaInvestigationData, AreaInvestigationAlarm, Nodes, GlobalInvestigationData } from 'src/hooks/useInvestigate';
+import GlobalInvestigationOverview from './GlobalInvestigationOverview';
 import { AreaOption } from './NewAreaInvestigateFilter';
 import { BASE_URL } from 'src/utils/axios';
 import dayjs from 'dayjs';
@@ -62,6 +63,10 @@ interface NewAreaInvestigateContentProps {
   timeRange?: string;
   fromDate?: string | null;
   toDate?: string | null;
+  globalData?: GlobalInvestigationData | null;
+  isGlobalLoading?: boolean;
+  onSelectArea?: (areaId: string) => void;
+  onSelectPerson?: (personId: string) => void;
 }
 
 const normalizeImageUrl = (path?: string | null) => {
@@ -199,6 +204,10 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
   timeRange,
   fromDate,
   toDate,
+  globalData,
+  isGlobalLoading = false,
+  onSelectArea,
+  onSelectPerson,
 }) => {
   const theme = useTheme();
   const [historySearch, setHistorySearch] = useState('');
@@ -279,42 +288,14 @@ const NewAreaInvestigateContent: React.FC<NewAreaInvestigateContentProps> = ({
 
   if (!selectedArea && !data) {
     return (
-      <Card
-        elevation={0}
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '16px',
-          p: 6,
-          textAlign: 'center',
-          bgcolor: 'background.paper',
-        }}
-      >
-        <Stack alignItems="center" justifyContent="center" spacing={2}>
-          <Box
-            sx={{
-              width: 64,
-              height: 64,
-              borderRadius: '50%',
-              bgcolor: '#E8F2FE',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1877F2',
-            }}
-          >
-            <IconMapPin size={32} />
-          </Box>
-          <Box>
-            <Typography variant="h5" fontWeight={700} color="text.primary" gutterBottom>
-              Select an Area to Investigate
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Choose an area from the filter above to inspect occupancy, access compliance, active alarms, and historical events.
-            </Typography>
-          </Box>
-        </Stack>
-      </Card>
+      <Box id="area-investigate-export-content">
+        <GlobalInvestigationOverview
+          data={globalData}
+          isLoading={isGlobalLoading}
+          onSelectArea={onSelectArea}
+          onSelectPerson={onSelectPerson}
+        />
+      </Box>
     );
   }
 
