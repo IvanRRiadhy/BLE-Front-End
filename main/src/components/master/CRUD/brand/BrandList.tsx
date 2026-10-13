@@ -256,9 +256,9 @@ const BrandList = () => {
     if (selectedReader) {
       try {
         await deleteReaderMutation.mutateAsync(selectedReader.id);
-        toast.success('Reader deleted successfully');
-      } catch (error) {
-        toast.error('Delete failed');
+        toast.success(`${selectedReader.name} deleted successfully`);
+      } catch (error: any) {
+        toast.error(`${error.response.data.msg}`);
         console.error(error);
       }
     }
@@ -340,7 +340,7 @@ const BrandList = () => {
               : it,
           ),
         );
-        toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        toast.error(`${error.response.data.msg} Stopped remaining deletions`);
         break; // Stop the whole loop on failure
       }
     }

@@ -10,7 +10,7 @@ services:
     environment:
       - PORT=3000
       - NODE_ENV=production
-      - API_KEY=FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK
+      - API_KEY=bio_ble_LAVuPFHKwUow0BZ2ELrRiiUFqSpBtHxR2GqGiT2fjWY1uSbHLtZB2RptXQZvEpVd
     volumes:
       - .env:/app/.env
     ports:

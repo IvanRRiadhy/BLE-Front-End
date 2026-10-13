@@ -47,7 +47,7 @@ import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
 import AddEditSecurityGuard from './AddEditSecurityGuard';
 import { useReleaseCard } from 'src/hooks/useCard';
-import { useSecurityByID } from 'src/hooks/useSecurityGuard';
+import { useDeleteSecurity, useSecurityByID } from 'src/hooks/useSecurityGuard';
 
 const SecurityGuardContent = () => {
   const { t } = useTranslation();
@@ -70,6 +70,8 @@ const SecurityGuardContent = () => {
   // const theme = useTheme();
   const [loading, setLoading] = useState(false);
 
+  const deleteMutation = useDeleteSecurity();
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<memberType | null>(null);
   // Open delete confirmation dialog
@@ -90,12 +92,13 @@ const SecurityGuardContent = () => {
     if (selectedMember) {
       setLoading(true);
       try {
-        const result = await dispatch(deleteMember(selectedMember.id));
+        const result = await deleteMutation.mutateAsync(selectedMember.id);
+        console.log('result',result);
 
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
+        if (result) {
           // ✅ Update cache manually
           queryClient.setQueryData<PaginatedResponse<memberType>>(
-            ['member-list', memberFilter],
+            ['security-list', memberFilter],
             (oldCache) =>
               oldCache
                 ? {
@@ -107,12 +110,12 @@ const SecurityGuardContent = () => {
                 : oldCache,
           );
 
-          toast.success('Member deleted successfully');
+          toast.success('Security Guard deleted successfully');
         } else {
           toast.error('Delete failed');
         }
       } catch (error) {
-        console.error('Error deleting member:', error);
+        console.error('Error deleting Security Guard:', error);
         toast.error('Delete Data Unsuccessful');
       } finally {
         setLoading(false);
@@ -122,74 +125,74 @@ const SecurityGuardContent = () => {
   };
 
   //Block Member
-  const [blacklistDialogOpen, setBlacklistDialogOpen] = useState(false);
-  const [targetSecurityGuard, setTargetMember] = useState<memberType | null>(null);
-  const [reason, setReason] = useState<string>('');
-  const { mutateAsync: blacklistMutation, isPending: isBlacklistPending } = useBlacklistMember();
+  // const [blacklistDialogOpen, setBlacklistDialogOpen] = useState(false);
+  // const [targetSecurityGuard, setTargetMember] = useState<memberType | null>(null);
+  // const [reason, setReason] = useState<string>('');
+  // const { mutateAsync: blacklistMutation, isPending: isBlacklistPending } = useBlacklistMember();
 
-  const handleOpenBlacklistDialog = (member: memberType) => {
-    console.log('member to blacklist:', member);
-    setTargetMember(member);
-    setBlacklistDialogOpen(true);
-  };
+  // const handleOpenBlacklistDialog = (member: memberType) => {
+  //   console.log('member to blacklist:', member);
+  //   setTargetMember(member);
+  //   setBlacklistDialogOpen(true);
+  // };
 
-  const handleCloseBlacklistDialog = () => {
-    setBlacklistDialogOpen(false);
-    setTargetMember(null);
-  };
+  // const handleCloseBlacklistDialog = () => {
+  //   setBlacklistDialogOpen(false);
+  //   setTargetMember(null);
+  // };
 
-  const handleConfirmBlacklist = async () => {
-    // if (targetSecurityGuard) {
-    //   dispatch(blacklistVisitor(targetSecurityGuard.id));
-    // }
-    if (targetSecurityGuard && reason) {
-      try {
-        await blacklistMutation({
-          memberId: targetSecurityGuard.id,
-          blacklistReason: reason,
-        });
-        toast.success('Member has been Blacklisted');
-      } catch (error) {
-        toast.error('Failed to blacklist member');
-        console.error(error);
-      }
-    }
-    handleCloseBlacklistDialog();
-  };
+  // const handleConfirmBlacklist = async () => {
+  //   // if (targetSecurityGuard) {
+  //   //   dispatch(blacklistVisitor(targetSecurityGuard.id));
+  //   // }
+  //   if (targetSecurityGuard && reason) {
+  //     try {
+  //       await blacklistMutation({
+  //         memberId: targetSecurityGuard.id,
+  //         blacklistReason: reason,
+  //       });
+  //       toast.success('Member has been Blacklisted');
+  //     } catch (error) {
+  //       toast.error('Failed to blacklist member');
+  //       console.error(error);
+  //     }
+  //   }
+  //   handleCloseBlacklistDialog();
+  // };
 
   //UnBlacklist Popup
-  const [unblacklistDialogOpen, setUnblacklistDialogOpen] = useState(false);
-  const [selectedUList, setSelectedUList] = useState<memberType | null>(null);
-  const { mutateAsync: unblacklistMutation, isPending: isUnblacklistPending } =
-    useUnBlacklistMember();
-  // Open delete confirmation dialog
-  const handleOpenUnblacklistDialog = (mem: memberType) => {
-    setSelectedUList(mem);
-    setUnblacklistDialogOpen(true);
-  };
+  // const [unblacklistDialogOpen, setUnblacklistDialogOpen] = useState(false);
+  // const [selectedUList, setSelectedUList] = useState<memberType | null>(null);
+  // const { mutateAsync: unblacklistMutation, isPending: isUnblacklistPending } =
+  //   useUnBlacklistMember();
+  // // Open delete confirmation dialog
+  // const handleOpenUnblacklistDialog = (mem: memberType) => {
+  //   setSelectedUList(mem);
+  //   setUnblacklistDialogOpen(true);
+  // };
 
-  // Close delete confirmation dialog
-  const handleCloseUnblacklistDialog = () => {
-    setUnblacklistDialogOpen(false);
-    setSelectedUList(null);
-  };
+  // // Close delete confirmation dialog
+  // const handleCloseUnblacklistDialog = () => {
+  //   setUnblacklistDialogOpen(false);
+  //   setSelectedUList(null);
+  // };
 
-  // Confirm delete action
-  const handleConfirmUnblacklist = async () => {
-    // if (targetSecurityGuard) {
-    //   dispatch(blacklistVisitor(targetSecurityGuard.id));
-    // }
-    if (selectedUList) {
-      try {
-        await unblacklistMutation(selectedUList.id);
-        toast.success('Member has been Unblacklisted');
-      } catch (error) {
-        toast.error('Failed to unblacklist member');
-        console.error(error);
-      }
-    }
-    handleCloseUnblacklistDialog();
-  };
+  // // Confirm delete action
+  // const handleConfirmUnblacklist = async () => {
+  //   // if (targetSecurityGuard) {
+  //   //   dispatch(blacklistVisitor(targetSecurityGuard.id));
+  //   // }
+  //   if (selectedUList) {
+  //     try {
+  //       await unblacklistMutation(selectedUList.id);
+  //       toast.success('Member has been Unblacklisted');
+  //     } catch (error) {
+  //       toast.error('Failed to unblacklist member');
+  //       console.error(error);
+  //     }
+  //   }
+  //   handleCloseUnblacklistDialog();
+  // };
 
    //Release Pop-up
         const [selectedCardNumber, setSelectedCardNumber] = useState('');
@@ -264,7 +267,7 @@ const SecurityGuardContent = () => {
               sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
             >
               Security Guard Details
-              {securityGuardDetail.isBlacklist && (
+              {/* {securityGuardDetail.isBlacklist && (
                 <Typography
                   variant="caption"
                   sx={{
@@ -278,7 +281,7 @@ const SecurityGuardContent = () => {
                 >
                   BLOCKED
                 </Typography>
-              )}
+              )} */}
             </Typography>
 
             {/* Right Section */}
@@ -372,7 +375,7 @@ const SecurityGuardContent = () => {
                 }}
               >
                 <Stack spacing={1} direction="column" alignItems="flex-start">
-                  <Button
+                  {/* <Button
                     size="large"
                     variant="contained"
                     color={securityGuardDetail.isBlacklist ? 'success' : 'error'}
@@ -392,7 +395,7 @@ const SecurityGuardContent = () => {
                     }}
                   >
                     {securityGuardDetail.isBlacklist ? 'Unblacklist Security Guard' : 'Blacklist Security Guard'}
-                  </Button>
+                  </Button> */}
                                     {
                                       securityGuardDetail.cardNumber && (
                                         <Button
@@ -418,7 +421,7 @@ const SecurityGuardContent = () => {
                 {securityGuardDetail.name}
               </Typography>
               {/* 🚨 WARNING BOX FOR BLACKLISTED MEMBER */}
-              {securityGuardDetail.isBlacklist && securityGuardDetail.blacklistReason && (
+              {/* {securityGuardDetail.isBlacklist && securityGuardDetail.blacklistReason && (
                 <Box
                   sx={{
                     mt: 2,
@@ -438,7 +441,7 @@ const SecurityGuardContent = () => {
                     {securityGuardDetail.blacklistReason}
                   </Typography>
                 </Box>
-              )}
+              )} */}
             </Box>
 
             <Grid container spacing={5} mb={3}>
@@ -541,7 +544,7 @@ const SecurityGuardContent = () => {
         </DialogActions>
       </Dialog>
       {/* Blacklist Confirmation Dialog */}
-      <Dialog
+      {/* <Dialog
         open={blacklistDialogOpen}
         onClose={handleCloseBlacklistDialog}
         maxWidth="sm"
@@ -576,9 +579,9 @@ const SecurityGuardContent = () => {
             {isBlacklistPending ? 'Blacklisting...' : 'Blacklist'}
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
       {/* Unblacklist Confirmation Dialog */}
-      <Dialog
+      {/* <Dialog
         open={unblacklistDialogOpen}
         onClose={handleCloseUnblacklistDialog}
         maxWidth="sm"
@@ -603,7 +606,7 @@ const SecurityGuardContent = () => {
             {isUnblacklistPending ? 'Unblacklisting...' : 'Unblacklist'}
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
                         {/* Delete Release Dialog */}
                   <Dialog open={releasePopupOpen} onClose={handleCloseReleasePopup}>
                     <DialogTitle>Confirm Card Release</DialogTitle>

@@ -26,7 +26,7 @@ export type GetFilter = {
   SearchValue: string;
   filters: {
     BrandId: string[];
-    EngineReaderId: string[];
+    // EngineReaderId: string[];
   };
 };
 

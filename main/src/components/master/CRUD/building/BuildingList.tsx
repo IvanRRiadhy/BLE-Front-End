@@ -234,9 +234,9 @@ const BuildingList = () => {
     if (selectedFloor) {
       try {
         await deleteFloorMutation.mutateAsync(selectedFloor.id);
-        toast.success('Floor deleted successfully');
-      } catch (error) {
-        toast.error('Delete failed');
+        toast.success(`Floor ${selectedFloor.name} deleted successfully`);
+      } catch (error: any) {
+        toast.error(`${error.response.data.msg}`);
         console.error(error);
       }
     }
@@ -371,7 +371,7 @@ const BuildingList = () => {
               : it,
           ),
         );
-        toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        toast.error(`${error.response.data.msg} Stopped remaining deletions`);
         break;
       }
     }

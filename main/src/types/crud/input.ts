@@ -192,7 +192,7 @@ export const visitorStatusEnumMap: Record<string, number> = {
 
   export const DeviceType: inputDataType[] = [
     { label: "Please select Type", value: '', disabled: true},
-    // { label: "CCTV", value: 'Cctv'}, //0
+    { label: "CCTV", value: 'Cctv'}, //0
     // { label: "Access Control", value: 'AccessDoor'}, //1
     { label: "Ble Reader", value: 'BleReader'}, //2
   ];

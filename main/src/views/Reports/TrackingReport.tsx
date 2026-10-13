@@ -178,11 +178,11 @@ const TrackingReport: React.FC = () => {
         id: found?.id || selectedPersonDetailRow.cardNumber || '1',
         name: pName,
         type: (isVisitor ? 'visitor' : 'member') as 'visitor' | 'member',
-        identityId: found?.identityId || found?.nik || pName.toLowerCase().replace(/\s+/g, ''),
-        cardNumber: selectedPersonDetailRow.cardNumber || found?.cardNumber || found?.cardId || 'G-677043',
-        email: found?.email || `${pName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-        phone: found?.phone || '+62 812 3456 7890',
-        organization: found?.companyName || found?.organization?.name || found?.department?.name || selectedPersonDetailRow.hostName || 'PT. Masela',
+        identityId: found?.identityId || found?.nik || '-',
+        cardNumber: selectedPersonDetailRow.cardNumber || found?.cardNumber || found?.cardId || '-',
+        email: found?.email || '-',
+        phone: found?.phone || '-',
+        organization: found?.companyName || found?.organization?.name || found?.department?.name || selectedPersonDetailRow.hostName || '-',
         avatarUrl: found?.faceImage ? (found.faceImage.startsWith('http') ? found.faceImage : `${BASE_URL}/${found.faceImage}`) : undefined,
       };
     }
@@ -193,13 +193,13 @@ const TrackingReport: React.FC = () => {
       if (m) {
         return {
           id: m.id || memId,
-          name: m.name || m.memberName || 'Vance Woolsey',
+          name: m.name || m.memberName || '-',
           type: 'member' as const,
-          identityId: m.identityId || m.nik || 'vwoolsey',
-          cardNumber: m.cardNumber || m.bleCardNumber || m.cardId || 'G-677043',
-          email: m.email || `${(m.name || 'vance.woolsey').toLowerCase().replace(/\s+/g, '.')}@example.com`,
-          phone: m.phone || '+62 812 3456 7890',
-          organization: m.organization?.name || m.department?.name || 'PT. Masela',
+          identityId: m.identityId || m.nik || '-',
+          cardNumber: m.cardNumber || m.bleCardNumber || m.cardId || '-',
+          email: m.email || '-',
+          phone: m.phone || '-',
+          organization: m.organization?.name || m.department?.name || '-',
           avatarUrl: m.faceImage ? (m.faceImage.startsWith('http') ? m.faceImage : `${BASE_URL}/${m.faceImage}`) : undefined,
         };
       }
@@ -211,13 +211,13 @@ const TrackingReport: React.FC = () => {
       if (v) {
         return {
           id: v.id || visId,
-          name: v.name || v.visitorName || 'Vance Woolsey',
+          name: v.name || v.visitorName || '-',
           type: 'visitor' as const,
-          identityId: v.identityId || v.nik || 'vwoolsey',
-          cardNumber: v.cardNumber || v.cardId || 'G-677043',
-          email: v.email || `${(v.name || 'vance.woolsey').toLowerCase().replace(/\s+/g, '.')}@example.com`,
-          phone: v.phone || '+62 812 3456 7890',
-          organization: v.companyName || v.organization || 'PT. Masela',
+          identityId: v.identityId || v.nik || '-',
+          cardNumber: v.cardNumber || v.cardId || '-',
+          email: v.email || '-',
+          phone: v.phone || '-',
+          organization: v.companyName || v.organization || '-',
           avatarUrl: v.faceImage ? (v.faceImage.startsWith('http') ? v.faceImage : `${BASE_URL}/${v.faceImage}`) : undefined,
         };
       }
@@ -235,13 +235,13 @@ const TrackingReport: React.FC = () => {
       const s = sessionList[0];
       return {
         id: s.personId || s.visitorId || s.memberId || '1',
-        name: s.personName || s.visitorName || s.memberName || 'Vance Woolsey',
+        name: s.personName || s.visitorName || s.memberName || '-',
         type: (s.personType?.toLowerCase() === 'visitor' ? 'visitor' : 'member') as 'visitor' | 'member',
-        identityId: 'vwoolsey',
-        cardNumber: s.cardName || s.cardId || 'G-677043',
-        email: 'vance.woolsey@example.com',
-        phone: '+62 812 3456 7890',
-        organization: s.hostName || 'PT. Masela',
+        identityId: s.personId || s.visitorId || s.memberId || '-',
+        cardNumber: s.cardName || s.cardId || '-',
+        email: s.email || '-',
+        phone: s.phone || '-',
+        organization: s.hostName || '-',
       };
     }
 

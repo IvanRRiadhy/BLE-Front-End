@@ -38,14 +38,45 @@ export interface ActiveFeaturesType {
 
 const API_URL = '/api/license/';
 
+const LICENSE_STORAGE_KEY = 'app_license_info';
+
+export function getCachedLicenseInfo(): AboutDataType | null {
+  try {
+    const raw = localStorage.getItem(LICENSE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setCachedLicenseInfo(data: AboutDataType) {
+  try {
+    localStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('Failed to save license info to localStorage', e);
+  }
+}
+
+export function clearCachedLicenseInfo() {
+  try {
+    localStorage.removeItem(LICENSE_STORAGE_KEY);
+  } catch (e) {
+    console.error('Failed to remove license info from localStorage', e);
+  }
+}
+
 export function useLicenseInfo() {
     return useQuery ({
         queryKey: ['info'],
         queryFn: async() => {
             const res = await axiosServices.get(`${API_URL}info`);
             console.log("Info Result: ", res.data);
-            return res.data.collection.data as AboutDataType
+            const data = res.data.collection.data as AboutDataType;
+            setCachedLicenseInfo(data);
+            return data;
         },
+        initialData: () => getCachedLicenseInfo() ?? undefined,
+        enabled: !getCachedLicenseInfo(),
     })
 };
 
@@ -56,7 +87,9 @@ export function toggleFeatures() {
         mutationFn: async({ featureKey, enabled }: { featureKey: string; enabled: boolean }) => {
             const res = await axiosServices.post(`${API_URL}module/toggle`, { featureKey, enabled });
             console.log("Toggle Result: ", res.data);
-            return res.data.collection.data as AboutDataType
+            const data = res.data.collection.data as AboutDataType;
+            setCachedLicenseInfo(data);
+            return data;
         },
         onSuccess: (_data, variables) => {
             toast.success(`Module Feature Turned ${variables.enabled ? 'On' : 'Off'}`);
@@ -93,7 +126,9 @@ export function activateLicense() {
                 },
             });
             console.log("Activate Result: ", res.data);
-            return res.data.collection.data as AboutDataType
+            const data = res.data.collection.data as AboutDataType;
+            setCachedLicenseInfo(data);
+            return data;
         },
         onSuccess: () => {
             toast.success("License Activated");

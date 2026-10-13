@@ -216,7 +216,7 @@ export function useUnBlacklistSecurity() {
 // -----------------------------------------------------------------------------
 export function useDeleteSecurity() {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: async (id: string) => {
       await axiosServices.delete(`${API_URL}${id}`);

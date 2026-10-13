@@ -31,6 +31,7 @@ import { fetchBrands, BrandType } from 'src/store/apps/crud/brand';
 import { IconTrash } from '@tabler/icons-react';
 import { RootState, AppDispatch } from 'src/store/Store';
 import AddEditIntegration from './AddEditIntegration';
+import IntegrationSecretDialog from './IntegrationSecretDialog';
 import { defaultIntegrationFilter } from 'src/store/apps/defaultForm';
 // import { useTranslation } from 'react-i18next';
 
@@ -221,7 +222,10 @@ const IntegrationList = () => {
                           maxWidth: 150,
                         }}
                       >
-                        <AddEditIntegration type="edit" integration={integration} />
+                        <IntegrationSecretDialog
+                          integrationId={integration.id}
+                          brandName={getBrandName(integration.brandId)}
+                        />
                         <IconButton
                           color="error"
                           size="small"

@@ -12,10 +12,12 @@ const OrganizationSearch = () => {
   );
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
+    if(searchValue.trim() !== (organizationFilter.SearchValue || '')){
+      const delayDebounce = setTimeout(() => {
       dispatch(UpdateFilter({ ...organizationFilter,Start: 0, SearchValue: searchValue.trim() }));
     }, 1000);
     return () => clearTimeout(delayDebounce);
+    }
   }, [searchValue, dispatch, organizationFilter]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

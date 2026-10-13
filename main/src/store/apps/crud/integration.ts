@@ -47,6 +47,7 @@ export interface IntegrationType {
     apiKeyField: string,
     apiKeyValue: string,
     applicationId: string,
+    scopes?: string,
     createdBy: string,
     createdAt: string,
     updatedBy: string,

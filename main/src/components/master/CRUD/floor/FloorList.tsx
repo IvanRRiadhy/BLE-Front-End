@@ -237,9 +237,9 @@ const FloorList = () => {
     if (selectedFloorplan) {
       try {
         await deleteFloorplanMutation.mutateAsync(selectedFloorplan.id);
-        toast.success('Floorplan deleted successfully');
-      } catch (error) {
-        toast.error('Delete failed');
+        toast.success(`${selectedFloorplan.name} deleted successfully`);
+      } catch (error: any) {
+        toast.error(`${error.response.data.msg}`);
         console.error(error);
       }
     }
@@ -354,7 +354,7 @@ const FloorList = () => {
               : it,
           ),
         );
-        toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        toast.error(`${error.response.data.msg} Stopped remaining deletions.`);
         break;
       }
     }

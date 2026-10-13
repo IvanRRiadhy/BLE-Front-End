@@ -24,8 +24,6 @@ import {
 import BlankCard from 'src/components/shared/BlankCard';
 import {
   CCTVType,
-  deleteCCTV,
-  fetchAccessCCTVDT,
   UpdateFilter,
 } from 'src/store/apps/crud/accessCCTV';
 import { IconTrash } from '@tabler/icons-react';
@@ -34,7 +32,6 @@ import AddEditAccessCCTV from './AddEditAccessCCTV';
 import { defaultAccessCCTVFilter } from 'src/store/apps/defaultForm';
 import { useCCTVList, useDeleteCCTV } from 'src/hooks/useCCTV';
 import toast from 'react-hot-toast';
-// import { useTranslation } from 'react-i18next';
 
 const columns = [
   { label: 'Name', field: 'Name', sortAble: true },
@@ -45,17 +42,12 @@ const SKELETON_ROWS = 5;
 
 const AccessCCTVList = () => {
   const dispatch: AppDispatch = useDispatch();
-  // const CCTVData: CCTVType[] = useSelector((state: RootState) => state.CCTVReducer.cctvs);
-  // const CCTVTotalCount = useSelector((state: RootState) => state.CCTVReducer.cctvTotalCount);
-  // const CCTVFilteredCount = useSelector((state: RootState) => state.CCTVReducer.cctvFilteredCount);
   const CCTVFilter = useSelector((state: RootState) => state.CCTVReducer.cctvFilter);
-  const { data, isLoading: queryLoading } = useCCTVList(CCTVFilter);
+  const { data, isLoading, isFetching, refetch } = useCCTVList(CCTVFilter);
+  const deleteMutation = useDeleteCCTV();
   const CCTVData = data?.data || [];
-  const CCTVTotalCount = data?.recordsTotal || 0;
-  const CCTVFilteredCount = data?.recordsFiltered || 0;
-  const isLoading = useSelector((state: RootState) => state.CCTVReducer.isLoading);
-  const hasLoaded = useSelector((state: RootState) => state.CCTVReducer.hasLoaded);
-  // const { t } = useTranslation();
+  const CCTVTotalCount = data?.recordsFiltered || data?.recordsTotal || 0;
+
   // Pagination State
   const page = Math.floor(CCTVFilter.Start / CCTVFilter.Length);
   const rowsPerPage = CCTVFilter.Length;
@@ -72,27 +64,12 @@ const AccessCCTVList = () => {
 
   useEffect(() => {
     dispatch(UpdateFilter(defaultAccessCCTVFilter));
-    try {
-      dispatch(fetchAccessCCTVDT(CCTVFilter));
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
   }, [dispatch]);
 
-  useEffect(() => {
-    try {
-      dispatch(fetchAccessCCTVDT(CCTVFilter));
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-
-    // dispatch(UpdateFilter(defaultAccessCCTVFilter));
-  }, [CCTVFilter, dispatch]);
-
-  //Delete Pop-up
+  // Delete Pop-up
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCCTV, setSelectedCCTV] = useState<CCTVType | null>(null);
-  const deleteMutation = useDeleteCCTV();
+
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (cctv: CCTVType) => {
     setSelectedCCTV(cctv);
@@ -107,12 +84,12 @@ const AccessCCTVList = () => {
 
   const handleConfirmDelete = async () => {
     if (selectedCCTV) {
-      // dispatch(deleteCCTV(selectedCCTV.id));
       try {
         await deleteMutation.mutateAsync(selectedCCTV.id);
-        toast.success('Data Deleted');
-      } catch (error) {
-        toast.error('Delete failed');
+        toast.success(`${selectedCCTV.name} deleted successfully`);
+        await refetch();
+      } catch (error: any) {
+        toast.error(`${error?.response?.data?.msg || 'Delete failed'}`);
         console.error(error);
       }
     }
@@ -197,9 +174,11 @@ const AccessCCTVList = () => {
       <Grid size={12}>
         <Box sx={{ overflow: 'auto', maxWidth: '100%' }}>
           <BlankCard>
-            <TableContainer  sx={{
-              maxHeight: '55vh',
-            }}>
+            <TableContainer
+              sx={{
+                maxHeight: '55vh',
+              }}
+            >
               <Table stickyHeader aria-label="simple table" sx={{ whiteSpace: 'nowrap' }}>
                 <TableHead>
                   <TableRow>
@@ -250,7 +229,7 @@ const AccessCCTVList = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {queryLoading
+                  {isLoading
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : CCTVData.map((cctv, index) => (
                         <TableRow key={index}>
@@ -302,7 +281,7 @@ const AccessCCTVList = () => {
             {/* Pagination */}
             <TablePagination
               component="div"
-              count={CCTVFilteredCount}
+              count={CCTVTotalCount}
               page={page}
               rowsPerPage={rowsPerPage}
               onPageChange={handleChangePage}
@@ -326,11 +305,11 @@ const AccessCCTVList = () => {
           </Button>
           <Button
             onClick={handleConfirmDelete}
-            color={isLoading ? 'primary' : 'error'}
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+            color={deleteMutation.isPending ? 'primary' : 'error'}
+            disabled={deleteMutation.isPending}
+            startIcon={deleteMutation.isPending ? <CircularProgress size={20} /> : null}
           >
-            {isLoading ? 'Deleting...' : 'Delete'}
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

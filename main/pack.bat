@@ -19,7 +19,7 @@ echo.
 echo [2/3] Checking web.config in dist...
 if not exist "dist\web.config" (
     echo Copying public\web.config to dist\web.config...
-    copy "public\web.config" "dist\web.config" >nul
+copy "public\web.config" "dist\web.config" >nul
 )
 
 echo.

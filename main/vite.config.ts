@@ -23,7 +23,7 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
         headers: {
-          'X-BIOPEOPLETRACKING-API-KEY': 'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+          'X-BIOPEOPLETRACKING-API-KEY': 'bio_ble_LAVuPFHKwUow0BZ2ELrRiiUFqSpBtHxR2GqGiT2fjWY1uSbHLtZB2RptXQZvEpVd',
         },
       },
       // Legacy backend proxy
@@ -32,7 +32,7 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
         headers: {
-          'X-BIOPEOPLETRACKING-API-KEY': 'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+          'X-BIOPEOPLETRACKING-API-KEY': 'bio_ble_LAVuPFHKwUow0BZ2ELrRiiUFqSpBtHxR2GqGiT2fjWY1uSbHLtZB2RptXQZvEpVd',
         },
         rewrite: (path) => path.replace(/^\/api-backend/, ''),
       },
@@ -87,7 +87,7 @@ export default defineConfig({
               const { default: axios } = await import('axios');
               const resp = await axios.get(imageUrl, {
                 responseType: 'arraybuffer',
-                validateStatus: false,
+                validateStatus: () => true,
               });
               
               if (resp.headers['content-type']) {

@@ -41,7 +41,7 @@ import { useTranslation } from 'react-i18next';
 // import IconClose from 'src/assets/images/frontend-pages/icons/icon-close.svg';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { PaginatedResponse, useBlacklistMember, useMemberByID, useUnBlacklistMember } from 'src/hooks/useMember';
+import { PaginatedResponse, useBlacklistMember, useDeleteMember, useMemberByID, useUnBlacklistMember } from 'src/hooks/useMember';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
 import { useAllDistricts } from 'src/hooks/useDistrict';
 import { useAllDepartments } from 'src/hooks/useDepartment';
@@ -76,6 +76,7 @@ const MemberContent = () => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState<memberType | null>(null);
+  const deleteMutation = useDeleteMember();
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (mem: memberType) => {
     setSelectedMember(mem);
@@ -94,9 +95,10 @@ const MemberContent = () => {
     if (selectedMember) {
       setLoading(true);
       try {
-        const result = await dispatch(deleteMember(selectedMember.id));
+        const result = await deleteMutation.mutateAsync(selectedMember.id);
+        console.log("delete result", result);
 
-        if (result && result.type && result.type.endsWith('/fulfilled')) {
+        if (result) {
           // ✅ Update cache manually
           queryClient.setQueryData<PaginatedResponse<memberType>>(
             ['member-list', memberFilter],

@@ -4,7 +4,7 @@
   "MQTT_URL": "ws://192.168.1.96:9005",
   "ALARM_TOPIC": "people_tracking/alarm/+/+/+/+/+",
   "CDN_URL": "http://192.168.1.96:5099",
-  "API_KEY": "FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK",
+  "API_KEY": "bio_ble_LAVuPFHKwUow0BZ2ELrRiiUFqSpBtHxR2GqGiT2fjWY1uSbHLtZB2RptXQZvEpVd",
   "NTFY_TOPIC": "alarm-ntfy",
   "MQTT_USERNAME": "bio_mqtt",
   "MQTT_PASSWORD": "P@ssw0rd",

@@ -21,7 +21,7 @@ export type GetFilter = {
     SearchValue: string,
     filters: {
         BrandId: string[],
-        EngineReaderId: string[],
+        // EngineReaderId: string[],
     }
 }
 
@@ -395,7 +395,7 @@ export const ExportBleReader = createAsyncThunk(
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
           'X-BIOPEOPLETRACKING-API-KEY':
-            'FujDuGTsyEXVwkKrtRgn52APwAVRGmPOiIRX8cffynDvIW35bJaGeH3NcH6HcSeK',
+            'bio_ble_LAVuPFHKwUow0BZ2ELrRiiUFqSpBtHxR2GqGiT2fjWY1uSbHLtZB2RptXQZvEpVd',
         },
       });
       console.log("Export response: ", response);

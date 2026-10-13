@@ -19,10 +19,13 @@ import {
   DialogContent,
   DialogActions,
   Portal,
+  keyframes,
 } from '@mui/material';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
-import { IconBellRinging } from '@tabler/icons-react';
+import { IconBellRinging, IconBellOff } from '@tabler/icons-react';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import { Link } from 'react-router';
 import { actionStatus, extraActionStatus } from 'src/types/crud/input';
@@ -41,6 +44,17 @@ import { DeleteSweep, VisibilityOutlined } from '@mui/icons-material';
 import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
 import AlarmTriggerMenuItem from '../../shared/AlarmTriggerMenuItem';
 import toast from 'react-hot-toast';
+import { setNotificationSetting } from 'src/store/customizer/SettingsSlice';
+
+const bellFlicker = keyframes`
+  0% { transform: rotate(0deg); opacity: 1; }
+  15% { transform: rotate(14deg); opacity: 0.3; }
+  30% { transform: rotate(-14deg); opacity: 1; }
+  45% { transform: rotate(10deg); opacity: 0.4; }
+  60% { transform: rotate(-10deg); opacity: 1; }
+  75% { transform: rotate(5deg); opacity: 0.5; }
+  100% { transform: rotate(0deg); opacity: 1; }
+`;
 
 type BubbleData = {
   id: string;
@@ -83,6 +97,49 @@ const Notifications = () => {
   const [bubbles, setBubbles] = useState<BubbleData[]>([]);
   const hideTimers = useRef<Record<string, number>>({});
   const hoverTimers = useRef<Record<string, number>>({});
+
+  // Mute notification popup bubbles (saved in localStorage so choice persists)
+  const [isMuted, setIsMuted] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('notification_bubble_muted') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleMute = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setIsMuted((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('notification_bubble_muted', String(next));
+      } catch (err) {
+        console.error(err);
+      }
+      toast(next ? 'Notifications muted (bubbles disabled)' : 'Notifications unmuted', {
+        icon: next ? '🔕' : '🔔',
+      });
+      return next;
+    });
+  };
+
+  const [isFlickering, setIsFlickering] = useState(false);
+  const flickerTimeoutRef = useRef<number | null>(null);
+
+  const triggerFlicker = () => {
+    setIsFlickering(true);
+    if (flickerTimeoutRef.current) {
+      window.clearTimeout(flickerTimeoutRef.current);
+    }
+    flickerTimeoutRef.current = window.setTimeout(() => {
+      setIsFlickering(false);
+    }, 1500);
+  };
+
+  const isMutedRef = useRef(isMuted);
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
 
   const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
   const closeMenu = () => {
@@ -276,28 +333,31 @@ const Notifications = () => {
             isLowBattery: false,
           };
 
-      // console.log('[Notifications] Creating bubble:', bd);
+      // If muted, do NOT generate bubbles, just flicker the bell icon
+      if (isMutedRef.current) {
+        triggerFlicker();
+      } else {
+        setBubbles((prev) => {
+          const next = [...prev, bd];
+          if (next.length > MAX_BUBBLES) next.shift(); // remove oldest
+          return next;
+        });
 
-      setBubbles((prev) => {
-        const next = [...prev, bd];
-        if (next.length > MAX_BUBBLES) next.shift(); // remove oldest
-        return next;
-      });
+        // auto-hide this one
+        const timerId = window.setTimeout(() => {
+          setBubbles((prev) => prev.filter((b) => b.id !== bd.id));
+          delete hideTimers.current[bd.id];
+        }, AUTOHIDE_MS);
+        hideTimers.current[bd.id] = timerId;
+      }
+
       // Play notification sound if not muted
       if (notificationSetting !== 'mute') {
-        
         notificationAudio.currentTime = 0; // rewind if it's still playing
         notificationAudio.play().catch((err) => {
           console.warn('Audio playback prevented:', err);
         });
       }
-
-      // auto-hide this one
-      const timerId = window.setTimeout(() => {
-        setBubbles((prev) => prev.filter((b) => b.id !== bd.id));
-        delete hideTimers.current[bd.id];
-      }, AUTOHIDE_MS);
-      hideTimers.current[bd.id] = timerId;
     };
 
     window.addEventListener('message', onNewAlarm);
@@ -305,7 +365,7 @@ const Notifications = () => {
       window.removeEventListener('message', onNewAlarm);
       Object.values(hideTimers.current).forEach((t) => window.clearTimeout(t));
     };
-  }, []);
+  }, [notificationSetting, notificationAudio]);
 
   // 🧊 Bubble animation variants
   const bubbleVariants = {
@@ -367,42 +427,20 @@ const Notifications = () => {
         size="large"
         color="error"
         onClick={openMenu}
-        sx={{ color: anchorEl ? 'error.main' : 'text.secondary' }}
-      >
-        <Badge badgeContent={categorizedTriggers.idle.length} color="error">
-          <IconBellRinging size="21" stroke="1.5" />
-        </Badge>
-      </IconButton>
-
-      {/* Test trigger button - UPDATED FOR MQTT DATA STRUCTURE */}
-      {/* <IconButton
-        size="large"
-        color="error"
-        onClick={() => {
-          window.postMessage(
-            {
-              type: 'app:new-alarm',
-              detail: {
-                alarm: {
-                  visitorName: 'Kaori',
-                  cardName: '676986',
-                  maskedAreaName: 'MA-Lantai 2',
-                  floorplanName: 'FP Lantai 2',
-                  action: 'high',
-                  priority: 'medium', // Added priority
-                  color: '#4caf50', // This will be used for chip color
-                  status: 'EXAMPLE', // Added status for category
-                },
-              },
-            },
-            '*',
-          );
+        sx={{
+          color: anchorEl ? 'error.main' : isMuted ? 'text.disabled' : 'text.secondary',
+          animation: isFlickering ? `${bellFlicker} 0.5s ease-in-out infinite` : 'none',
+          transition: 'color 0.2s ease',
         }}
       >
-        <Badge badgeContent="!" color="error">
-          <IconBellRinging size="21" stroke="1.5" />
+        <Badge badgeContent={categorizedTriggers.idle.length} color="error">
+          {isMuted ? (
+            <IconBellOff size="21" stroke="1.5" />
+          ) : (
+            <IconBellRinging size="21" stroke="1.5" />
+          )}
         </Badge>
-      </IconButton> */}
+      </IconButton>
 
       {/* 🎨 Animated Bubble Stack */}
       <Portal>
@@ -422,7 +460,7 @@ const Notifications = () => {
                   position: 'fixed',
                   top: pos?.top ?? 64,
                   left: pos ? pos.left : undefined,
-                  zIndex: 2000,
+                  zIndex: 1050, // Below MUI Menu/Popover/Modal (1300) and Tooltip (1500)
                   width: 360,
                 }}
               >
@@ -572,7 +610,9 @@ const Notifications = () => {
         onClose={closeMenu}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        sx={{ '& .MuiMenu-paper': { width: '360px' } }}
+        sx={{
+          '& .MuiMenu-paper': { width: '360px' },
+        }}
       >
         <Box
           sx={{
@@ -588,7 +628,22 @@ const Notifications = () => {
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Typography variant="h6">All Notifications</Typography>
 
-            <Stack direction="row" spacing={0.5}>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              {/* Mute Notification Bubbles Button */}
+              <Tooltip title={isMuted ? 'Unmute Notifications (Enable Bubbles)' : 'Mute Notifications (Disable Bubbles)'}>
+                <IconButton
+                  size="small"
+                  onClick={toggleMute}
+                  color={isMuted ? 'warning' : 'default'}
+                >
+                  {isMuted ? (
+                    <NotificationsOffIcon fontSize="small" />
+                  ) : (
+                    <NotificationsActiveIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+
               <Tooltip title="Mark all as seen">
                 <span>
                   <IconButton

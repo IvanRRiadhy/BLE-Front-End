@@ -40,11 +40,11 @@ import { ProductFiterType } from 'src/types/apps/eCommerce';
 
 const ProductFilter = () => {
   const dispatch = useDispatch();
-  const products = useSelector((state) => state.ecommerceReducer.products);
-  const active = useSelector((state) => state.ecommerceReducer.filters);
-  const checkactive = useSelector((state) => state.ecommerceReducer.sortBy);
-  const customizer = useSelector((state) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
+  // const products = useSelector((state) => state.ecommerceReducer.products);
+  // const active = useSelector((state) => state.ecommerceReducer.filters);
+  // const checkactive = useSelector((state) => state.ecommerceReducer.sortBy);
+  const settings = useSelector((state) => state.settings);
+  const br = `${settings.borderRadius}px`;
 
   const getUniqueData = (data: string[], attr: any) => {
     let newVal = data.map((curElem) => {
@@ -57,8 +57,8 @@ const ProductFilter = () => {
     return (newVal = ['All', ...Array.from(new Set(newVal))]);
   };
 
-  const filterbyGender = getUniqueData(products, 'gender');
-  const filterbyColors = getUniqueData(products, 'colors');
+  // const filterbyGender = getUniqueData(products, 'gender');
+  // const filterbyColors = getUniqueData(products, 'colors');
 
   const filterCategory: ProductFiterType[] = [
     {
@@ -165,7 +165,7 @@ const ProductFilter = () => {
           return (
             <ListItemButton
               sx={{ mb: 1, mx: 3, borderRadius: br }}
-              selected={active.category === `${filter.sort}`}
+              // selected={active.category === `${filter.sort}`}
               onClick={() => dispatch(filterProducts({ category: `${filter.sort}` }))}
               key={filter.id}
             >
@@ -186,7 +186,7 @@ const ProductFilter = () => {
           return (
             <ListItemButton
               sx={{ mb: 1, mx: 3, borderRadius: br }}
-              selected={checkactive === `${filter.value}`}
+              // selected={checkactive === `${filter.value}`}
               onClick={() => dispatch(sortByProducts(`${filter.value}`))}
               key={filter.id + filter.label + filter.value}
             >
@@ -206,7 +206,7 @@ const ProductFilter = () => {
             By Gender
           </Typography>
           <br />
-          <FormGroup>
+          {/* <FormGroup>
             {filterbyGender.map((gen) => (
               <FormControlLabel
                 key={gen}
@@ -220,7 +220,7 @@ const ProductFilter = () => {
                 label={gen}
               />
             ))}
-          </FormGroup>
+          </FormGroup> */}
         </Box>
         <Divider></Divider>
         {/* ------------------------------------------- */}
@@ -237,7 +237,7 @@ const ProductFilter = () => {
                 control={
                   <Radio
                     value={price.value}
-                    checked={active.price === price.value}
+                    // checked={active.price === price.value}
                     onChange={handlerPriceFilter}
                   />
                 }
@@ -254,7 +254,7 @@ const ProductFilter = () => {
         {/* Filter By colors */}
         {/* ------------------------------------------- */}
         <Box p={3} pt={0}>
-          <Stack direction={'row'} flexWrap="wrap" gap={1}>
+          {/* <Stack direction={'row'} flexWrap="wrap" gap={1}>
             {filterbyColors.map((curColor) => {
               if (curColor !== 'All') {
                 return (
@@ -280,7 +280,7 @@ const ProductFilter = () => {
                 return <Box key={curColor} sx={{ display: 'none' }}></Box>;
               }
             })}
-          </Stack>
+          </Stack> */}
         </Box>
         <Divider></Divider>
         {/* ------------------------------------------- */}

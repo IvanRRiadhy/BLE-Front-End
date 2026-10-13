@@ -220,7 +220,8 @@ const FloorplanList = () => {
               : it,
           ),
         );
-        toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        // toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        toast.error(`${error.response.data.msg} Stopped remaining deletions`);
         break;
       }
     }

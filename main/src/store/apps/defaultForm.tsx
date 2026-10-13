@@ -182,7 +182,7 @@ export const defaultBleReaderFilter: BleReaderFilter = {
   SearchValue: '',
   filters: {
     BrandId: [],
-    EngineReaderId: [],
+    // EngineReaderId: [],
   },
 };
 //#endregion
@@ -374,6 +374,7 @@ export const defaultIntegrationForm: IntegrationType = {
   apiKeyField: '',
   apiKeyValue: '',
   applicationId: localStorage.getItem('applicationId') || '',
+  scopes: '',
   createdBy: '',
   createdAt: '',
   updatedBy: '',

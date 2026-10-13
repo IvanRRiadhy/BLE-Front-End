@@ -12,10 +12,12 @@ const BrandSearch = () => {
   );
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
+    if(searchValue.trim() !== (brandFilter.SearchValue || '')){
+      const delayDebounce = setTimeout(() => {
       dispatch(UpdateFilter({ ...brandFilter,Start: 0, SearchValue: searchValue.trim() }));
     }, 1000);
     return () => clearTimeout(delayDebounce);
+    }
   }, [searchValue, dispatch, brandFilter]);
 
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

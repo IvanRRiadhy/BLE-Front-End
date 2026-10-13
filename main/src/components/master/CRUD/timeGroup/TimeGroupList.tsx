@@ -179,7 +179,9 @@ const TimeGroupList = () => {
               : it,
           ),
         );
-        toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        // toast.error(`Failed to delete "${item.name}". Stopped remaining deletions.`);
+        // console.log("ERROR: ", error.response.data.msg)
+        toast.error(`${error.response.data.msg} Stopped remaining deletions`);
         break; // Stop the whole loop on failure
       }
     }

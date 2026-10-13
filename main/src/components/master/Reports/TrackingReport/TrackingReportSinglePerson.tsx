@@ -40,6 +40,7 @@ import {
   IconPlus,
   IconMinus,
   IconArrowLeft,
+  IconUserOff,
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { toLocalDate } from 'src/utils/time';
@@ -175,9 +176,9 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
     let typeLabel: 'Member' | 'Visitor' = selectedPersonInfo?.type === 'member' ? 'Member' : 'Visitor';
     let identId = selectedPersonInfo?.identityId || '-';
     let cardNo = selectedPersonInfo?.cardNumber || '-';
-    let userEmail = selectedPersonInfo?.email || 'user@example.com';
-    let userPhone = selectedPersonInfo?.phone || '+62 812 3456 7890';
-    let orgName = selectedPersonInfo?.organization || 'PT. Masela';
+    let userEmail = selectedPersonInfo?.email || '-';
+    let userPhone = selectedPersonInfo?.phone || '-';
+    let orgName = selectedPersonInfo?.organization || '-';
 
     // Parse sessions to records
     const records: MovementRecord[] = [];
@@ -222,14 +223,14 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
           exitTime: exitDate ? dayjs(exitDate).format('MMM D, YYYY HH:mm') : '—',
           rawEnterTime: s.enterTime,
           rawExitTime: s.exitTime,
-          buildingName: s.buildingName || 'Buni',
-          floorName: s.floorName || 'Lantai 1',
-          floorplanName: s.floorplanId ? `FP ${s.floorName || 'Lantai 1'}` : 'FP Lantai 1',
-          areaName: s.areaName || 'L1 Lobby',
+          buildingName: s.buildingName || '-',
+          floorName: s.floorName || '-',
+          floorplanName: s.floorplanId ? `FP ${s.floorName || '-'}` : '-',
+          areaName: s.areaName || '-',
           durationMinutes: dur,
           durationStr: dur > 0 ? `${Math.floor(dur / 60) > 0 ? `${Math.floor(dur / 60)}h ` : ''}${dur % 60}m` : '0m',
           status: recordStatus,
-          hostName: s.hostName || 'PT. Masela',
+          hostName: s.hostName || '-',
         });
       });
 
@@ -256,14 +257,14 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
             exitTime: exitDate ? dayjs(exitDate).format('MMM D, YYYY HH:mm') : '—',
             rawEnterTime: s.enterTime,
             rawExitTime: s.exitTime,
-            buildingName: s.buildingName || 'Buni',
-            floorName: s.floorName || 'Lantai 1',
-            floorplanName: 'FP Lantai 1',
-            areaName: s.areaName || p.currentArea || 'L1 Lobby',
+            buildingName: s.buildingName || '-',
+            floorName: s.floorName || '-',
+            floorplanName: '-',
+            areaName: s.areaName || p.currentArea || '-',
             durationMinutes: dur,
             durationStr: dur > 0 ? `${Math.floor(dur / 60) > 0 ? `${Math.floor(dur / 60)}h ` : ''}${dur % 60}m` : '0m',
             status: exitDate ? 'Closed' : 'Active',
-            hostName: 'PT. Masela',
+            hostName: '-',
           });
         });
       }
@@ -275,23 +276,23 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
     const durationFormatted = durationHours > 0 ? `${durationHours}h ${mins}m` : `${mins}m`;
 
     // First / Last Seen formatted
-    const fSeen = firstTime ? dayjs(toLocalDate(firstTime)!).format('MMM D, YYYY HH:mm') : 'Sep 1, 2026 08:32';
-    const lSeen = lastTime ? dayjs(toLocalDate(lastTime)!).format('MMM D, YYYY HH:mm') : 'Sep 1, 2026 10:38';
+    const fSeen = firstTime ? dayjs(toLocalDate(firstTime)!).format('MMM D, YYYY HH:mm') : '-';
+    const lSeen = lastTime ? dayjs(toLocalDate(lastTime)!).format('MMM D, YYYY HH:mm') : '-';
 
     // Status: On Site or Off Site
     const isCurrentlyOnSite = latestSession ? !latestSession.exitTime : records.some((r) => r.status === 'Active');
     const statusText = isCurrentlyOnSite ? 'On Site' : 'Off Site';
     const activeRecord = records.find((r) => r.status === 'Active') || records[records.length - 1];
 
-    let sinceText = 'Since 10:09 (29 minutes)';
+    let sinceText = '-';
     if (activeRecord?.rawEnterTime) {
       const enterD = dayjs(toLocalDate(activeRecord.rawEnterTime)!);
       const diffMins = dayjs().diff(enterD, 'minute');
       sinceText = `Since ${enterD.format('HH:mm')} (${diffMins} minutes)`;
     }
 
-    const curArea = activeRecord?.areaName || 'Ruangan Programmer';
-    const curBldgFlr = `${activeRecord?.buildingName || 'Buni'} - ${activeRecord?.floorName || 'Lantai 2'}`;
+    const curArea = activeRecord?.areaName || '-';
+    const curBldgFlr = `${activeRecord?.buildingName || '-'} - ${activeRecord?.floorName || '-'}`;
 
     // Calculate Presence Over Time (Hourly buckets from 00:00 to 23:00)
     const hours = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
@@ -315,8 +316,8 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
     const areaLabels = Object.keys(areaMap);
     const areaSeries = Object.values(areaMap);
     if (areaLabels.length === 0) {
-      areaLabels.push('Ruangan Programmer', 'L1 Lobby');
-      areaSeries.push(252, 252); // 4h 12m each (50%)
+      areaLabels.push('-', '-');
+      areaSeries.push(0, 0);
     }
 
     return {
@@ -327,9 +328,9 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
       email: userEmail,
       phone: userPhone,
       organization: orgName,
-      totalVisits: records.length || 4,
-      totalDurationMinutes: totMin || 504,
-      totalDurationFormatted: totMin > 0 ? durationFormatted : '8h 24m',
+      totalVisits: records.length || 0,
+      totalDurationMinutes: totMin || 0,
+      totalDurationFormatted: totMin > 0 ? durationFormatted : '-',
       firstSeenStr: fSeen,
       lastSeenStr: lSeen,
       currentStatus: statusText,
@@ -338,7 +339,7 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
       currentBuildingFloor: curBldgFlr,
       movementRecords: records,
       presenceCategories: hours,
-      presenceChartData: hourlyBuckets.some((v) => v > 0) ? hourlyBuckets : [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      presenceChartData: hourlyBuckets.some((v) => v > 0) ? hourlyBuckets : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       areaBreakdown: { labels: areaLabels, series: areaSeries },
     };
   }, [data, selectedPersonInfo]);
@@ -350,19 +351,27 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
   const activeFloorplan = useMemo(() => {
     if (!floorplansData || floorplansData.length === 0) return null;
     const activeRec = movementRecords.find((r) => r.status === 'Active') || movementRecords[0];
-    if (activeRec?.floorplanName) {
+    if (!activeRec) return null;
+
+    if (activeRec.floorplanName && activeRec.floorplanName !== '-') {
       const match = floorplansData.find(
-        (f: any) => f.name === activeRec.floorplanName || f.id === activeRec.floorplanName
+        (f: any) =>
+          f.name === activeRec.floorplanName ||
+          f.id === activeRec.floorplanName ||
+          f.name?.toLowerCase() === activeRec.floorplanName.toLowerCase()
       );
       if (match) return match;
     }
-    if (activeRec?.floorName) {
+    if (activeRec.floorName && activeRec.floorName !== '-') {
       const match = floorplansData.find(
-        (f: any) => f.floor?.name === activeRec.floorName || f.name?.includes(activeRec.floorName)
+        (f: any) =>
+          f.floor?.name === activeRec.floorName ||
+          f.name?.includes(activeRec.floorName) ||
+          f.floor?.name?.toLowerCase() === activeRec.floorName.toLowerCase()
       );
       if (match) return match;
     }
-    return floorplansData[0];
+    return null;
   }, [floorplansData, movementRecords]);
 
   const floorplanImageUrl = useMemo(() => {
@@ -1098,7 +1107,7 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
               </Box>
             </Stack>
 
-            {/* Real Floorplan Image & Beacon Renderer Canvas */}
+            {/* Real Floorplan Image & Beacon Renderer Canvas / Fallback State */}
             <Box
               sx={{
                 flex: 1,
@@ -1114,76 +1123,114 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
                 justifyContent: 'center',
               }}
             >
-              {floorplanImgObj ? (
-                <Box sx={{ transform: `scale(${zoomLevel})`, transition: 'transform 0.2s linear' }}>
-                  <Stage width={stageWidth} height={stageHeight}>
-                    <Layer>
-                      <KonvaImage image={floorplanImgObj} width={stageWidth} height={stageHeight} />
-                      <BeaconRenderer
-                        id={selectedPersonInfo?.id || 'current-beacon-pin'}
-                        x={beaconPos.x}
-                        y={beaconPos.y}
-                        beaconSize={1.1}
-                        clickable={false}
-                        label={personName}
-                        isSecurity={false}
-                        isMember={personTypeLabel === 'Member'}
-                        isVisitor={personTypeLabel === 'Visitor'}
-                        faceImage={selectedPersonInfo?.avatarUrl}
-                        area={currentAreaName}
-                        floorplan={currentBuildingFloor}
-                        time={lastSeenStr}
-                      />
-                    </Layer>
-                  </Stage>
-                </Box>
-              ) : (
+              {activeFloorplan ? (
+                floorplanImgObj ? (
+                  <Box sx={{ transform: `scale(${zoomLevel})`, transition: 'transform 0.2s linear' }}>
+                    <Stage width={stageWidth} height={stageHeight}>
+                      <Layer>
+                        <KonvaImage image={floorplanImgObj} width={stageWidth} height={stageHeight} />
+                        <BeaconRenderer
+                          id={selectedPersonInfo?.id || 'current-beacon-pin'}
+                          x={beaconPos.x}
+                          y={beaconPos.y}
+                          beaconSize={1.1}
+                          clickable={false}
+                          label={personName}
+                          isSecurity={false}
+                          isMember={personTypeLabel === 'Member'}
+                          isVisitor={personTypeLabel === 'Visitor'}
+                          faceImage={selectedPersonInfo?.avatarUrl}
+                          area={currentAreaName}
+                          floorplan={currentBuildingFloor}
+                          time={lastSeenStr}
+                        />
+                      </Layer>
+                    </Stage>
+                  </Box>
+                ) : (
+                  <Stack alignItems="center" spacing={1} py={4}>
+                    <CircularProgress size={28} />
+                    <Typography variant="caption" color="text.secondary">
+                      Loading floorplan image...
+                    </Typography>
+                  </Stack>
+                )
+              ) : isLoading ? (
                 <Stack alignItems="center" spacing={1} py={4}>
                   <CircularProgress size={28} />
                   <Typography variant="caption" color="text.secondary">
-                    Loading floorplan image...
+                    Loading current location...
                   </Typography>
+                </Stack>
+              ) : (
+                <Stack alignItems="center" spacing={1.5} py={4} px={2} textAlign="center">
+                  <Box
+                    sx={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: '50%',
+                      bgcolor: '#F1F5F9',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    <IconUserOff size={28} stroke={1.5} />
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={700} color="text.primary">
+                      Person Not Found
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 260, display: 'block', mt: 0.5 }}>
+                      No active location or floorplan found for this person.
+                    </Typography>
+                  </Box>
                 </Stack>
               )}
 
-              {/* Map Zoom Controls Top-Left */}
-              <Stack
-                spacing={0.5}
-                sx={{
-                  position: 'absolute',
-                  top: 12,
-                  left: 12,
-                  bgcolor: 'background.paper',
-                  borderRadius: '8px',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  p: 0.5,
-                  zIndex: 5,
-                }}
-              >
-                <IconButton size="small" onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 1.8))}>
-                  <IconPlus size={16} />
-                </IconButton>
-                <IconButton size="small" onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.6))}>
-                  <IconMinus size={16} />
-                </IconButton>
-              </Stack>
+              {/* Map Zoom Controls Top-Left (Only when active floorplan exists) */}
+              {activeFloorplan && (
+                <Stack
+                  spacing={0.5}
+                  sx={{
+                    position: 'absolute',
+                    top: 12,
+                    left: 12,
+                    bgcolor: 'background.paper',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    p: 0.5,
+                    zIndex: 5,
+                  }}
+                >
+                  <IconButton size="small" onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 1.8))}>
+                    <IconPlus size={16} />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.6))}>
+                    <IconMinus size={16} />
+                  </IconButton>
+                </Stack>
+              )}
 
-              {/* Floor Chip Bottom-Right */}
-              <Chip
-                label={activeFloorplan?.name || activeFloorplan?.floor?.name || 'Lantai 2'}
-                size="small"
-                sx={{
-                  position: 'absolute',
-                  bottom: 12,
-                  right: 12,
-                  bgcolor: 'background.paper',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  fontWeight: 600,
-                  zIndex: 5,
-                }}
-              />
+              {/* Floor Chip Bottom-Right (Only when active floorplan exists) */}
+              {activeFloorplan && (
+                <Chip
+                  label={activeFloorplan?.name || activeFloorplan?.floor?.name || 'Floor Plan'}
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    bottom: 12,
+                    right: 12,
+                    bgcolor: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    fontWeight: 600,
+                    zIndex: 5,
+                  }}
+                />
+              )}
             </Box>
           </Card>
         </Grid>

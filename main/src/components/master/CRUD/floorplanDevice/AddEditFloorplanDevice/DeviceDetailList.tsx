@@ -126,7 +126,7 @@ const DeviceDetailList = () => {
     updatedBy: '',
     updatedAt: '',
   });
-  const currentDevice = savedDevices.find((d) => d.id === device?.id) || null;
+  const currentDevice = savedDevices.find((d: FloorplanDeviceType) => d.id === device?.id) || null;
   console.log("Current Device", currentDevice)
   const [otherReader, setOtherReader] = useState<FloorplanDeviceType[]>([]);
   const currentReader = bleReaderData.find((r) => r.id === formData.readerId) || null;

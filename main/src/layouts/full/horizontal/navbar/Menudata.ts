@@ -37,6 +37,7 @@ import {
   IconActivity,
   IconBroadcast,
   IconHeartRateMonitor,
+  IconPuzzle,
 } from '@tabler/icons-react';
 import { AlarmSettingType } from 'src/store/apps/alarmsetting/alarmSettings';
 import { RootState, useSelector } from 'src/store/Store';
@@ -170,6 +171,7 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
           children: [
             { id: 'devices-brand', title: 'Brand', icon: IconBadgeTm, href: '/master/brand/' },
             { id: 'devices-reader', title: 'Ble Reader', icon: IconDeviceIpad, href: '/master/blereader/' },
+            { id: 'devices-cctv', title: 'Access CCTV', icon: IconDeviceCctv, href: '/master/accesscctv/' },
             { id: 'devices-mapping', title: 'Device Mapping', icon: IconDevices, href: '/master/device/' },
           ],
         },
@@ -238,6 +240,13 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
           title: 'Application',
           icon: IconAppWindow,
           href: '/master/application/',
+        },
+        {
+          id: 'master-integration',
+          title: 'Integration',
+          icon: IconPuzzle,
+          href: '/master/integration/',
+          key: ['core.masterData'],
         },
       ],
     },

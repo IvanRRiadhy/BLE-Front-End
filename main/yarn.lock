@@ -4388,6 +4388,11 @@ es-toolkit@^1.39.3:
   resolved "https://registry.npmjs.org/es-toolkit/-/es-toolkit-1.39.9.tgz"
   integrity sha512-9OtbkZmTA2Qc9groyA1PUNeb6knVTkvB2RSdr/LcJXDL8IdEakaxwXLHXa7VX/Wj0GmdMJPR3WhnPGhiP3E+qg==
 
+es6-promise@^4.2.8:
+  version "4.2.8"
+  resolved "https://registry.npmjs.org/es6-promise/-/es6-promise-4.2.8.tgz"
+  integrity sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==
+
 esbuild@^0.25.0:
   version "0.25.12"
   resolved "https://registry.npmjs.org/esbuild/-/esbuild-0.25.12.tgz"
@@ -4951,6 +4956,14 @@ flatted@^3.2.9:
   resolved "https://registry.npmjs.org/flatted/-/flatted-3.3.3.tgz"
   integrity sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==
 
+flv.js@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.npmjs.org/flv.js/-/flv.js-1.6.2.tgz"
+  integrity sha512-xre4gUbX1MPtgQRKj2pxJENp/RnaHaxYvy3YToVVCrSmAWUu85b9mug6pTXF6zakUjNP2lFWZ1rkSX7gxhB/2A==
+  dependencies:
+    es6-promise "^4.2.8"
+    webworkify-webpack "^2.1.5"
+
 follow-redirects@^1.15.6:
   version "1.15.11"
   resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.11.tgz"
@@ -5429,6 +5442,11 @@ highlightjs-vue@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/highlightjs-vue/-/highlightjs-vue-1.0.0.tgz"
   integrity sha512-PDEfEF102G23vHmPhLyPboFCD+BkMGu+GuJe2d9/eH4FsCwvgBpnc9n0pGE+ffKdph38s6foEZiEjdgHdzp+IA==
+
+hls.js@^1.7.3:
+  version "1.7.3"
+  resolved "https://registry.npmjs.org/hls.js/-/hls.js-1.7.3.tgz"
+  integrity sha512-MsPlx6yVW4Qv4C7mEVou4/gk/5cN2dVxOTnrNjPSmyH2f0Ln+/UkG10Ax1PE6OvrmTVPKgQYozTtBaPOuCzq7A==
 
 hoist-non-react-statics@^3.3.0, hoist-non-react-statics@^3.3.1:
   version "3.3.2"
@@ -6378,6 +6396,7 @@ magic-string@^0.30.19:
     "@tiptap/extension-table" "^2.9.1"
     "@tiptap/react" "^2.9.1"
     "@tiptap/starter-kit" "^2.9.1"
+    altcha "^3.2.2"
     apexcharts "^5.3.5"
     axios "^1.10.0"
     axios-mock-adapter "2.0.0"
@@ -6389,6 +6408,7 @@ magic-string@^0.30.19:
     exceljs "^4.4.0"
     express "^4.21.2"
     file-saver "^2.0.5"
+    flv.js "^1.6.2"
     formik "^2.4.5"
     formik-mui "^5.0.0-alpha.0"
     framer-motion "^10.16.4"
@@ -9801,6 +9821,11 @@ warning@^4.0.3:
   integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
   dependencies:
     loose-envify "^1.0.0"
+
+webworkify-webpack@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.npmjs.org/webworkify-webpack/-/webworkify-webpack-2.1.5.tgz"
+  integrity sha512-2akF8FIyUvbiBBdD+RoHpoTbHMQF2HwjcxfDvgztAX5YwbZNyrtfUMgvfgFVsgDhDPVTlkbb5vyasqDHfIDPQw==
 
 whatwg-encoding@^3.1.1:
   version "3.1.1"
