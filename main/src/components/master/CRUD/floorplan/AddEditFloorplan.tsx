@@ -113,7 +113,7 @@ const AddEditFloorplan = ({ type, floorplan, fixedFloorId, trigger }: FormType) 
     ) {
       // Fetch the image from the server
       // console.log("fetching floorplan image");
-      fetch(`${BASE_URL}${floorplan.floorplanImage}`)
+      fetch(getCdnUrl(floorplan.floorplanImage))
         .then((res) => res.blob())
         .then((blob) => {
           // Create a File object from the Blob

@@ -5,18 +5,15 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Grid2 as Grid,
   IconButton,
   Tooltip,
   Typography,
   CircularProgress,
-  Autocomplete,
-  TextField,
   Box,
   FormHelperText,
   Stack,
 } from '@mui/material';
-import { IconPencil, IconPlus } from '@tabler/icons-react';
+import { IconInfoCircle, IconPencil, IconPlus } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
@@ -48,7 +45,7 @@ const AddEditFloor = ({ type, floor, fixedBuildingId, trigger }: FormType) => {
   // ✅ Hooks
   const addMutation = useAddFloor();
   const editMutation = useEditFloor();
-  const { data: buildingData = [], isLoading: buildingLoading } = useAllBuilding();
+  const { data: buildingData = [] } = useAllBuilding();
 
   // 🧭 Open/close dialog
   const handleClickOpen = () => {
@@ -89,6 +86,7 @@ const AddEditFloor = ({ type, floor, fixedBuildingId, trigger }: FormType) => {
         id: formData.id,
         name: formData.name,
         buildingId: formData.buildingId,
+        level: Number(formData.level) || 0,
       };
 
       if (type === 'add') {
@@ -112,7 +110,7 @@ const AddEditFloor = ({ type, floor, fixedBuildingId, trigger }: FormType) => {
   const handleInputChange = (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | { target: { id?: string; name?: string; value: string } },
+      | { target: { id?: string; name?: string; value: any } },
   ) => {
     const { id, name, value } = e.target;
     const key = (id || name) as keyof typeof formData; // ✅ explicitly assert string key
@@ -190,7 +188,7 @@ const AddEditFloor = ({ type, floor, fixedBuildingId, trigger }: FormType) => {
               </Box>
 
               {/* Floor Name */}
-              <CustomFormLabel htmlFor="floor-name">Name</CustomFormLabel>
+              <CustomFormLabel htmlFor="name">Name</CustomFormLabel>
               <CustomTextField
                 id="name"
                 value={formData.name}
@@ -200,6 +198,36 @@ const AddEditFloor = ({ type, floor, fixedBuildingId, trigger }: FormType) => {
                 error={!!formErrors.name}
                 helperText={formErrors.name}
               />
+
+              {/* Floor Level */}
+              <Box>
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <CustomFormLabel htmlFor="level" sx={{ mt: 0 }}>
+                    Floor Level
+                  </CustomFormLabel>
+                  <Tooltip
+                    title="Set to 0 for Ground Floor (Level 0), positive numbers (e.g. 1, 2) for upper floors, and negative numbers (e.g. -1, -2) for basement / underground levels."
+                    arrow
+                    placement="top"
+                  >
+                    <IconButton size="small" sx={{ p: 0.25, color: 'text.secondary' }}>
+                      <IconInfoCircle size={16} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+                <CustomTextField
+                  id="level"
+                  type="number"
+                  value={formData.level ?? 0}
+                  onChange={handleInputChange}
+                  fullWidth
+                  variant="outlined"
+                  placeholder="e.g. 0 for ground, 1 for 1st floor, -1 for basement"
+                />
+                <FormHelperText sx={{ mt: 0.5, color: 'text.secondary' }}>
+                  Use <strong>0</strong> for Ground Level, positive numbers (1, 2...) for above ground, and negative numbers (-1, -2...) for underground / basement levels.
+                </FormHelperText>
+              </Box>
             </Stack>
           </Box>
         </DialogContent>

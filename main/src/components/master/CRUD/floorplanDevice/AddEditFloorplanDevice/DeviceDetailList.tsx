@@ -34,8 +34,9 @@ import {
   // CancelAllDevicesEditing,
 } from 'src/store/apps/crud/floorplanDevice';
 import { useMaskedAreaList } from 'src/hooks/useMaskedArea';
-import { useAllUnassignedCCTV } from 'src/hooks/useCCTV';
+import { useAllCCTV, useAllUnassignedCCTV } from 'src/hooks/useCCTV';
 import { useAllReaders, useAllUnassignedReaders } from 'src/hooks/useReader';
+import { useLicenseInfo } from 'src/hooks/useInfo';
 import { DeviceType, readerType } from 'src/types/crud/input';
 import { isEqual } from 'lodash';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
@@ -100,7 +101,19 @@ const DeviceDetailList = () => {
     },
   });
 
-  const { data: CCTVData = [] } = useAllUnassignedCCTV();
+  const activeFeatures = useSelector(
+    (state: RootState) => state.sessionReducer.activeFeatures,
+  );
+  const { data: licenseInfo } = useLicenseInfo();
+
+  const isCctvModuleEnabled = Boolean(
+    (Array.isArray(activeFeatures) && activeFeatures.includes('module.cctv')) ||
+    licenseInfo?.features?.modules?.['module.cctv']?.isEnabled ||
+    licenseInfo?.features?.modules?.['cctv']?.isEnabled
+  );
+
+  const { data: CCTVData = [] } = useAllCCTV();
+  const { data: allUnassignedCCTV = [] } = useAllUnassignedCCTV();
   const { data: bleReaderData = [] } = useAllReaders();
   const { data: allUnassignedReaders = [] } = useAllUnassignedReaders();
 
@@ -144,6 +157,25 @@ const DeviceDetailList = () => {
       return true;
     });
   }, [currentReader, currentDevice?.reader, allUnassignedReaders]);
+
+  const currentCCTV =
+    CCTVData.find((c) => c.id === formData.accessCctvId) ||
+    currentDevice?.accessCctv ||
+    null;
+  const availableCCTVOptions = React.useMemo(() => {
+    const rawOptions = [
+      ...(currentDevice?.accessCctv ? [currentDevice.accessCctv] : []),
+      ...(currentCCTV ? [currentCCTV] : []),
+      ...allUnassignedCCTV,
+    ];
+    const seen = new Set<string>();
+    return rawOptions.filter((c) => {
+      if (!c || !c.id) return false;
+      if (seen.has(c.id)) return false;
+      seen.add(c.id);
+      return true;
+    });
+  }, [currentCCTV, currentDevice?.accessCctv, allUnassignedCCTV]);
 
   // When device is selected for editing, initialize form
   useEffect(() => {
@@ -486,7 +518,7 @@ const DeviceDetailList = () => {
                 variant="outlined"
                 required
               >
-                {DeviceType.map((deviceType) => (
+                {DeviceType.filter((deviceType) => isCctvModuleEnabled || deviceType.value !== 'Cctv').map((deviceType) => (
                   <MenuItem
                     key={deviceType.value}
                     value={deviceType.value}
@@ -504,8 +536,8 @@ const DeviceDetailList = () => {
                 <CustomFormLabel htmlFor="access-cctv-id">Access CCTV</CustomFormLabel>
                 <CustomAutocomplete
                   label="Access CCTV"
-                  options={availableCCTVs}
-                  value={availableCCTVs.find((x) => x.id === formData.accessCctvId) || null}
+                  options={availableCCTVOptions}
+                  value={availableCCTVOptions.find((x) => x.id === formData.accessCctvId) || null}
                   onChange={(newVal) => {
                     const newFormData = {
                       ...formData,

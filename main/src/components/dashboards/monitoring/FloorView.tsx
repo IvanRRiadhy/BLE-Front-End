@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import {
@@ -29,6 +29,8 @@ import { fetchMembers, memberType } from 'src/store/apps/crud/member';
 import { fetchVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import BeaconDetailPopup from './Popup/BeaconDetailPopup';
 import TrackingDetailPopup from './Popup/TrackingDetailPopup';
+import ReaderDetailPopup from './Popup/ReaderDetailPopup';
+import CCTVDetailPopup from './Popup/CCTVDetailPopup';
 import { setScreenDisplay, setScreenFloorplan, setScreenSettings, swapScreen } from 'src/store/apps/monitoring/layout';
 import {
   fetchGeoFencingAlarmsAll,
@@ -212,9 +214,7 @@ const FloorView: React.FC<{
   }, [isHovered, isDragging, zoomable, wakeUpOverlays]);
 
   const floorplanImage = actFloorplan?.floorplanImage
-    ? actFloorplan.floorplanImage.startsWith('/Uploads/')
-      ? `${BASE_URL}${actFloorplan.floorplanImage}`
-      : actFloorplan.floorplanImage
+    ? getCdnUrl(actFloorplan.floorplanImage)
     : 'No Active Floorplan';
 
   const { data: Devices = [] } = useAllFloorplanDevices();
@@ -225,7 +225,19 @@ const FloorView: React.FC<{
   // Popup State
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [openTrackDetail, setOpenTrackDetail] = useState(false);
+  const [readerDetailOpen, setReaderDetailOpen] = useState(false);
+  const [cctvDetailOpen, setCctvDetailOpen] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<FloorplanDeviceType | null>(null);
   const selectedBeacon = useSelector((state: RootState) => state.BeaconReducer.selectedBeacon);
+
+  const handleSelectDevice = (device: FloorplanDeviceType) => {
+    setSelectedDevice(device);
+    if (device.type?.toLowerCase() === 'cctv') {
+      setCctvDetailOpen(true);
+    } else {
+      setReaderDetailOpen(true);
+    }
+  };
 
   const handleSelectBeacon = (info: {
     id: string;
@@ -945,7 +957,7 @@ const isBoundaryActive = isActive('boundary');
               { label: 'Show Areas', checked: showArea, onChange: setShowArea },
               { label: 'Show Area Name', checked: showAreaName, onChange: setShowAreaName },
               { label: 'Show Occupancy Text', checked: showOccupancy, onChange: setShowOccupancy },
-              { label: 'Show Gateways', checked: showGates, onChange: setShowGates },
+              { label: 'Show Devices', checked: showGates, onChange: setShowGates },
               ...(isGeoFencingActive ? [{ label: 'Show GeoFence Areas', checked: showGeoFence, onChange: setShowGeoFence }] : []),
               ...(isOverPopulatingActive ? [{ label: 'Show Over Population Areas', checked: showOverPopulate, onChange: setShowOverPopulate }] : []),
               ...(isStayOnAreaActive ? [{ label: 'Show Stay on Areas', checked: showStayOnArea, onChange: setShowStayOnArea }] : []),
@@ -1030,7 +1042,7 @@ const isBoundaryActive = isActive('boundary');
             </Box>
             <Box>
               <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 700 }}>
-                Gateway Size: {gateSize.toFixed(1)}
+                Device Size: {gateSize.toFixed(1)}
               </Typography>
               <Slider
                 size="small"
@@ -1136,6 +1148,7 @@ const isBoundaryActive = isActive('boundary');
               gateSize={gateSize}
               topic={topic}
               onSelectBeacon={handleSelectBeacon}
+              onSelectDevice={handleSelectDevice}
               detailDialogOpen={detailDialogOpen}
               setDetailDialogOpen={setDetailDialogOpen}
               openTrackDetail={openTrackDetail}
@@ -1306,6 +1319,36 @@ const isBoundaryActive = isActive('boundary');
             </>
           );
         })()}
+
+      {/* Reader Detail Popup */}
+      <ReaderDetailPopup
+        open={readerDetailOpen}
+        onClose={() => {
+          setReaderDetailOpen(false);
+          setSelectedDevice(null);
+        }}
+        device={selectedDevice}
+        area={
+          Areas.find((a: MaskedAreaType) => a.id === selectedDevice?.floorplanMaskedAreaId) ||
+          selectedDevice?.floorplanMaskedArea ||
+          null
+        }
+      />
+
+      {/* CCTV Detail Popup */}
+      <CCTVDetailPopup
+        open={cctvDetailOpen}
+        onClose={() => {
+          setCctvDetailOpen(false);
+          setSelectedDevice(null);
+        }}
+        device={selectedDevice}
+        area={
+          Areas.find((a: MaskedAreaType) => a.id === selectedDevice?.floorplanMaskedAreaId) ||
+          selectedDevice?.floorplanMaskedArea ||
+          null
+        }
+      />
     </Box>
   );
 };

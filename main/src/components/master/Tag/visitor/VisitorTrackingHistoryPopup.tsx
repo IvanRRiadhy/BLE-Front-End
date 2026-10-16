@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import {
   Box,
   Button,
@@ -114,7 +114,7 @@ const VisitorTrackingHistoryPopup = ({ open, onClose, visitor }: VisitorTracking
   useEffect(() => {
     if (activeFloorImage) {
       const img = new window.Image();
-      img.src = `${BASE_URL}${activeFloorImage}`;
+      img.src = getCdnUrl(activeFloorImage);
       img.onload = () => {
         setImageObj(img);
         setImageDimensions({ width: img.width, height: img.height });

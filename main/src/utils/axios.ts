@@ -9,6 +9,20 @@ export let BASE_URL = '';
 export let CDN_URL = '';
 export let API_ENGINE_URL = '';
 
+export const getCdnUrl = (url?: string | null) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  let cdnBase = '';
+  try {
+    cdnBase = getConfig()?.CDN_URL || '';
+  } catch {
+    cdnBase = '';
+  }
+  const cleanBase = cdnBase.replace(/\/+$/, '');
+  const cleanPath = url.replace(/^\/+/, '');
+  return cleanBase ? `${cleanBase}/${cleanPath}` : url;
+};
+
 // 🧠 In-Memory RAM storage (pure variable, no localStorage persistence)
 let accessToken: string | null = null;
 let authResponse: any = null;
@@ -55,7 +69,6 @@ export const refreshAccessToken = async (): Promise<string> => {
   if (refreshPromise) {
     return refreshPromise;
   }
-
   refreshPromise = (async () => {
     try {
       const config = getConfig();
@@ -65,7 +78,7 @@ export const refreshAccessToken = async (): Promise<string> => {
 
       let response;
       try {
-        // Body refreshToken dihilangkan karena dikirim via HttpOnly cookie
+        // Refresh token dikirim otomatis via HttpOnly cookie (withCredentials: true)
         response = await axios.post(
           refreshUrl,
           {},
@@ -119,7 +132,6 @@ export const refreshAccessToken = async (): Promise<string> => {
       refreshPromise = null;
     }
   })();
-
   return refreshPromise;
 };
 
@@ -319,11 +331,25 @@ function createAxiosService({ getBaseUrl }: AxiosServiceOptions): AxiosInstance 
         originalRequest?.url?.includes('/api/Auth/refresh') ||
         originalRequest?.url?.includes('/api/Auth/altcha');
 
+      const status = error.response?.status;
+      const responseData = error.response?.data;
+      const message =
+        (typeof responseData === 'string'
+          ? responseData
+          : responseData?.msg || responseData?.message || responseData?.title || '')
+          .toLowerCase();
+
+      const hasSession = !!localStorage.getItem('levelPriority') || !!getAccessToken();
+
       const isTokenExpired =
-        error.response?.status === 401 ||
-        (error.response?.status === 403 &&
-          (error.response?.data?.msg?.toLowerCase().includes('token') ||
-           error.response?.data?.message?.toLowerCase().includes('token')));
+        status === 401 ||
+        (status === 403 &&
+          hasSession &&
+          (message.includes('token') ||
+            message.includes('expired') ||
+            message.includes('unauthorized') ||
+            message.includes('forbidden') ||
+            !responseData?.msg));
 
       if (isTokenExpired && !originalRequest?._retry && !isAuthUrl) {
         originalRequest._retry = true;

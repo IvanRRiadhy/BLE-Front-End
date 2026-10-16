@@ -48,6 +48,7 @@ import toast from 'react-hot-toast';
 import { BuildingType, fetchBuildings } from 'src/store/apps/crud/building';
 import { fetchFloors } from 'src/store/apps/crud/floor';
 import { fetchEngines } from 'src/store/apps/crud/engine';
+import { getConfig } from 'src/config';
 
 const columns = [
   { label: 'Floorplan Name', field: 'Name', sortAble: true },
@@ -62,7 +63,15 @@ const AddEditFloorplan = lazy(() => import('./AddEditFloorplan'));
 const getCdnUrl = (url?: string | null) => {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `https://ble-cdn.app.bio-experience.com${url}`;
+  let cdnBase = '';
+  try {
+    cdnBase = getConfig()?.CDN_URL || '';
+  } catch {
+    cdnBase = '';
+  }
+  const cleanBase = cdnBase.replace(/\/+$/, '');
+  const cleanPath = url.replace(/^\/+/, '');
+  return cleanBase ? `${cleanBase}/${cleanPath}` : url;
 };
 
 const SKELETON_ROWS = 5;

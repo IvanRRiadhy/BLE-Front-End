@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useState } from 'react';
 import { Text, Circle, Shape, Group } from 'react-konva';
 import { RootState, useSelector } from 'src/store/Store';
@@ -41,7 +41,7 @@ const TrackingPositionMarker: React.FC<TrackingPositionMarkerProps> = ({
 
   const isMember = Boolean(memberId);
   const label = person?.name ?? 'Unknown';
-  const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
+  const imageUrl = getCdnUrl(person?.faceImage);
 
   const radius = 8;
   const triangleHeight = 8;

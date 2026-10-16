@@ -54,7 +54,7 @@ export const defaultAccessCCTVForm: CCTVType = {
   updatedBy: '',
   updatedAt: '',
   integrationId: '',
-  applicationId: localStorage.getItem('applicationId') || '',
+  // applicationId: localStorage.getItem('applicationId') || '',
 };
 export const defaultAccessCCTVFilter: CCTVFilter = {
   Draw: 1,
@@ -297,6 +297,7 @@ export const defaultFloorForm: floorType = {
   id: '',
   buildingId: '',
   name: '',
+  level: 0,
   createdBy: '',
   createdAt: '',
   updatedBy: '',

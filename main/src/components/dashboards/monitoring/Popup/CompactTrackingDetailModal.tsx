@@ -34,7 +34,7 @@ import {
   IconCreditCard,
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import { usePersonOverview } from 'src/hooks/useInvestigate';
 
 interface CompactTrackingDetailModalProps {
@@ -84,7 +84,7 @@ const CompactTrackingDetailModal: React.FC<CompactTrackingDetailModalProps> = ({
 
   const displayName = info?.name || personName || undefined;
   const displayType = info?.personType || personType;
-  const avatarUrl = info?.faceImage ? `${BASE_URL}${info.faceImage}` : faceImage ? `${BASE_URL}${faceImage}` : undefined;
+  const avatarUrl = info?.faceImage ? getCdnUrl(info.faceImage) : faceImage ? getCdnUrl(faceImage) : undefined;
 
   const totalPresence = stayAnalysis?.totalPresenceFormatted || '0 min';
   const complianceScore = compliance?.complianceScore ?? 100;

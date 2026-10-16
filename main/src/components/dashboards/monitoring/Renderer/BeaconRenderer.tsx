@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Text, Group, Path, Circle } from 'react-konva';
 import { useSelector } from 'src/store/Store';
 import { RootState } from 'src/store/Store';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 
 // Global lightweight image cache for high-performance canvas rendering
 const imageCache = new Map<string, HTMLImageElement>();
@@ -12,12 +12,10 @@ const FAILED_COOLDOWN_MS = 60 * 1000; // 1 minute retry cooldown
 
 export function getFullImageUrl(src?: string): string | null {
   if (!src) return null;
-  if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:') || src.startsWith('blob:')) {
+  if (src.startsWith('data:') || src.startsWith('blob:')) {
     return src;
   }
-  const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
-  const cleanPath = src.startsWith('/') ? src : `/${src}`;
-  return `${cleanBase}${cleanPath}`;
+  return getCdnUrl(src);
 }
 
 export function preloadImage(src?: string, onLoaded?: () => void): HTMLImageElement | null {

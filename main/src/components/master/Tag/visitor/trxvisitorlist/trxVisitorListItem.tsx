@@ -1,5 +1,5 @@
 import React from 'react';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { useSelector } from 'src/store/Store';
 import {
   ListItemText,
@@ -33,8 +33,8 @@ const visitorStatusColorMap: Record<number, any> = {
 };
 
 const TrxVisitorListItem = ({ onTagClick, trx, active }: Props) => {
-  const customizer = useSelector((state) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
+  const settings = useSelector((state) => state.settings);
+  const br = `${settings.borderRadius}px`;
 
   const statusValue = trx?.status ? visitorStatusEnumMap[trx.status] : undefined;
   const chipColor = statusValue !== undefined ? visitorStatusColorMap[statusValue] : 'default';
@@ -58,7 +58,7 @@ const TrxVisitorListItem = ({ onTagClick, trx, active }: Props) => {
       <ListItemAvatar>
         <Avatar
           alt="Visitor Face"
-          src={`${BASE_URL}${trx?.visitor?.faceImage}`}
+          src={getCdnUrl(trx?.visitor?.faceImage)}
         />
       </ListItemAvatar>
 

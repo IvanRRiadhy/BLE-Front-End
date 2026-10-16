@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
 import {
@@ -41,7 +41,7 @@ const VisitorContent = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const didInit = useRef(false);
-  const language = useSelector((state: RootState) => state.customizer.isLanguage);
+  const language = useSelector((state: RootState) => state.settings.isLanguage);
 
   const [viewMode, setViewMode] = useState<'alarm' | 'tracking'>('tracking');
   const [loading, setLoading] = useState(false);
@@ -259,7 +259,7 @@ const VisitorContent = () => {
             content: (
               <Box display="flex" alignItems="center" gap={2} p={2.5}>
                 <Avatar
-                  src={`${BASE_URL}${visitorDetail?.faceImage}`}
+                  src={getCdnUrl(visitorDetail?.faceImage)}
                   alt={visitorDetail?.name}
                   sx={{ width: 90, height: 90 }}
                 />

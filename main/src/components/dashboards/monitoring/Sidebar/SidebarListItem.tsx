@@ -9,10 +9,10 @@ import {
   IconButton,
   useTheme,
 } from '@mui/material';
-import { IconBell, IconLiveView, IconInfoCircle } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import { useSelector } from 'src/store/Store';
+import { IconBell, IconInfoCircle, IconLiveView } from '@tabler/icons-react';
 
 type ListType = {
   id: string;
@@ -109,7 +109,7 @@ const SidebarListItem = ({ item, isNew, onItemClick }: Props) => {
       {/* ================= BODY ================= */}
       <Box display="flex" alignItems="center" gap={2}>
         {/* <Avatar
-          src={item?.image ? `${BASE_URL}${item.image}` : undefined}
+          src={item?.image ? getCdnUrl(item.image) : undefined}
           alt={item?.target}
         /> */}
 

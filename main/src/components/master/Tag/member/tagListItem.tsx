@@ -1,5 +1,5 @@
 import React from 'react';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import {
   ListItemText,
   Avatar,
@@ -46,7 +46,7 @@ const TagListItem: React.FC<Props> = ({
       <ListItemAvatar>
         <Avatar
           alt={member.name || 'Member Face'}
-          src={member.faceImage ? `${BASE_URL}${member.faceImage}` : undefined}
+          src={getCdnUrl(member.faceImage)}
         />
       </ListItemAvatar>
 

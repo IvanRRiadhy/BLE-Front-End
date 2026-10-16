@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, Circle, Shape, Group } from 'react-konva';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
@@ -72,7 +72,7 @@ const InvestigationBeaconRenderer: React.FC<BeaconRendererProps> = ({
   const isMember = membersData.some((m) => m.id === id);
   const isSecurity = securityData.some((s) => s.id === id);
   const label = person?.name || id;
-  const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
+  const imageUrl = getCdnUrl(person?.faceImage);
 
   useEffect(() => {
     if (imageUrl) {

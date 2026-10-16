@@ -46,7 +46,7 @@ import {
 import { Stage, Layer, Image as KonvaImage, Group } from 'react-konva';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { VisitorType } from 'src/store/apps/crud/visitor';
 import { memberType } from 'src/store/apps/crud/member';
 import { useNewVisitorSession } from 'src/hooks/useVisitorSession';
@@ -342,9 +342,7 @@ const InvestigateContent: React.FC<InvestigateContentProps> = ({
 
     Object.values(sessionData.visualPaths.floorplans).forEach((fp) => {
       if (!fp.floorplanImage) return;
-      const imgSrc = fp.floorplanImage.startsWith('http')
-        ? fp.floorplanImage
-        : `${BASE_URL}${fp.floorplanImage}`;
+      const imgSrc = getCdnUrl(fp.floorplanImage);
 
       const img = new window.Image();
       img.crossOrigin = 'anonymous';
@@ -390,7 +388,7 @@ const InvestigateContent: React.FC<InvestigateContentProps> = ({
 
       const img = new window.Image();
       img.crossOrigin = 'anonymous';
-      img.src = imgSrc.startsWith('http') ? imgSrc : `${BASE_URL}${imgSrc}`;
+      img.src = getCdnUrl(imgSrc);
 
       img.onload = () => {
         const w = img.naturalWidth || img.width || 1200;
@@ -925,7 +923,7 @@ const InvestigateContent: React.FC<InvestigateContentProps> = ({
                 <Avatar
                   src={
                     selectedPersonOption?.avatarUrl ||
-                    (selectedPerson?.faceImage ? `${BASE_URL}${selectedPerson.faceImage}` : undefined)
+                    (selectedPerson?.faceImage ? getCdnUrl(selectedPerson.faceImage) : undefined)
                   }
                   sx={{
                     width: isFullscreen ? 62 : 56,

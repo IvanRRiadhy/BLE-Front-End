@@ -117,13 +117,46 @@ export function useSecurityByID(id: string) {
   });
 }
 // -----------------------------------------------------------------------------
+// ✅ CREATE SECURITY TYPES
+// -----------------------------------------------------------------------------
+export interface CreateSecurityAccount {
+  username?: string | null;
+  password?: string | null;
+  groupId?: string | null;
+}
+
+export interface CreateSecurityPayload {
+  personId?: string | null;
+  identityId?: string | null;
+  name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  gender?: string | null;
+  address?: string | null;
+  faceImage?: string | null;
+  organizationId?: string | null;
+  departmentId?: string | null;
+  districtId?: string | null;
+  cardId?: string | null;
+  isHead?: boolean | null;
+  birthDate?: string | null;
+  joinDate?: string | null;
+  securityHead1Id?: string | null;
+  securityHead2Id?: string | null;
+  statusEmployee?: string | null;
+  userId?: string | null;
+  account?: CreateSecurityAccount | null;
+  [key: string]: any;
+}
+
+// -----------------------------------------------------------------------------
 // ✅ ADD Security (POST with FormData or JSON)
 // -----------------------------------------------------------------------------
 export function useAddSecurity() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: Partial<securityType> | FormData) => {
+    mutationFn: async (payload: CreateSecurityPayload | Partial<securityType> | FormData) => {
       let res;
       if (payload instanceof FormData) {
         payload.delete('id');
@@ -131,7 +164,7 @@ export function useAddSecurity() {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        const { id, ...filteredPayload } = payload;
+        const { id, ...filteredPayload } = payload as any;
         res = await axiosServices.post(API_URL, filteredPayload);
       }
       return res.data;
@@ -159,11 +192,14 @@ export function useEditSecurity() {
         payload.delete('organization');
         payload.delete('department');
         payload.delete('district');
+        payload.delete('userId');
+        payload.delete('account');
         res = await axiosServices.put(`${API_URL}${id}`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        const { id, ...filteredPayload } = payload;
+        const { id, userId, account, organization, department, district, ...filteredPayload } = payload as any;
+        console.log("Editing: ", filteredPayload);
         if (!id) throw new Error('Missing security id');
         res = await axiosServices.put(`${API_URL}${id}`, filteredPayload);
       }
@@ -226,6 +262,7 @@ export function useDeleteSecurity() {
       queryClient.invalidateQueries({ queryKey: ['security-list'] });
       queryClient.invalidateQueries({ queryKey: ['security-all'] });
       queryClient.invalidateQueries({ queryKey: ['security-lookup'] });
+
     },
   });
 }

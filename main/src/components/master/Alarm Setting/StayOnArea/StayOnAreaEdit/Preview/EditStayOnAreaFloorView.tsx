@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@mui/material';
@@ -59,9 +59,7 @@ const EditStayOnAreaFloorView = () => {
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
   const floorplanImage = activeFloorPlan?.floorplanImage
-    ? activeFloorPlan.floorplanImage.startsWith('/Uploads/') // Check if the URL is already absolute
-      ? `${BASE_URL}${activeFloorPlan.floorplanImage}`
-      : activeFloorPlan.floorplanImage // Prepend BASE_URL for relative paths
+    ? getCdnUrl(activeFloorPlan.floorplanImage)
     : undefined; // Fallback to default image if not available
   useEffect(() => {
     if (floorplanImage) {

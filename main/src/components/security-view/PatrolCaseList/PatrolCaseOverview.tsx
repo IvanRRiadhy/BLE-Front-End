@@ -4,6 +4,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useApproveCase, useCloseCase, useRejectCase } from 'src/hooks/usePatrolCase';
 import { PatrolCaseType } from 'src/store/apps/crud/patrolCase';
+import { getConfig } from 'src/config';
 
 interface Props {
   data: PatrolCaseType;
@@ -15,10 +16,18 @@ const PatrolCaseOverview = ({ data }: Props) => {
   const attachments = data.attachments || [];
   const activeAttachment = attachments[activeIndex];
 
-  const getCdnUrl = (url?: string) => {
+  const getCdnUrl = (url?: string | null) => {
     if (!url) return '';
-    if (url.startsWith('https://ble-cdn.app.bio-experience.com')) return url;
-    return `https://ble-cdn.app.bio-experience.com${url}`;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    let cdnBase = '';
+    try {
+      cdnBase = getConfig()?.CDN_URL || '';
+    } catch {
+      cdnBase = '';
+    }
+    const cleanBase = cdnBase.replace(/\/+$/, '');
+    const cleanPath = url.replace(/^\/+/, '');
+    return cleanBase ? `${cleanBase}/${cleanPath}` : url;
   };
 
   const isImage = (att: any) =>

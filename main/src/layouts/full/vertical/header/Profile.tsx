@@ -9,7 +9,7 @@ import { IconMail } from '@tabler/icons-react';
 
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 import { useProfile } from 'src/hooks/useProfile';
-import { BASE_URL, CDN_URL, logoutUser } from 'src/utils/axios';
+import { getCdnUrl, logoutUser } from 'src/utils/axios';
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
@@ -19,9 +19,7 @@ const Profile = () => {
   const groupName = profile?.groupName || localStorage.getItem('groupName') || profile?.groupLevel || localStorage.getItem('levelPriority') || '';
   const email = profile?.email || localStorage.getItem('email') || '';
   const avatarSrc = profile?.profilePicture
-    ? (profile.profilePicture.startsWith('http')
-        ? profile.profilePicture
-        : `${BASE_URL.replace(/\/+$/, '')}/${profile.profilePicture.replace(/^\/+/, '')}`)
+    ? getCdnUrl(profile.profilePicture)
     : ProfileImg;
 
   const handleClick2 = (event: any) => {

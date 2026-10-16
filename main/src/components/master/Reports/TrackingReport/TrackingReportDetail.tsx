@@ -44,7 +44,7 @@ import {
   VisitorSessionPersonType,
   VisitorSessionType,
 } from 'src/store/apps/crud/visitorSession';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 
 import { useLocationHierarchy } from 'src/hooks/useBuilding';
@@ -765,7 +765,7 @@ const TrackingReportDetail: React.FC<TrackingReportDetailProps> = ({ data, isLoa
                     >
                       <Stack direction="row" spacing={1.5} alignItems="center">
                         <Avatar
-                          src={isVisitor ? `${BASE_URL}/images/users/user-1.jpg` : `${BASE_URL}/images/users/user-2.jpg`}
+                          src={isVisitor ? getCdnUrl('/images/users/user-1.jpg') : getCdnUrl('/images/users/user-2.jpg')}
                           sx={{ width: 36, height: 36 }}
                         />
                         <Typography variant="subtitle2" fontWeight={600}>

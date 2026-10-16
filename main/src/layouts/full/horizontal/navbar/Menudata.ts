@@ -171,7 +171,7 @@ export const useMenuItems = (alarmSettings: AlarmSettingType[]): MenuItemType[] 
           children: [
             { id: 'devices-brand', title: 'Brand', icon: IconBadgeTm, href: '/master/brand/' },
             { id: 'devices-reader', title: 'Ble Reader', icon: IconDeviceIpad, href: '/master/blereader/' },
-            { id: 'devices-cctv', title: 'Access CCTV', icon: IconDeviceCctv, href: '/master/accesscctv/' },
+            { id: 'devices-cctv', title: 'Access CCTV', icon: IconDeviceCctv, href: '/master/accesscctv/', key: ['module.cctv'] },
             { id: 'devices-mapping', title: 'Device Mapping', icon: IconDevices, href: '/master/device/' },
           ],
         },

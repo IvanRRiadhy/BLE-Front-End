@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
@@ -368,7 +368,7 @@ const MemberContent = () => {
             >
               <Avatar
                 alt="Member Profile"
-                src={`${BASE_URL}${memberDetail.faceImage}`}
+                src={getCdnUrl(memberDetail.faceImage)}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
               <Box

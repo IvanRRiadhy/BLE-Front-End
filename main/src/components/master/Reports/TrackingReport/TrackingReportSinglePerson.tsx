@@ -42,12 +42,12 @@ import {
   IconArrowLeft,
   IconUserOff,
 } from '@tabler/icons-react';
-import dayjs from 'dayjs';
 import { toLocalDate } from 'src/utils/time';
-import { VisitorSessionResponseType, VisitorSessionType } from 'src/store/apps/crud/visitorSession';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
 import { useAllFloorplans } from 'src/hooks/useFloorplan';
+import { VisitorSessionResponseType, VisitorSessionType } from 'src/store/apps/crud/visitorSession';
+import dayjs from 'dayjs';
 
 interface TrackingReportSinglePersonProps {
   data: VisitorSessionType[] | VisitorSessionResponseType | null | undefined;
@@ -376,13 +376,7 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
 
   const floorplanImageUrl = useMemo(() => {
     if (!activeFloorplan?.floorplanImage) return null;
-    const path = activeFloorplan.floorplanImage;
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
-      return path;
-    }
-    const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${cleanBase}${cleanPath}`;
+    return getCdnUrl(activeFloorplan.floorplanImage);
   }, [activeFloorplan]);
 
   const [floorplanImgObj, setFloorplanImgObj] = useState<HTMLImageElement | null>(null);
@@ -600,7 +594,7 @@ const TrackingReportSinglePerson: React.FC<TrackingReportSinglePersonProps> = ({
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
           {/* Avatar Monogram */}
           <Avatar
-            src={selectedPersonInfo?.avatarUrl || `${BASE_URL}/images/users/user-1.jpg`}
+            src={selectedPersonInfo?.avatarUrl || getCdnUrl('/images/users/user-1.jpg')}
             sx={{
               width: 72,
               height: 72,

@@ -8,7 +8,7 @@ import Navigation from 'src/layouts/full/horizontal/navbar/Navigation';
 import HorizontalHeader from 'src/layouts/full/horizontal/header/Header';
 import ScrollToTop from '../../components/shared/ScrollToTop';
 import LoadingBar from '../../LoadingBar';
-import { BASE_URL, setSessionExpiredHandler } from 'src/utils/axios';
+import { setSessionExpiredHandler, getCdnUrl } from 'src/utils/axios';
 import SessionExp from 'src/layouts/full/shared/SessionExp';
 import Header from './HeaderSecurity/Header';
 import { Toaster } from 'react-hot-toast';
@@ -97,7 +97,7 @@ const SecurityViewLayout: FC = () => {
       const person = resolvePerson(acceptedAlarm);
       const alarm: SecurityAlarmLogItem = {
         id: acceptedAlarm.id,
-        image: person.image ? `${BASE_URL}${person.image}` : '',
+        image: person.image ? getCdnUrl(person.image) : '',
         name: person.name,
         beacon: acceptedAlarm.beaconId ?? '-',
         idleTime: acceptedAlarm.idleTimestamp ? formatTime(acceptedAlarm.idleTimestamp) : '-',

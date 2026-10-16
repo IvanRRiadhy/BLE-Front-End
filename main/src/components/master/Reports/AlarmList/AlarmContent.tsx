@@ -41,6 +41,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import axiosServices, { BASE_URL } from 'src/utils/axios';
+import { getConfig } from 'src/config';
 import { SelectVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { memberType, SelectMember } from 'src/store/apps/crud/member';
 import duration from 'dayjs/plugin/duration';
@@ -991,11 +992,7 @@ const AlarmContent = () => {
   // 🔹 Category data is now derived from per-category infinite queries above
 
   const AlarmCard = ({ alarmTrigger }: { alarmTrigger: AlarmTriggerType }) => {
-    const imgSrc = alarmTrigger.floorplanImage
-      ? `${alarmTrigger.floorplanImage}`
-      : alarmTrigger.floorplan?.floorplanImage
-        ? `${alarmTrigger.floorplan.floorplanImage}`
-        : null;
+    const imgSrc = getCdnUrl(alarmTrigger.floorplanImage);
     const lang = language === 'id' ? 'id' : 'en';
     const append = language === 'id' ? 'hingga' : 'to';
 
@@ -1141,10 +1138,18 @@ const AlarmContent = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const activeAttachment = incidentAttachments[activeIndex];
 
-  const getCdnUrl = (url?: string) => {
+  const getCdnUrl = (url?: string | null) => {
     if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `https://ble-cdn.app.bio-experience.com${url}`;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    let cdnBase = '';
+    try {
+      cdnBase = getConfig()?.CDN_URL || '';
+    } catch {
+      cdnBase = '';
+    }
+    const cleanBase = cdnBase.replace(/\/+$/, '');
+    const cleanPath = url.replace(/^\/+/, '');
+    return cleanBase ? `${cleanBase}/${cleanPath}` : url;
   };
   const isImage = (att: any) =>
     att?.mimeType?.startsWith('image') || /\.(png|jpg|jpeg|gif|webp)$/i.test(att?.fileUrl || '');
@@ -1218,7 +1223,7 @@ const AlarmContent = () => {
           >
             <Avatar
               alt={`${personType} Face`}
-              src={`${BASE_URL}${currentPerson.faceImage ?? ''}`}
+              src={getCdnUrl(currentPerson.faceImage)}
               sx={{
                 width: 160,
                 height: 160,
@@ -1783,7 +1788,7 @@ const AlarmContent = () => {
                 >
                   <Avatar
                     alt={`${personType} Face`}
-                    src={`${BASE_URL}${alarmCardPerson.faceImage ?? ''}`}
+                    src={getCdnUrl(alarmCardPerson.faceImage)}
                     sx={{
                       width: 160,
                       height: 160,
@@ -2404,11 +2409,7 @@ const AlarmContent = () => {
                         compliancePage * complianceRowsPerPage + complianceRowsPerPage
                       )
                       .map((person) => {
-                        const avatarSrc = person.faceImage
-                          ? person.faceImage.startsWith('http')
-                            ? person.faceImage
-                            : `${BASE_URL}${person.faceImage.startsWith('/') ? '' : '/'}${person.faceImage}`
-                          : undefined;
+                        const avatarSrc = person.faceImage ? getCdnUrl(person.faceImage) : undefined;
 
                         return (
                           <TableRow key={person.personId} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>

@@ -16,12 +16,19 @@ import {
   Stepper,
   Step,
   StepLabel,
+  FormControlLabel,
+  InputAdornment,
+  RadioGroup,
+  Radio,
+  Paper,
+  Chip,
 } from '@mui/material';
-import { IconPencil, IconPlus, IconPhoto, IconUpload, IconX } from '@tabler/icons-react';
+import { IconPencil, IconPlus, IconPhoto, IconUpload, IconX, IconEye, IconEyeOff } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 import CustomSelect from 'src/components/forms/theme-elements/CustomSelect';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
+import CustomSwitch from 'src/components/forms/theme-elements/CustomSwitch';
 import { getConfig } from 'src/config';
 import { dispatch, RootState, useSelector } from 'src/store/Store';
 import { addMember, editMember, memberType, securityType } from 'src/store/apps/crud/member';
@@ -44,6 +51,7 @@ import { useAllDepartments } from 'src/hooks/useDepartment';
 import { useAllOrganizations } from 'src/hooks/useOrganization';
 import { useAllCard, useUnassignedCard } from 'src/hooks/useCard';
 import { useAddSecurity, useEditSecurity, useSecurityList } from 'src/hooks/useSecurityGuard';
+import { useUnlinkedUser, useAllUserGroups } from 'src/hooks/useUser';
 
 interface FormType {
   type?: string;
@@ -70,16 +78,54 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
       '',
   });
   const [activeStep, setActiveStep] = React.useState(0);
-  const steps = ['Security Details', 'Security Photo'];
+  const steps = type === 'add' 
+    ? ['Security Details', 'Security Photo', 'Account Binding'] 
+    : ['Security Details', 'Security Photo'];
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
   const [isDragging, setIsDragging] = React.useState(false);
+
+  // Account Binding States (3rd step for "add")
+  const [accountMode, setAccountMode] = React.useState<'none' | 'existing' | 'new'>('none');
+  const [selectedUserId, setSelectedUserId] = React.useState<string | null>(null);
+  const [newAccount, setNewAccount] = React.useState({
+    username: '',
+    password: '',
+    groupId: '',
+  });
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  // Queries for Account Binding
+  const isHeadChecked = Boolean(formData.isHead);
+  const unlinkedPriority = isHeadChecked ? 'PrimaryAdmin' : 'Primary';
+  const { data: rawUnlinkedUsers = [], isLoading: isLoadingUnlinked } = useUnlinkedUser(unlinkedPriority);
+  const { data: allUserGroups = [], isLoading: isLoadingGroups } = useAllUserGroups();
+
+  // Filter unlinked users: if head, groupIsHead === true; if not head, no extra filter needed
+  const filteredUnlinkedUsers = React.useMemo(() => {
+    if (!rawUnlinkedUsers) return [];
+    if (isHeadChecked) {
+      return rawUnlinkedUsers.filter((u: any) => Boolean(u.groupIsHead));
+    }
+    return rawUnlinkedUsers;
+  }, [rawUnlinkedUsers, isHeadChecked]);
+
+  // Filter user groups:
+  // For "head" security: only display "PrimaryAdmin" levelPriority with isHead: true
+  // For "not head" security: only display "Primary" levelPriority
+  const filteredUserGroups = React.useMemo(() => {
+    if (!allUserGroups) return [];
+    if (isHeadChecked) {
+      return allUserGroups.filter(
+        (g: any) => g.levelPriority === 'PrimaryAdmin' && Boolean(g.isHead),
+      );
+    }
+    return allUserGroups.filter((g: any) => g.levelPriority === 'Primary');
+  }, [allUserGroups, isHeadChecked]);
+
   const memberFilter = useSelector((state: RootState) => state.memberReducer.memberFilter);
   const districtData = useAllDistricts().data || [];
   const departmentData = useAllDepartments().data || [];
   const organizationData = useAllOrganizations().data || [];
-  //   const districtData: DistrictType[] =  [];
-  // const departmentData: DepartmentType[] =[];
-  // const organizationData: OrganizationType[] =  [];
   const filteredCard = useUnassignedCard().data || [];
   const cardData = useAllCard().data || [];
   const cardOptions = React.useMemo(() => {
@@ -88,10 +134,6 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
       id: c.id,
       bleCardNumber: c.dmac,
     }));
-    // console.log('Filtered Cards (unassigned):', filteredCard);
-    // console.log('All Cards:', cardData);
-    // console.log('Current form cardId:', formData.cardNumber);
-    // ensure selected card always exists
     if (formData.cardNumber && !base.find((c) => c.label === formData.cardNumber)) {
       const existing = cardData.find((c) => c.cardNumber === formData.cardNumber);
       if (existing) {
@@ -119,6 +161,18 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
   const filteredHead1Options = headOptions.filter((opt) => opt.id !== currentHead2Id);
   const filteredHead2Options = headOptions.filter((opt) => opt.id !== currentHead1Id);
 
+  // Helper to reset account binding inputs
+  const resetAccountInputs = () => {
+    setAccountMode('none');
+    setSelectedUserId(null);
+    setNewAccount({
+      username: '',
+      password: '',
+      groupId: '',
+    });
+    setShowPassword(false);
+  };
+
   const handleClickOpen = () => {
     setLoading(true);
     setFormErrors({});
@@ -133,10 +187,12 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
     setFormData({
       ...defaultSecurityForm,
       ...member,
+      isHead: member?.isHead ?? false,
       securityHead1Id: initialHead1Id,
       securityHead2Id: initialHead2Id,
     });
     setActiveStep(0);
+    resetAccountInputs();
 
     // Set image preview properly - check if member exists and has faceImage
     if (member?.faceImage) {
@@ -159,6 +215,7 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
     console.log(member);
     setOpen(false);
     setActiveStep(0);
+    resetAccountInputs();
 
     // Reset preview to the original member image if it exists
     if (member?.faceImage) {
@@ -170,8 +227,8 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
     setImage(null);
   };
 
-  const addMemberMutation = useAddSecurity();
-  const editMemberMutation = useEditSecurity();
+  const addSecurityMutation = useAddSecurity();
+  const editSecurityMutation = useEditSecurity();
   const uploadMutation = useUploadCDN({ category: 'member' });
 
   const getCdnUrl = (url?: string | null) => {
@@ -203,6 +260,16 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
     } else if (step === 1) {
       if (!image && type === 'add' && !preview && !formData.faceImage) {
         errors.faceImage = 'Face Image is required';
+      }
+    } else if (step === 2 && type === 'add') {
+      if (accountMode === 'existing') {
+        if (!selectedUserId) {
+          errors.userId = 'Please select an existing user account';
+        }
+      } else if (accountMode === 'new') {
+        if (!newAccount.username.trim()) errors.username = 'Username is required';
+        if (!newAccount.password.trim()) errors.password = 'Password is required';
+        if (!newAccount.groupId) errors.groupId = 'User Group is required';
       }
     }
     setFormErrors(errors);
@@ -261,32 +328,51 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
       uploadFrError,
       securityHead1,
       securityHead2,
-      isHead,
       generate,
       ...cleanData
     } = formData;
 
-    const payload: Partial<securityType> = {
+    const payload: any = {
       ...cleanData,
+      ...(type === 'add' ? { isHead: Boolean(formData.isHead) } : {}),
+      securityHead1Id: formData.isHead ? null : cleanData.securityHead1Id || null,
+      securityHead2Id: formData.isHead ? null : cleanData.securityHead2Id || null,
       faceImage: finalImageUrl || null,
     };
 
+    if (type === 'add') {
+      delete payload.id;
+      if (accountMode === 'existing' && selectedUserId) {
+        payload.userId = selectedUserId;
+        payload.account = null;
+      } else if (accountMode === 'new') {
+        payload.userId = null;
+        payload.account = {
+          username: newAccount.username.trim(),
+          password: newAccount.password,
+          groupId: newAccount.groupId,
+        };
+      } else {
+        payload.userId = null;
+        payload.account = null;
+      }
+    } else if (type === 'edit') {
+      delete payload.userId;
+      delete payload.account;
+    }
+
     Object.keys(payload).forEach((key) => {
-      const val = (payload as any)[key];
+      const val = payload[key];
       if (typeof val === 'string' && val.trim() === '') {
-        (payload as any)[key] = null;
+        payload[key] = null;
       }
     });
 
-    if (type !== 'edit') {
-      delete payload.id;
-    }
-
     try {
       if (type === 'edit') {
-        await editMemberMutation.mutateAsync(payload);
+        await editSecurityMutation.mutateAsync(payload);
       } else {
-        await addMemberMutation.mutateAsync(payload);
+        await addSecurityMutation.mutateAsync(payload);
       }
 
       toast.success('Data saved successfully!');
@@ -737,60 +823,88 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
                         rows={1}
                       />
                     </Grid>
-                    <Grid size={6}>
-                      <CustomFormLabel htmlFor="head-Member-1">Head Security 1</CustomFormLabel>
-                      <CustomAutocomplete
-                        label="Head Security 1"
-                        options={filteredHead1Options}
-                        value={
-                          filteredHead1Options.find((h) => h.id === formData.securityHead1Id) || null
-                        }
-                        onChange={(val) => {
-                          const id = val?.id ?? '';
-                          setFormData((prev) => ({ ...prev, securityHead1Id: id }));
-                        }}
-                        getOptionLabel={(opt) => opt.label}
-                        isOptionEqualToValue={(a, b) => a.id === b.id}
-                        renderOption={(props: any, option: (typeof headOptions)[number]) => (
-                          <li {...props} key={option.id}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <Typography variant="body1">{option.label}</Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {option.personId}
-                              </Typography>
-                            </div>
-                          </li>
-                        )}
-                        sx={{ flex: 1 }}
-                      />
-                    </Grid>
-                    <Grid size={6}>
-                      <CustomFormLabel htmlFor="head-Member-2">Head Security 2</CustomFormLabel>
-                      <CustomAutocomplete
-                        label="Head Security 2"
-                        options={filteredHead2Options}
-                        value={
-                          filteredHead2Options.find((h) => h.id === formData.securityHead2Id) || null
-                        }
-                        onChange={(val) => {
-                          const id = val?.id ?? '';
-                          setFormData((prev) => ({ ...prev, securityHead2Id: id }));
-                        }}
-                        getOptionLabel={(opt) => opt.label}
-                        isOptionEqualToValue={(a, b) => a.id === b.id}
-                        renderOption={(props: any, option: (typeof headOptions)[number]) => (
-                          <li {...props} key={option.id}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <Typography variant="body1">{option.label}</Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {option.personId}
-                              </Typography>
-                            </div>
-                          </li>
-                        )}
-                        sx={{ flex: 1 }}
-                      />
-                    </Grid>
+                    {type === 'add' && (
+                      <Grid size={12} sx={{ mt: 1 }}>
+                        <FormControlLabel
+                          control={
+                            <CustomSwitch
+                              id="isHead"
+                              name="isHead"
+                              checked={Boolean(formData.isHead)}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                const checked = e.target.checked;
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  isHead: checked,
+                                  ...(checked ? { securityHead1Id: null, securityHead2Id: null } : {}),
+                                }));
+                                resetAccountInputs();
+                              }}
+                            />
+                          }
+                          label="Is Head Security Guard"
+                        />
+                      </Grid>
+                    )}
+
+                    {!formData.isHead && (
+                      <Grid container spacing={2} size={12}>
+                        <Grid size={6}>
+                          <CustomFormLabel htmlFor="head-Member-1">Head Security 1</CustomFormLabel>
+                          <CustomAutocomplete
+                            label="Head Security 1"
+                            options={filteredHead1Options}
+                            value={
+                              filteredHead1Options.find((h) => h.id === formData.securityHead1Id) || null
+                            }
+                            onChange={(val) => {
+                              const id = val?.id ?? '';
+                              setFormData((prev) => ({ ...prev, securityHead1Id: id }));
+                            }}
+                            getOptionLabel={(opt) => opt.label}
+                            isOptionEqualToValue={(a, b) => a.id === b.id}
+                            renderOption={(props: any, option: (typeof headOptions)[number]) => (
+                              <li {...props} key={option.id}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <Typography variant="body1">{option.label}</Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {option.personId}
+                                  </Typography>
+                                </div>
+                              </li>
+                            )}
+                            sx={{ flex: 1 }}
+                          />
+                        </Grid>
+                        <Grid size={6}>
+                          <CustomFormLabel htmlFor="head-Member-2">Head Security 2</CustomFormLabel>
+                          <CustomAutocomplete
+                            label="Head Security 2"
+                            options={filteredHead2Options}
+                            value={
+                              filteredHead2Options.find((h) => h.id === formData.securityHead2Id) || null
+                            }
+                            onChange={(val) => {
+                              const id = val?.id ?? '';
+                              setFormData((prev) => ({ ...prev, securityHead2Id: id }));
+                            }}
+                            getOptionLabel={(opt) => opt.label}
+                            isOptionEqualToValue={(a, b) => a.id === b.id}
+                            renderOption={(props: any, option: (typeof headOptions)[number]) => (
+                              <li {...props} key={option.id}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <Typography variant="body1">{option.label}</Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {option.personId}
+                                  </Typography>
+                                </div>
+                              </li>
+                            )}
+                            sx={{ flex: 1 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    )}
                   </Grid>
                 </Grid>
               </Grid>
@@ -956,6 +1070,301 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
                 )}
               </Box>
             )}
+            {activeStep === 2 && type === 'add' && (
+              <Box sx={{ maxWidth: '750px', mx: 'auto', mt: 3, mb: 2 }}>
+                <Typography variant="h5" fontWeight={700} mb={1} textAlign="center">
+                  Account Binding
+                </Typography>
+                <Typography variant="body2" color="textSecondary" mb={3} textAlign="center">
+                  Bind this security guard to an existing user account, create a new user account, or skip for now.
+                </Typography>
+
+                <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+                  <Typography variant="subtitle1" fontWeight={600} mb={1}>
+                    Choose Binding Option
+                  </Typography>
+                  <RadioGroup
+                    row
+                    value={accountMode}
+                    onChange={(e) => {
+                      const mode = e.target.value as 'none' | 'existing' | 'new';
+                      setAccountMode(mode);
+                      setFormErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.userId;
+                        delete next.username;
+                        delete next.password;
+                        delete next.groupId;
+                        return next;
+                      });
+                    }}
+                  >
+                    <FormControlLabel
+                      value="none"
+                      control={<Radio />}
+                      label="No Account (Skip)"
+                    />
+                    <FormControlLabel
+                      value="existing"
+                      control={<Radio />}
+                      label="Link Existing Account"
+                    />
+                    <FormControlLabel
+                      value="new"
+                      control={<Radio />}
+                      label="Create New Account"
+                    />
+                  </RadioGroup>
+                </Paper>
+
+                {/* Option 1: Link Existing User Account */}
+                {accountMode === 'existing' && (
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 3,
+                      borderRadius: 2,
+                      borderColor: 'primary.main',
+                      backgroundColor: 'rgba(93, 135, 255, 0.02)',
+                    }}
+                  >
+                    <Typography variant="h6" fontWeight={600} mb={1}>
+                      Select Existing User Account
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" mb={2}>
+                      Showing unlinked users with{' '}
+                      <strong>{isHeadChecked ? 'PrimaryAdmin (Head)' : 'Primary'}</strong> priority.
+                    </Typography>
+
+                    <CustomAutocomplete
+                      label="Select User Account"
+                      options={filteredUnlinkedUsers.map((u: any) => ({
+                        id: u.id,
+                        label: `${u.username || u.fullName || 'User'} (${u.email || 'No Email'})`,
+                        user: u,
+                      }))}
+                      value={
+                        selectedUserId
+                          ? {
+                              id: selectedUserId,
+                              label: (() => {
+                                const found = filteredUnlinkedUsers.find((u: any) => u.id === selectedUserId);
+                                return found
+                                  ? `${found.username || found.fullName || 'User'} (${found.email || 'No Email'})`
+                                  : '';
+                              })(),
+                              user: filteredUnlinkedUsers.find((u: any) => u.id === selectedUserId),
+                            }
+                          : null
+                      }
+                      onChange={(val: any) => {
+                        setSelectedUserId(val?.id || null);
+                        setFormErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.userId;
+                          return next;
+                        });
+                      }}
+                      getOptionLabel={(o: any) => o.label}
+                      isOptionEqualToValue={(a: any, b: any) => a.id === b.id}
+                      renderOption={(props: any, option: any) => (
+                        <li {...props} key={option.id}>
+                          <Box display="flex" flexDirection="column" gap={0.5}>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Typography variant="subtitle2" fontWeight={600}>
+                                {option.user?.username || option.user?.fullName}
+                              </Typography>
+                              {option.user?.groupName && (
+                                <Chip
+                                  size="small"
+                                  label={option.user.groupName}
+                                  variant="outlined"
+                                  color="primary"
+                                  sx={{ height: 20, fontSize: '0.7rem' }}
+                                />
+                              )}
+                              {option.user?.groupIsHead && (
+                                <Chip
+                                  size="small"
+                                  label="Head"
+                                  color="secondary"
+                                  sx={{ height: 20, fontSize: '0.7rem' }}
+                                />
+                              )}
+                            </Box>
+                            <Typography variant="caption" color="text.secondary">
+                              Email: {option.user?.email || 'N/A'} • Group Level: {option.user?.groupLevel || 'N/A'}
+                            </Typography>
+                          </Box>
+                        </li>
+                      )}
+                    />
+                    {isLoadingUnlinked && (
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                        Loading unlinked users...
+                      </Typography>
+                    )}
+                    {formErrors.userId && (
+                      <FormHelperText error sx={{ mt: 1 }}>
+                        {formErrors.userId}
+                      </FormHelperText>
+                    )}
+                  </Paper>
+                )}
+
+                {/* Option 2: Create New Account */}
+                {accountMode === 'new' && (
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 3,
+                      borderRadius: 2,
+                      borderColor: 'primary.main',
+                      backgroundColor: 'rgba(93, 135, 255, 0.02)',
+                    }}
+                  >
+                    <Typography variant="h6" fontWeight={600} mb={1}>
+                      Create New Account Details
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" mb={2}>
+                      Fill in credentials and assign to an appropriate user group.
+                    </Typography>
+
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <CustomFormLabel htmlFor="new-username" sx={{ mt: 0 }}>Username *</CustomFormLabel>
+                        <CustomTextField
+                          id="new-username"
+                          fullWidth
+                          value={newAccount.username}
+                          onChange={(e: any) => {
+                            setNewAccount((prev) => ({ ...prev, username: e.target.value }));
+                            setFormErrors((prev) => {
+                              const next = { ...prev };
+                              delete next.username;
+                              return next;
+                            });
+                          }}
+                          placeholder="e.g. sec23"
+                          error={!!formErrors.username}
+                          helperText={formErrors.username}
+                        />
+                      </Grid>
+
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <CustomFormLabel htmlFor="new-password" sx={{ mt: 0 }}>Password *</CustomFormLabel>
+                        <CustomTextField
+                          id="new-password"
+                          type={showPassword ? 'text' : 'password'}
+                          fullWidth
+                          value={newAccount.password}
+                          onChange={(e: any) => {
+                            setNewAccount((prev) => ({ ...prev, password: e.target.value }));
+                            setFormErrors((prev) => {
+                              const next = { ...prev };
+                              delete next.password;
+                              return next;
+                            });
+                          }}
+                          placeholder="Enter password"
+                          error={!!formErrors.password}
+                          helperText={formErrors.password}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  aria-label="toggle password visibility"
+                                  onClick={() => setShowPassword((prev) => !prev)}
+                                  edge="end"
+                                  size="small"
+                                >
+                                  {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid size={12}>
+                        <CustomFormLabel htmlFor="new-group" sx={{ mt: 0 }}>User Group *</CustomFormLabel>
+                        <CustomAutocomplete
+                          label="Select User Group"
+                          options={filteredUserGroups.map((g: any) => ({
+                            id: g.id,
+                            label: g.name,
+                            group: g,
+                          }))}
+                          value={
+                            filteredUserGroups
+                              .map((g: any) => ({ id: g.id, label: g.name, group: g }))
+                              .find((opt) => opt.id === newAccount.groupId) || null
+                          }
+                          onChange={(val: any) => {
+                            setNewAccount((prev) => ({ ...prev, groupId: val?.id || '' }));
+                            setFormErrors((prev) => {
+                              const next = { ...prev };
+                              delete next.groupId;
+                              return next;
+                            });
+                          }}
+                          getOptionLabel={(o: any) => o.label}
+                          isOptionEqualToValue={(a: any, b: any) => a.id === b.id}
+                          renderOption={(props: any, option: any) => {
+                            const group = option.group;
+                            const buildingNames =
+                              group?.accessibleBuildings && group.accessibleBuildings.length > 0
+                                ? group.accessibleBuildings.map((b: any) => b.name).filter(Boolean).join(', ')
+                                : 'n/a';
+
+                            return (
+                              <li {...props} key={option.id}>
+                                <Box display="flex" flexDirection="column" gap={0.5} width="100%">
+                                  <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                                    <Typography variant="subtitle2" fontWeight={600}>
+                                      {group.name}
+                                    </Typography>
+                                    <Box display="flex" gap={0.5}>
+                                      <Chip
+                                        size="small"
+                                        label={group.levelPriority}
+                                        color={group.levelPriority === 'PrimaryAdmin' ? 'secondary' : 'default'}
+                                        sx={{ height: 20, fontSize: '0.7rem' }}
+                                      />
+                                      {group.isHead && (
+                                        <Chip
+                                          size="small"
+                                          label="Head Group"
+                                          color="info"
+                                          sx={{ height: 20, fontSize: '0.7rem' }}
+                                        />
+                                      )}
+                                    </Box>
+                                  </Box>
+                                  <Typography variant="caption" color="text.secondary">
+                                    Accessible Buildings: <strong>{buildingNames || 'n/a'}</strong>
+                                  </Typography>
+                                </Box>
+                              </li>
+                            );
+                          }}
+                        />
+                        {isLoadingGroups && (
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Loading user groups...
+                          </Typography>
+                        )}
+                        {formErrors.groupId && (
+                          <FormHelperText error sx={{ mt: 1 }}>
+                            {formErrors.groupId}
+                          </FormHelperText>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                )}
+              </Box>
+            )}
           </DialogContent>
           <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', px: 3, pb: 3 }}>
             <Box>
@@ -970,7 +1379,7 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
                 </Button>
               ) : (
                 <Button
-                  onClick={() => setActiveStep(0)}
+                  onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
                   variant="outlined"
                   sx={{ fontSize: '1rem', py: 1, px: 3 }}
                 >
@@ -979,28 +1388,58 @@ const AddEditSecurityGuard = ({ type, member }: FormType) => {
               )}
             </Box>
             <Box>
-              {activeStep === 0 ? (
-                <Button
-                  onClick={() => {
-                    if (validateStep(0)) setActiveStep(1);
-                    else toast.error('Please fill all required fields correctly.');
-                  }}
-                  variant="contained"
-                  color="primary"
-                  sx={{ fontSize: '1rem', py: 1, px: 3 }}
-                >
-                  Next
-                </Button>
+              {type === 'add' ? (
+                activeStep < 2 ? (
+                  <Button
+                    onClick={() => {
+                      if (validateStep(activeStep)) {
+                        setActiveStep((prev) => prev + 1);
+                      } else {
+                        toast.error('Please fill all required fields correctly.');
+                      }
+                    }}
+                    variant="contained"
+                    color="primary"
+                    sx={{ fontSize: '1rem', py: 1, px: 3 }}
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSave}
+                    variant="contained"
+                    color="success"
+                    sx={{ fontSize: '1rem', py: 1, px: 3 }}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save Security'}
+                  </Button>
+                )
               ) : (
-                <Button
-                  onClick={handleSave}
-                  variant="contained"
-                  color="success"
-                  sx={{ fontSize: '1rem', py: 1, px: 3 }}
-                  disabled={isSaving}
-                >
-                  {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save Security'}
-                </Button>
+                /* Edit Mode (2 steps) */
+                activeStep === 0 ? (
+                  <Button
+                    onClick={() => {
+                      if (validateStep(0)) setActiveStep(1);
+                      else toast.error('Please fill all required fields correctly.');
+                    }}
+                    variant="contained"
+                    color="primary"
+                    sx={{ fontSize: '1rem', py: 1, px: 3 }}
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSave}
+                    variant="contained"
+                    color="success"
+                    sx={{ fontSize: '1rem', py: 1, px: 3 }}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? <CircularProgress size={20} color="inherit" /> : 'Save Security'}
+                  </Button>
+                )
               )}
             </Box>
           </DialogActions>

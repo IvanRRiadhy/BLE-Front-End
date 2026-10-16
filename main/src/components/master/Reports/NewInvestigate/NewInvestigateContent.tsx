@@ -71,7 +71,7 @@ import { PersonOverviewData, useCoPresenceInvestigation, GlobalInvestigationData
 import GlobalInvestigationOverview from './GlobalInvestigationOverview';
 import { PersonOption } from './NewInvestigateFilter';
 import { actionStatus, extraActionStatus, actionStatusColormap } from 'src/types/crud/input';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import BeaconRenderer from 'src/components/dashboards/monitoring/Renderer/BeaconRenderer';
 import InvestigateContent from 'src/components/master/Reports/Investigation/InvestigateContent';
 import { VisitorSessionResponseType } from 'src/store/apps/crud/visitorSession';
@@ -88,10 +88,7 @@ const AREA_COLORS = ['#1877F2', '#36B37E', '#FFAB00', '#FF5630', '#6554C0', '#00
 
 const normalizeImageUrl = (path?: string | null) => {
   if (!path) return null;
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
-  const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${cleanBase}${cleanPath}`;
+  return getCdnUrl(path);
 };
 
 function getAreaPoints(

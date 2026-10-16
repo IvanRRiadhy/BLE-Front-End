@@ -19,7 +19,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { fetchVisitorbyId, fillFormVisitor, VisitorType } from 'src/store/apps/crud/visitor';
 import { AppDispatch, dispatch, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { IdentityType } from 'src/types/crud/input';
 
 const useQuery = () => {
@@ -376,7 +376,7 @@ const VisitorFormPage = () => {
               )}
               {preview && (
                 <img
-                  src={preview.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
+                  src={preview.startsWith('blob:') ? preview : getCdnUrl(preview)}
                   alt="Preview"
                   style={{ width: '100%', borderRadius: 8, marginTop: 10 }}
                 />

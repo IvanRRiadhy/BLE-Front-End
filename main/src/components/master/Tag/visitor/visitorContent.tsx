@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'src/store/Store';
 import {
@@ -195,7 +195,7 @@ const VisitorContent = () => {
             >
               <Avatar
                 alt="Visitor Face"
-                src={`${BASE_URL}${displayVisitorDetail.visitor?.faceImage}`}
+                src={getCdnUrl(displayVisitorDetail.visitor?.faceImage)}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
               <VisitorActions

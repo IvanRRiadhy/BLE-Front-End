@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box } from '@mui/material';
@@ -37,9 +37,7 @@ const TrackingPositionFloorView: React.FC<TrackingPositionFloorViewProps> = ({
   const filteredAreas = maskedAreas.filter((a: MaskedAreaType) => a.floorplanId === floorplanId);
 
   const floorplanImage = activeFloorplan?.floorplanImage
-    ? activeFloorplan.floorplanImage.startsWith('/Uploads/')
-      ? `${BASE_URL}${activeFloorplan.floorplanImage}`
-      : activeFloorplan.floorplanImage
+    ? getCdnUrl(activeFloorplan.floorplanImage)
     : '';
 
   useEffect(() => {

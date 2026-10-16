@@ -6,7 +6,7 @@ import { RootState } from 'src/store/Store';
 import { Link, useNavigate } from 'react-router';
 import React, { useState } from 'react';
 import { useProfile } from 'src/hooks/useProfile';
-import { BASE_URL, CDN_URL, logoutUser } from 'src/utils/axios';
+import { getCdnUrl, logoutUser } from 'src/utils/axios';
 
 export const Profile = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -21,9 +21,7 @@ export const Profile = () => {
   const groupName = profile?.groupName || localStorage.getItem('groupName') || profile?.groupLevel || localStorage.getItem('levelPriority') || 'User';
   const email = profile?.email || localStorage.getItem('email') || '';
   const avatarSrc = profile?.profilePicture
-    ? (profile.profilePicture.startsWith('http')
-        ? profile.profilePicture
-        : `${BASE_URL.replace(/\/+$/, '')}/${profile.profilePicture.replace(/^\/+/, '')}`)
+    ? getCdnUrl(profile.profilePicture)
     : img1;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

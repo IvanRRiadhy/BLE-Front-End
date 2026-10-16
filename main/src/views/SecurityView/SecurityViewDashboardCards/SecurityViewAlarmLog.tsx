@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { Box, Typography, Avatar, Stack } from '@mui/material';
 import { useRealtimeAlarmLog } from 'src/hooks/useDashboard';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
 import { toast } from 'react-hot-toast';
 
@@ -115,7 +115,7 @@ const SecurityViewAlarmLog: React.FC = () => {
       const person = resolvePerson(x);
 
       return {
-        image: person.image ? `${BASE_URL}${person.image}` : '',
+        image: person.image ? getCdnUrl(person.image) : '',
         name: person.name,
         idleTime: x.idleTimestamp ? new Date(x.idleTimestamp).toLocaleString() : '-',
         triggerTime: x.triggerTime ? new Date(x.triggerTime).toLocaleString() : '-',

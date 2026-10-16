@@ -1,5 +1,5 @@
 import React from 'react';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { useSelector } from 'src/store/Store';
 import {
   ListItemText,
@@ -50,7 +50,7 @@ const IntruderListItem = ({ onTagClick, intruder, active }: Props) => {
       onClick={onTagClick}
     >
       <ListItemAvatar>
-        <Avatar alt="Visitor Face" src={`${BASE_URL}${intruder?.personImage}`} />
+        <Avatar alt="Visitor Face" src={getCdnUrl(intruder?.personImage)} />
       </ListItemAvatar>
 
       <ListItemText

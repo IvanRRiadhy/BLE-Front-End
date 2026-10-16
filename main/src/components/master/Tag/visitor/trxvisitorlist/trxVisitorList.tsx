@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import {
-  Backdrop,
   Box,
-  CircularProgress,
   List,
   Skeleton,
   ListItemButton,
@@ -10,30 +8,51 @@ import {
   ListItemText,
   Stack,
 } from '@mui/material';
-import { createPortal } from 'react-dom';
-import { useTrxVisitorList, useAllTrxVisitor, useTrxVisitorStatus } from 'src/hooks/useVisitorTrx';
-import { defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
-import Scrollbar from 'src/components/custom-scroll/Scrollbar';
+import { useInfiniteTrxVisitorList } from 'src/hooks/useVisitorTrx';
+import { useInView } from 'react-intersection-observer';
 import TrxVisitorListItem from './trxVisitorListItem';
-import { SelectTrxVisitor } from 'src/store/apps/crud/trxVisitor';
-import { useDispatch, useSelector } from 'src/store/Store';
+import { SelectTrxVisitor, UpdateFilter, TrxVisitorType } from 'src/store/apps/crud/trxVisitor';
+import { defaultTrxVisitorFilter } from 'src/store/apps/defaultForm';
+import { useDispatch, useSelector, RootState } from 'src/store/Store';
 
 const SKELETON_ROWS = 5;
 
 const VisitorList = () => {
   const dispatch = useDispatch();
-  
-  // Use React Query hooks instead of Redux
-  const { data: paginatedData, isLoading, isFetching } = useTrxVisitorList();
-  const { data: allVisitors } = useAllTrxVisitor();
-  const { hasLoaded } = useTrxVisitorStatus();
 
-  // Use either paginated data or all visitors based on your needs
-  const trxVisitors = useMemo(() => {
-    return paginatedData?.data || allVisitors || [];
-  }, [paginatedData, allVisitors]);
-  const selectedTrxVisitor = useSelector((state) => state.TrxVisitorReducer.SelectedTrxVisitor);
+  // 🔹 Redux filter and selected state
+  const trxVisitorFilter = useSelector(
+    (state: RootState) => state.TrxVisitorReducer.TrxVisitorFilter,
+  );
+  const selectedTrxVisitor = useSelector(
+    (state: RootState) => state.TrxVisitorReducer.SelectedTrxVisitor,
+  );
 
+  // 🔹 React Query infinite fetching
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteTrxVisitorList(trxVisitorFilter, 50);
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Reset filter to default on mount (similar to tagList.tsx)
+  useEffect(() => {
+    dispatch(UpdateFilter({ ...defaultTrxVisitorFilter }));
+  }, [dispatch]);
+
+  // 🔹 Derived visitors list from pages
+  const trxVisitors = data?.pages.flatMap((page) => page.data) ?? [];
+  const active = trxVisitors?.find((trx: TrxVisitorType) => trx.id === selectedTrxVisitor?.id);
 
   const renderSkeletonItems = (count: number) => (
     <>
@@ -56,48 +75,27 @@ const VisitorList = () => {
     </>
   );
 
-  const loading = isLoading || isFetching;
-
   return (
-    <>
-      <List>
-        <Box
-          sx={{
-            height: { lg: 'calc(100vh - 220px)', md: '100vh' },
-            maxHeight: '75vh',
-            overflow: 'auto',
-          }}
-        >
-          {hasLoaded && trxVisitors.length > 0 ? (
-            trxVisitors.map((trx) => (
+    <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '75vh', height: { lg: 'calc(100vh - 220px)', md: '100vh' } }}>
+      <List sx={{ px: 0 }}>
+        {isLoading
+          ? renderSkeletonItems(SKELETON_ROWS)
+          : trxVisitors.map((trx) => (
               <TrxVisitorListItem
                 key={trx.id}
-                active={trx.id === selectedTrxVisitor?.id}
+                active={trx === active || trx.id === selectedTrxVisitor?.id}
                 trx={trx}
                 onTagClick={() => {
                   dispatch(SelectTrxVisitor(trx));
                 }}
               />
-            ))
-          ) : (
-            renderSkeletonItems(SKELETON_ROWS)
-          )}
-        </Box>
+            ))}
+
+        {isFetchingNextPage && renderSkeletonItems(3)}
+
+        {hasNextPage && <div ref={ref} style={{ height: '20px' }} />}
       </List>
-      {loading &&
-        createPortal(
-          <Backdrop
-            open={loading}
-            sx={{
-              color: '#fff',
-              zIndex: (theme) => theme.zIndex.drawer + 1,
-            }}
-          >
-            <CircularProgress color="inherit" />
-          </Backdrop>,
-          document.body,
-        )}
-    </>
+    </Box>
   );
 };
 

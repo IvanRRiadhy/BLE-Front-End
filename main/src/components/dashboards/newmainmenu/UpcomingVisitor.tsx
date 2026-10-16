@@ -9,11 +9,11 @@ import {
   InputAdornment,
   IconButton,
 } from '@mui/material';
-import { IconSearch, IconX } from '@tabler/icons-react';
 import { useInfiniteUpcomingVisitor } from 'src/hooks/useDashboard';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
 import { useInView } from 'react-intersection-observer';
+import { IconSearch, IconX } from '@tabler/icons-react';
 
 const defaultFilter = {
   draw: 1,
@@ -254,7 +254,7 @@ const UpcomingVisitor: React.FC = () => {
               >
                 {/* Avatar */}
                 <Avatar
-                  src={item.image ? `${BASE_URL}${item.image}` : ''}
+                  src={item.image ? getCdnUrl(item.image) : ''}
                   alt="visitor"
                   sx={{ width: 56, height: 56 }}
                 />

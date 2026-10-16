@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import dayjs from 'dayjs';
 import { toLocalDate } from 'src/utils/time';
+import { getConfig } from 'src/config';
 
 export const PATROL_REPORT_COLUMNS = [
   { header: 'Patrol Assignment', key: 'assignmentName', width: 20 },
@@ -47,10 +48,18 @@ export interface PatrolReportRow {
   attachment?: string | null;
 }
 
-const getCdnUrl = (url?: string) => {
+const getCdnUrl = (url?: string | null) => {
   if (!url) return '';
-  if (url.startsWith('https://ble-cdn.app.bio-experience.com')) return url;
-  return `https://ble-cdn.app.bio-experience.com${url}`;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  let cdnBase = '';
+  try {
+    cdnBase = getConfig()?.CDN_URL || '';
+  } catch {
+    cdnBase = '';
+  }
+  const cleanBase = cdnBase.replace(/\/+$/, '');
+  const cleanPath = url.replace(/^\/+/, '');
+  return cleanBase ? `${cleanBase}/${cleanPath}` : url;
 };
 
 // ─────────────────────────────────────────────────────────────

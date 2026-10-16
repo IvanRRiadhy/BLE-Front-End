@@ -251,3 +251,38 @@ export function useMaskedAreaStatus() {
     allMaskedAreaCount: all.data?.length ?? 0,
   };
 }
+
+
+// CCTV in Area Type definition
+export interface AreaCCTVType {
+  id: string;
+  name: string;
+  rtsp: string;
+  isAssigned: boolean;
+  integrationId: string;
+  integrationType: string;
+  floorplanDeviceId: string;
+  deviceName: string;
+  floorplanId: string;
+  floorplanMaskedAreaId: string;
+  posX: number;
+  posY: number;
+  posPxX: number;
+  posPxY: number;
+  deviceStatus: string;
+}
+
+// Fetch CCTV in Area
+export function useAreaCCTV(areaId: string | null | undefined) {
+  return useQuery({
+    queryKey: ['masked-area-cctv', areaId],
+    queryFn: async () => {
+      if (!areaId) return [];
+      const res = await axiosServices.get(`${API_URL}${areaId}/cctv`);
+      const data = res.data.collection.data as AreaCCTVType[];
+      return data;
+    },
+    enabled: Boolean(areaId),
+    placeholderData: [],
+  });
+}

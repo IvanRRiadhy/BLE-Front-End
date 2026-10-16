@@ -5,6 +5,7 @@ import { getAccessToken, refreshAccessToken, clearSession } from 'src/utils/axio
 import { Box, CircularProgress, Paper, Typography, ThemeProvider, createTheme } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import { getConfig } from 'src/config';
+import { fetchLicenseInfo } from 'src/hooks/useInfo';
 
 import bg from 'src/assets/images/backgrounds/bg.jpg';
 import Footer from 'src/layouts/Footer';
@@ -89,6 +90,11 @@ const Login = () => {
     }
 
     if (levelPriority) {
+      try {
+        await fetchLicenseInfo();
+      } catch (licenseErr) {
+        console.warn('Failed to refresh license info on existing session check:', licenseErr);
+      }
       navigate(
         levelPriority === 'Primary' ? '/security-view/dashboard' : '/dashboards/newmainmenu',
         { replace: true }

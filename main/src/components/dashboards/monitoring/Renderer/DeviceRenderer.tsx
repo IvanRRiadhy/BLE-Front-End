@@ -469,6 +469,7 @@ type DeviceRendererProps = {
   focusDmac?: string;
   showOtherBeacons?: boolean;
   followingPersons?: any[];
+  onSelectDevice?: (device: FloorplanDeviceType) => void;
   // Stage transform props (from parent)
   stageScale: number;
   stageX: number;
@@ -519,6 +520,8 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     onFocusPosition,
     onFloorplanChange,
     showOtherBeacons,
+    followingPersons,
+    onSelectDevice,
     screenId,
     stageScale,
     stageX,
@@ -1182,6 +1185,8 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
 
   // track which area is hovered
   const [hoveredAreaId, setHoveredAreaId] = useState<string | null>(null);
+  // track which device is hovered
+  const [hoveredDeviceId, setHoveredDeviceId] = useState<string | null>(null);
 
   // render devices - using original image coordinates
   const renderDeviceShape = (device: FloorplanDeviceType) => {
@@ -1201,22 +1206,70 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
     const x = device.posPxX - (20 * gateSize);
     const y = device.posPxY - (20 * gateSize);
     const statusActive = device.deviceStatus.toLocaleLowerCase() === 'active';
+    const isHovered = hoveredDeviceId === device.id;
+    const centerX = device.posPxX;
+    const centerY = device.posPxY;
+    const radius = 24 * gateSize;
     // console.log("Device", device.reader)
     return (
       <Group
         key={`device-${device.id}`}
         name="device"
+        onMouseEnter={(e: any) => {
+          const stage = e.target.getStage();
+          if (stage) stage.container().style.cursor = 'pointer';
+          setHoveredDeviceId(device.id);
+        }}
+        onMouseLeave={(e: any) => {
+          const stage = e.target.getStage();
+          if (stage) stage.container().style.cursor = 'default';
+          setHoveredDeviceId((prev) => (prev === device.id ? null : prev));
+        }}
         onClick={(e: any) => {
           e.cancelBubble = true;
           dispatch(setFocus({ type: 'device', id: device.id }));
+          if (onSelectDevice) {
+            onSelectDevice(device);
+          }
         }}
       >
+        {/* Glowing aura & highlight ring when hovered */}
+        {isHovered && (
+          <Group listening={false}>
+            {/* Ambient outer glow */}
+            <Circle
+              x={centerX}
+              y={centerY}
+              radius={radius + 6}
+              stroke="#1976d2"
+              strokeWidth={3}
+              fill="#1976d2"
+              opacity={0.15}
+              shadowColor="#1976d2"
+              shadowBlur={16}
+              shadowOpacity={0.8}
+            />
+            {/* Crisp highlight ring */}
+            <Circle
+              x={centerX}
+              y={centerY}
+              radius={radius + 2}
+              stroke="#ffffff"
+              strokeWidth={2}
+              fill="transparent"
+              shadowColor="#ffffff"
+              shadowBlur={6}
+              shadowOpacity={0.9}
+            />
+          </Group>
+        )}
+
         <Text
           x={x - (40 * gateSize)}
           y={y - (statusActive ? 5 * gateSize : 25 * gateSize)}
           text={device.name}
-          fontSize={9 * gateSize}
-          fill="#1976d2"
+          fontSize={(isHovered ? 10 : 9) * gateSize}
+          fill={isHovered ? '#0d47a1' : '#1976d2'}
           fontStyle="bold"
           width={120 * gateSize}
           align="center"
@@ -1239,9 +1292,11 @@ const DeviceRenderer: React.FC<DeviceRendererProps> = (props) => {
           name="device"
           image={deviceIcon}
           x={x}
-          y={y} width={40 * gateSize} height={40 * gateSize}
-          stroke={!statusActive ? 'red' : 'transparent'}
-          strokeWidth={!statusActive ? 3 : 0}
+          y={y}
+          width={40 * gateSize}
+          height={40 * gateSize}
+          stroke={isHovered ? '#1976d2' : !statusActive ? 'red' : 'transparent'}
+          strokeWidth={isHovered ? 2.5 : !statusActive ? 3 : 0}
         />
         {device.reader?.forceReading && (
           <Circle x={x + (20 * gateSize)} y={y + (20 * gateSize)} radius={((device.reader?.forceRadiusMeter || 2) / meterPx)} fill="transparent" stroke="#1976d2" strokeWidth={2} />

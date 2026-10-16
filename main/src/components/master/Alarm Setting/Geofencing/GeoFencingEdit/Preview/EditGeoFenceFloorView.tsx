@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useSelector, RootState } from 'src/store/Store';
 import { Box, Switch, FormControlLabel, FormLabel, Divider, Typography } from '@mui/material';
@@ -74,9 +74,7 @@ const EditGeoFenceFloorView = () => {
 
   // Floorplan image URL
   const floorplanImage = activeFloorPlan?.floorplanImage
-    ? activeFloorPlan.floorplanImage.startsWith('/Uploads/')
-      ? `${BASE_URL}${activeFloorPlan.floorplanImage}`
-      : activeFloorPlan.floorplanImage
+    ? getCdnUrl(activeFloorPlan.floorplanImage)
     : FloorplanHouse;
 
   // Load image to get natural dimensions

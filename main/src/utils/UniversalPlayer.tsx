@@ -10,7 +10,7 @@ interface UniversalVideoPlayerProps {
 
 export default function UniversalVideoPlayer({ 
   streamUrl, 
-  engineWsUrl = 'ws://192.168.1.166:8282',
+  engineWsUrl = 'ws://192.168.1.96:8282',
   style
 }: UniversalVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);

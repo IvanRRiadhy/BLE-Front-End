@@ -207,3 +207,22 @@ export function useRevokeAllBuilding() {
     },
   });
 }
+
+export function useUnlinkedUser(priority?: string) {
+  return useQuery({
+    queryKey: ['user-unlinked', priority],
+    queryFn: async () => {
+      const res = await axiosServices.get(`${API_DT_URL}/unlinked`, {
+        params: priority ? { priority } : undefined,
+      });
+      console.log('Unlinked Users: ', res.data);
+      return (res.data?.collection?.data || []) as (userType & {
+        groupIsHead?: boolean;
+        groupName?: string;
+        groupLevel?: string;
+        [key: string]: any;
+      })[];
+    },
+    placeholderData: [],
+  });
+}

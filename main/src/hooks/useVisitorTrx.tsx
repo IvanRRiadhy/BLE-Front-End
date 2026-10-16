@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import axiosServices from 'src/utils/axios';
 import { TrxVisitorType, GetFilter } from '../store/apps/crud/trxVisitor';
 import { RootState, useSelector } from 'src/store/Store';
@@ -32,6 +32,36 @@ export function useTrxVisitorList() {
     },
     placeholderData: keepPreviousData,
     staleTime: 60_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
+export function useInfiniteTrxVisitorList(filter: GetFilter, pageSize = 50) {
+  return useInfiniteQuery({
+    queryKey: ['trx-visitor-list-infinite', { ...filter, Length: undefined, Start: undefined }, pageSize],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await axiosServices.post(API_DT_URL, {
+        ...filter,
+        Start: pageParam,
+        Length: pageSize,
+      });
+      const collection = response.data.collection;
+      return {
+        data: collection.data as TrxVisitorType[],
+        draw: collection.draw,
+        recordsTotal: collection.recordsTotal,
+        recordsFiltered: collection.recordsFiltered,
+      } satisfies PaginatedResponse<TrxVisitorType>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedCount = allPages.flatMap((page) => page.data).length;
+      if (loadedCount < lastPage.recordsFiltered) {
+        return loadedCount;
+      }
+      return undefined;
+    },
+    staleTime: 5_000,
     gcTime: 5 * 60_000,
   });
 }

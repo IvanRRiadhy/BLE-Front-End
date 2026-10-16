@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, Circle, Shape, Group } from 'react-konva';
 import { fetchMembers, memberType } from 'src/store/apps/crud/member';
@@ -73,7 +73,7 @@ const BeaconRenderer: React.FC<BeaconRendererProps> = ({
   const isMember = membersData.some((m) => m.bleCardNumber === id);
   const isSecurity = securityData.some((s) => s.bleCardNumber === id);
   const label = person?.name || id;
-  const imageUrl = person?.faceImage ? `${BASE_URL}${person.faceImage}` : '';
+  const imageUrl = getCdnUrl(person?.faceImage);
 
 // Global failed image load timestamp cache (1 minute retry cooldown)
 const visitorFailedImages = new Map<string, number>();

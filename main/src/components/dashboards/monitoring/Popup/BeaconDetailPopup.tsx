@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import {
   Avatar,
   Box,
@@ -352,7 +352,7 @@ const BeaconDetailPopup = ({
             <Grid size={12} display={'flex'} justifyContent={'center'} my={1}>
               <Avatar
                 alt="Profile"
-                src={`${BASE_URL}${personDetail?.faceImage}`}
+                src={getCdnUrl(personDetail?.faceImage)}
                 sx={{
                   width: '120px',
                   height: '120px',

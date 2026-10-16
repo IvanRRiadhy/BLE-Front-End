@@ -865,20 +865,38 @@ const AboutPage = ({ isLicenseLocked = false }: AboutPageProps) => {
                     <CardContent>
                       <Typography id="capacity" variant="h4" mb={2}>Capacity</Typography>
                       
-                      <Grid container spacing={3} mb={4}>
-                        <Grid size={{ xs: 6 }}>
-                          <Box p={4} bgcolor="primary.light" borderRadius={2} color="primary.main" textAlign="center">
-                            <Typography variant="h3" fontWeight={700}>{data.maxReaders.toLocaleString()}</Typography>
-                            <Typography variant="h6">Max Readers</Typography>
-                          </Box>
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
-                          <Box p={4} bgcolor="secondary.light" borderRadius={2} color="secondary.main" textAlign="center">
-                            <Typography variant="h3" fontWeight={700}>{data.maxBeacons.toLocaleString()}</Typography>
-                            <Typography variant="h6">Max Beacons</Typography>
-                          </Box>
-                        </Grid>
-                      </Grid>
+                      {(() => {
+                        const isCctvEnabled = Boolean(
+                          data.features?.modules?.['module.cctv']?.isEnabled ||
+                          data.features?.modules?.['cctv']?.isEnabled
+                        );
+                        const colSize = isCctvEnabled ? { xs: 12, sm: 4 } : { xs: 12, sm: 6 };
+
+                        return (
+                          <Grid container spacing={3} mb={4}>
+                            <Grid size={colSize}>
+                              <Box p={4} bgcolor="primary.light" borderRadius={2} color="primary.main" textAlign="center">
+                                <Typography variant="h3" fontWeight={700}>{(data.maxReaders ?? 0).toLocaleString()}</Typography>
+                                <Typography variant="h6">Max Readers</Typography>
+                              </Box>
+                            </Grid>
+                            <Grid size={colSize}>
+                              <Box p={4} bgcolor="secondary.light" borderRadius={2} color="secondary.main" textAlign="center">
+                                <Typography variant="h3" fontWeight={700}>{(data.maxBeacons ?? 0).toLocaleString()}</Typography>
+                                <Typography variant="h6">Max Beacons</Typography>
+                              </Box>
+                            </Grid>
+                            {isCctvEnabled && (
+                              <Grid size={colSize}>
+                                <Box p={4} bgcolor="warning.light" borderRadius={2} color="warning.main" textAlign="center">
+                                  <Typography variant="h3" fontWeight={700}>{(data.maxCctv ?? 0).toLocaleString()}</Typography>
+                                  <Typography variant="h6">Max CCTV</Typography>
+                                </Box>
+                              </Grid>
+                            )}
+                          </Grid>
+                        );
+                      })()}
 
                       <Typography id="core-features" variant="h4" mb={2} mt={6}>Core Features</Typography>
                       <List dense disablePadding>

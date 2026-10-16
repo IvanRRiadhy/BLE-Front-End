@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, FormControlLabel, FormLabel, Switch } from '@mui/material';
@@ -99,9 +99,7 @@ const EditAreaFloorView: React.FC<{
 
   // Get floorplan image URL
   const floorplanImage = activeFloorPlan?.floorplanImage
-    ? activeFloorPlan.floorplanImage.startsWith('/Uploads/')
-      ? `${BASE_URL}${activeFloorPlan.floorplanImage}`
-      : activeFloorPlan.floorplanImage
+    ? getCdnUrl(activeFloorPlan.floorplanImage)
     : FloorplanHouse;
 
   // Load image to get natural dimensions

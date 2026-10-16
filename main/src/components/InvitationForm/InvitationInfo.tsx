@@ -24,7 +24,7 @@ import {
 import { AppDispatch, dispatch, useDispatch } from 'src/store/Store';
 import toast from 'react-hot-toast';
 import { fetchTrxVisitorById, TrxVisitorType } from 'src/store/apps/crud/trxVisitor';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
@@ -386,7 +386,7 @@ const InvitationInfo = () => {
                       <Box mt={2}>
                         {preview && (
                           <img
-                            src={`${BASE_URL}${preview}`}
+                            src={getCdnUrl(preview)}
                             alt="Preview"
                             style={{ width: '100%', borderRadius: 8, marginTop: 10 }}
                           />

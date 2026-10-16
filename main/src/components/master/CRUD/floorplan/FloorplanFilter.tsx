@@ -7,8 +7,9 @@ import {
 } from '@mui/material';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-react';
 import { isEqual } from 'lodash';
-import { lazy, useEffect, useState } from 'react';
+import { lazy, useEffect, useMemo, useState } from 'react';
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
+import { useLocationHierarchy } from 'src/hooks/useBuilding';
 import { UpdateFilter } from 'src/store/apps/crud/floorplan';
 import { RootState, useDispatch, useSelector } from 'src/store/Store';
 // import AutocompleteFilter from 'src/layouts/full/horizontal/navbar/AutocompleteFilter';
@@ -21,6 +22,18 @@ const FloorplanFilter = () => {
   const [resetToken, setResetToken] = useState(0);
 
   const floorplanFilter = useSelector((state: RootState) => state.floorplanReducer.floorplanFilter);
+
+  const { data: hierarchyTree = [] } = useLocationHierarchy();
+
+  const floorList = useMemo(() => {
+    const list: { id: string; name: string; buildingId: string }[] = [];
+    for (const b of hierarchyTree) {
+      for (const f of b.floors ?? []) {
+        list.push({ id: f.id, name: f.name, buildingId: b.id });
+      }
+    }
+    return list;
+  }, [hierarchyTree]);
 
   // --- Local filter state (only FloorId matters for API) ---
   const [appliedFilter, setAppliedFilter] = useState({

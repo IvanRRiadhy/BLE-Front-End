@@ -31,8 +31,10 @@ export type GetFilter = {
         },
     }
     filters:{
-        Status?: number,
-        Gender?: number,
+        Status?: number | string | string[],
+        status?: string[],
+        Gender?: number | string | string[],
+        gender?: string | string[],
         VisitorId?: string,
     }
 }

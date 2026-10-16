@@ -44,7 +44,7 @@ export interface floorType {
     id: string,
     buildingId: string,
     name: string,
-    
+    level: number,
 
     createdBy: string,
     createdAt: string,

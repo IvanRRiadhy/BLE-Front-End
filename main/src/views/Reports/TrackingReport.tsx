@@ -34,10 +34,10 @@ import TrackingReportSinglePerson from 'src/components/master/Reports/TrackingRe
 import CustomFormLabel from 'src/components/forms/theme-elements/CustomFormLabel';
 
 import { useVisitorSession } from 'src/hooks/useVisitorSession';
+import { OldGetFilter } from 'src/store/apps/crud/visitorSession';
 import { useAllVisitor } from 'src/hooks/useVisitor';
 import { useAllMembers } from 'src/hooks/useMember';
-import { OldGetFilter } from 'src/store/apps/crud/visitorSession';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 
 const AutocompleteFilter = lazy(
   () => import('src/layouts/full/horizontal/navbar/AutocompleteFilter'),
@@ -183,7 +183,7 @@ const TrackingReport: React.FC = () => {
         email: found?.email || '-',
         phone: found?.phone || '-',
         organization: found?.companyName || found?.organization?.name || found?.department?.name || selectedPersonDetailRow.hostName || '-',
-        avatarUrl: found?.faceImage ? (found.faceImage.startsWith('http') ? found.faceImage : `${BASE_URL}/${found.faceImage}`) : undefined,
+        avatarUrl: found?.faceImage ? getCdnUrl(found.faceImage) : undefined,
       };
     }
 
@@ -200,7 +200,7 @@ const TrackingReport: React.FC = () => {
           email: m.email || '-',
           phone: m.phone || '-',
           organization: m.organization?.name || m.department?.name || '-',
-          avatarUrl: m.faceImage ? (m.faceImage.startsWith('http') ? m.faceImage : `${BASE_URL}/${m.faceImage}`) : undefined,
+          avatarUrl: m.faceImage ? getCdnUrl(m.faceImage) : undefined,
         };
       }
     }
@@ -218,7 +218,7 @@ const TrackingReport: React.FC = () => {
           email: v.email || '-',
           phone: v.phone || '-',
           organization: v.companyName || v.organization || '-',
-          avatarUrl: v.faceImage ? (v.faceImage.startsWith('http') ? v.faceImage : `${BASE_URL}/${v.faceImage}`) : undefined,
+          avatarUrl: v.faceImage ? getCdnUrl(v.faceImage) : undefined,
         };
       }
     }

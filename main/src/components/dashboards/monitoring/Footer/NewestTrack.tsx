@@ -33,10 +33,8 @@ import { useSelector } from 'react-redux';
 import { useAllMembers } from 'src/hooks/useMember';
 import { useAllSecuritys } from 'src/hooks/useSecurityGuard';
 import { useAllVisitor } from 'src/hooks/useVisitor';
-import { memberType } from 'src/store/apps/crud/member';
-import { VisitorType } from 'src/store/apps/crud/visitor';
 import { RootState } from 'src/store/Store';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import TrackingDetailPopup from '../Popup/TrackingDetailPopup';
 
 const ROLE_THEMES: Record<
@@ -334,7 +332,7 @@ const TrackCard = ({
       <Box display="flex" alignItems="flex-start" justifyContent="space-between" mb={1.75}>
         <Box display="flex" alignItems="center" gap={1.25} sx={{ minWidth: 0, flex: 1 }}>
           <Avatar
-            src={faceImage ? `${BASE_URL}${faceImage}` : undefined}
+            src={faceImage ? getCdnUrl(faceImage) : undefined}
             sx={{
               width: isSidebar ? 46 : 56,
               height: isSidebar ? 46 : 56,

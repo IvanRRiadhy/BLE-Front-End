@@ -23,6 +23,7 @@ export type AboutDataType = {
     daysRemaining: number;
     maxBeacons: number;
     maxReaders: number;
+    maxCctv?: number;
     features: {
         core: Record<string, FeaturesType>;
         modules: Record<string, FeaturesType>;
@@ -65,18 +66,19 @@ export function clearCachedLicenseInfo() {
   }
 }
 
+export async function fetchLicenseInfo(): Promise<AboutDataType> {
+    const res = await axiosServices.get(`${API_URL}info`);
+    console.log("Info Result: ", res.data);
+    const data = res.data.collection.data as AboutDataType;
+    setCachedLicenseInfo(data);
+    return data;
+}
+
 export function useLicenseInfo() {
     return useQuery ({
         queryKey: ['info'],
-        queryFn: async() => {
-            const res = await axiosServices.get(`${API_URL}info`);
-            console.log("Info Result: ", res.data);
-            const data = res.data.collection.data as AboutDataType;
-            setCachedLicenseInfo(data);
-            return data;
-        },
+        queryFn: fetchLicenseInfo,
         initialData: () => getCachedLicenseInfo() ?? undefined,
-        enabled: !getCachedLicenseInfo(),
     })
 };
 

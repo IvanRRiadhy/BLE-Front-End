@@ -14,7 +14,7 @@ import { IconGripHorizontal } from '@tabler/icons-react';
 import { PatrolAreaType } from 'src/store/apps/crud/patrolArea';
 import { useEffect, useRef, useState } from 'react';
 import { FloorplanType } from 'src/store/apps/crud/floorplan';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import AreaHighlightRenderer from 'src/layouts/full/shared/AreaHighlightRenderer';
 
 interface SortablePatrolAreaCardProps {
@@ -60,9 +60,7 @@ const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [imgSize, setImgSize] = useState<{ width: number; height: number } | null>(null);
 
     const floorplanImage = floorplan?.floorplanImage
-      ? floorplan.floorplanImage.startsWith('/Uploads/')
-        ? `${BASE_URL}${floorplan.floorplanImage}`
-        : floorplan.floorplanImage
+      ? getCdnUrl(floorplan.floorplanImage)
       : '';
 
       

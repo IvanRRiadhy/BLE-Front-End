@@ -14,12 +14,12 @@ import {
   InputAdornment,
   IconButton,
 } from '@mui/material';
-import { IconSearch, IconX } from '@tabler/icons-react';
 import { useInfiniteRealtimeAlarmLog } from 'src/hooks/useDashboard';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
 import { AlarmTriggerType } from 'src/store/apps/crud/alarmTrigger';
 import { useInView } from 'react-intersection-observer';
+import { IconSearch, IconX } from '@tabler/icons-react';
 
 const defaultFilter = {
   draw: 1,
@@ -104,7 +104,7 @@ const AlarmLog: React.FC = () => {
     return rawData.map((x: any) => {
       const person = resolvePerson(x);
       return {
-        image: person.image ? `${BASE_URL}${person.image}` : '',
+        image: person.image ? getCdnUrl(person.image) : '',
         name: person.name,
         idleTime: x.idleTimestamp ? new Date(x.idleTimestamp).toLocaleString() : '-',
         triggerTime: x.triggerTime ? new Date(x.triggerTime).toLocaleString() : '-',

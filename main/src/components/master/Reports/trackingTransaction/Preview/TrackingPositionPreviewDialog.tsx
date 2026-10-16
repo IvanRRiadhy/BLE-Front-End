@@ -4,8 +4,8 @@ import { IconX } from '@tabler/icons-react';
 import TrackingPositionFloorView from './TrackingPositionFloorView';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store/Store';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { trackingTransType } from 'src/store/apps/crud/trackingTrans';
-import { BASE_URL } from 'src/utils/axios';
 
 const TrackingPositionPreviewDialog: React.FC<{
   transaction: trackingTransType;
@@ -21,9 +21,7 @@ const TrackingPositionPreviewDialog: React.FC<{
   useEffect(() => {
     if (!selected?.floorplanImage) return;
     const img = new Image();
-    img.src = selected.floorplanImage.startsWith('/Uploads/')
-      ? `${BASE_URL}${selected.floorplanImage}`
-      : selected.floorplanImage;
+    img.src = getCdnUrl(selected.floorplanImage);
 
     img.onload = () => {
       const maxWidth = window.innerWidth * 0.85;

@@ -31,6 +31,7 @@ const VisitorTag = () => {
             width: drawerWidth,
             [`& .MuiDrawer-paper`]: { width: drawerWidth, position: 'relative', zIndex: 2 },
             flexShrink: 0,
+            maxHeight: 'calc(100vh - 100px)',
           }}
           variant={lgUp ? 'permanent' : 'temporary'}
         >
@@ -45,6 +46,7 @@ const VisitorTag = () => {
             minWidth: secdrawerWidth,
             width: { xs: '100%', md: secdrawerWidth, lg: secdrawerWidth },
             flexShrink: 0,
+            maxHeight: 'calc(100vh - 100px)',
           }}
         >
           <VisitorSearch onClick={() => setLeftSidebarOpen(true)} />

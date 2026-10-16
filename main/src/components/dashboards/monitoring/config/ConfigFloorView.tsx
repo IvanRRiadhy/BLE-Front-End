@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, FormControlLabel, Grid2 as Grid, Switch, Typography } from '@mui/material';
@@ -75,10 +75,8 @@ const ConfigFloorView: React.FC<{
   const dragStart = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false); // State to track mouse hover
   const floorplanImage = actFloorplan?.floorplanImage
-    ? actFloorplan.floorplanImage.startsWith('/Uploads/') // Check if the URL is already absolute
-      ? `${BASE_URL}${actFloorplan.floorplanImage}`
-      : actFloorplan.floorplanImage // Prepend BASE_URL for relative paths
-    : 'No Active Floorplan'; // Fallback to default image if not available
+    ? getCdnUrl(actFloorplan.floorplanImage)
+    : 'No Active Floorplan';
 
   const devices = useSelector((state: RootState) => state.floorplanDeviceReducer.floorplanDevices);
   const [filteredDevices, setFilteredDevices] = useState<FloorplanDeviceType[]>([]);

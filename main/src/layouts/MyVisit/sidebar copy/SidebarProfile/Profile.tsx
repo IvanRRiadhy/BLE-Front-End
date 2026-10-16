@@ -4,7 +4,7 @@ import img1 from 'src/assets/images/profile/user-1.jpg';
 import { IconPower } from '@tabler/icons-react';
 import { RootState } from 'src/store/Store';
 import { useProfile } from 'src/hooks/useProfile';
-import { BASE_URL, CDN_URL, logoutUser } from 'src/utils/axios';
+import { getCdnUrl, logoutUser } from 'src/utils/axios';
 
 export const Profile = () => {
   const customizer = useSelector((state: RootState) => state.customizer);
@@ -15,9 +15,7 @@ export const Profile = () => {
   const fullName = profile?.fullName || localStorage.getItem('fullName') || profile?.username || localStorage.getItem('username') || 'Guest';
   const groupName = profile?.groupName || localStorage.getItem('groupName') || profile?.groupLevel || localStorage.getItem('levelPriority') || 'User';
   const avatarSrc = profile?.profilePicture
-    ? (profile.profilePicture.startsWith('http')
-        ? profile.profilePicture
-        : `${BASE_URL.replace(/\/+$/, '')}/${profile.profilePicture.replace(/^\/+/, '')}`)
+    ? getCdnUrl(profile.profilePicture)
     : img1;
 
   return (

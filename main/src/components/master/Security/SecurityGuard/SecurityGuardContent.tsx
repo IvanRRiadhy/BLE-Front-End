@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector, useDispatch, RootState } from 'src/store/Store';
@@ -363,7 +363,7 @@ const SecurityGuardContent = () => {
             >
               <Avatar
                 alt="Security Guard Profile"
-                src={`${BASE_URL}${securityGuardDetail.faceImage}`}
+                src={getCdnUrl(securityGuardDetail.faceImage)}
                 sx={{ width: 200, height: 200, mb: 2 }}
               />
               <Box

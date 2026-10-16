@@ -46,6 +46,11 @@ import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import AlarmMenuItem from './vertical/header/AlarmMenuItem';
 import { defaultAlarmTriggerFilter } from 'src/store/apps/defaultForm';
 import AlarmTriggerMenuItem from './shared/AlarmTriggerMenuItem';
+import { useAreaCCTV, useAllMaskedAreas } from 'src/hooks/useMaskedArea';
+import UniversalVideoPlayer from 'src/utils/UniversalPlayer';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { IconExternalLink } from '@tabler/icons-react';
 import { AlarmTriggerType, NearestSecurityType } from 'src/store/apps/crud/alarmTrigger';
 import CustomAutocomplete from 'src/components/shared/CustomAutocomplete';
 import dayjs, { Dayjs } from 'dayjs';
@@ -147,6 +152,302 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
   const [openUnseenDialog, setOpenUnseenDialog] = useState(false);
   const [visuallySeenIds, setVisuallySeenIds] = useState<Set<string>>(new Set());
   const [selectedAlarms, setSelectedAlarms] = useState<AlarmType[]>([]);
+
+  const [activeTab, setActiveTab] = useState<'details' | 'cctv'>('details');
+  const [selectedCctvId, setSelectedCctvId] = useState<string | null>(null);
+  const [openedInNewWindowCctvIds, setOpenedInNewWindowCctvIds] = useState<Set<string>>(new Set());
+
+  const { data: allMaskedAreas = [] } = useAllMaskedAreas();
+
+  // Resolve areaId from alarm object (or fallback to matching by area name)
+  const targetAreaId = useMemo(() => {
+    if (!alarm) return null;
+    const a = alarm as any;
+    if (a.floorplanMaskedAreaId) return a.floorplanMaskedAreaId;
+    if (a.floorplanmaskedAreaId) return a.floorplanmaskedAreaId;
+    if (a.areaId) return a.areaId;
+    if (alarm.area && allMaskedAreas.length) {
+      const trimmed = alarm.area.trim().toLowerCase();
+      const found = allMaskedAreas.find(
+        (m) =>
+          m.id === alarm.area ||
+          m.name?.trim().toLowerCase() === trimmed ||
+          (m as any).areaName?.trim().toLowerCase() === trimmed,
+      );
+      if (found) return found.id;
+    }
+    return null;
+  }, [alarm, allMaskedAreas]);
+
+  const { data: cctvList = [], isLoading: isLoadingCCTV } = useAreaCCTV(targetAreaId);
+
+  // Group unique RTSP streams to avoid duplicate video decoders/connections
+  const uniqueRtspStreams = useMemo(() => {
+    const seenUrls = new Set<string>();
+    const uniqueStreams: { streamUrl: string; cctvIds: string[]; representativeCctv: (typeof cctvList)[0] }[] = [];
+
+    cctvList.forEach((cctv) => {
+      const url = cctv.rtsp ? cctv.rtsp.trim() : '';
+      if (!url) return;
+
+      const existing = uniqueStreams.find((s) => s.streamUrl === url);
+      if (existing) {
+        existing.cctvIds.push(cctv.id);
+      } else {
+        uniqueStreams.push({
+          streamUrl: url,
+          cctvIds: [cctv.id],
+          representativeCctv: cctv,
+        });
+      }
+    });
+
+    return uniqueStreams;
+  }, [cctvList]);
+
+  // Reset opened in new window set whenever the alarm/area changes
+  useEffect(() => {
+    setOpenedInNewWindowCctvIds(new Set());
+  }, [alarm?.id, targetAreaId]);
+
+  useEffect(() => {
+    if (cctvList.length > 0) {
+      // Pick first un-opened CCTV if available, else pick first existing
+      const availableCctvs = cctvList.filter((c) => !openedInNewWindowCctvIds.has(c.id));
+      if (availableCctvs.length > 0) {
+        if (!selectedCctvId || !availableCctvs.some((c) => c.id === selectedCctvId)) {
+          setSelectedCctvId(availableCctvs[0].id);
+        }
+      } else {
+        // All CCTVs have been opened in new window
+        setSelectedCctvId(null);
+      }
+    } else {
+      setSelectedCctvId(null);
+    }
+  }, [cctvList, selectedCctvId, openedInNewWindowCctvIds]);
+
+  // Handler to open CCTV RTSP stream in a dedicated popup window
+  const handleOpenInNewWindow = (cctv: { id: string; name: string; rtsp?: string }) => {
+    if (!cctv) return;
+
+    const streamUrl = cctv.rtsp || '';
+    const cameraName = cctv.name || 'Live Camera Stream';
+    const engineWsUrl = 'ws://192.168.1.166:8282';
+
+    const newWin = window.open(
+      '',
+      `cctv_win_${cctv.id}`,
+      'width=960,height=580,menubar=no,toolbar=no,location=no,status=no,resizable=yes',
+    );
+
+    if (newWin) {
+      const popupHtml = `
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>${cameraName} - CCTV Stream</title>
+            <script src="https://cdn.jsdelivr.net/npm/flv.js@1.6.2/dist/flv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body {
+                background: #0c0f14;
+                color: #fff;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                overflow: hidden;
+              }
+              header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 16px;
+                background: #151a23;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                flex-shrink: 0;
+              }
+              .title-group {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+              .live-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: #4caf50;
+                box-shadow: 0 0 8px #4caf50;
+              }
+              .cam-title {
+                font-size: 15px;
+                font-weight: 700;
+              }
+              .badge {
+                background: #f44336;
+                color: #fff;
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 8px;
+                border-radius: 10px;
+                letter-spacing: 0.5px;
+              }
+              .player-container {
+                flex: 1;
+                position: relative;
+                background: #000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              video {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                outline: none;
+              }
+              .status-overlay {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                background: rgba(0,0,0,0.85);
+                font-size: 14px;
+                color: rgba(255,255,255,0.8);
+                transition: opacity 0.2s ease;
+              }
+              .spinner {
+                width: 36px;
+                height: 36px;
+                border: 3px solid rgba(255,255,255,0.2);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            </style>
+          </head>
+          <body>
+            <header>
+              <div class="title-group">
+                <span class="live-dot"></span>
+                <span class="cam-title">${cameraName}</span>
+              </div>
+              <span class="badge">LIVE RTSP</span>
+            </header>
+            <div class="player-container">
+              <video id="videoElement" controls autoplay muted playsinline></video>
+              <div id="statusOverlay" class="status-overlay">
+                <div class="spinner"></div>
+                <span>Connecting live camera stream...</span>
+              </div>
+            </div>
+            <script>
+              const streamUrl = ${JSON.stringify(streamUrl)};
+              const engineWsUrl = ${JSON.stringify(engineWsUrl)};
+              const video = document.getElementById('videoElement');
+              const overlay = document.getElementById('statusOverlay');
+
+              function hideOverlay() {
+                if (overlay) overlay.style.display = 'none';
+              }
+              function showMessage(msg) {
+                if (overlay) {
+                  overlay.style.display = 'flex';
+                  overlay.innerHTML = '<span style="color:#ff6b6b;font-weight:600;">' + msg + '</span>';
+                }
+              }
+
+              video.addEventListener('playing', hideOverlay);
+
+              if (!streamUrl) {
+                showMessage('No RTSP URL configured for this camera.');
+              } else if (streamUrl.startsWith('rtsp://')) {
+                if (window.flvjs && flvjs.isSupported()) {
+                  const wsUrl = engineWsUrl + '/?url=' + encodeURIComponent(streamUrl);
+                  const flvPlayer = flvjs.createPlayer({
+                    type: 'flv',
+                    isLive: true,
+                    hasAudio: false,
+                    url: wsUrl
+                  }, {
+                    enableWorker: false,
+                    enableStashBuffer: false,
+                    stashInitialSize: 128,
+                    autoCleanupSourceBuffer: true
+                  });
+                  flvPlayer.attachMediaElement(video);
+                  flvPlayer.load();
+                  flvPlayer.play().catch(e => console.log('Autoplay:', e));
+                  flvPlayer.on(flvjs.Events.ERROR, (type, detail) => {
+                    showMessage('Stream Error: ' + type + ' - ' + detail);
+                  });
+                } else {
+                  showMessage('FLV playback is not supported in this browser.');
+                }
+              } else if (streamUrl.includes('m3u8')) {
+                if (window.Hls && Hls.isSupported()) {
+                  const hls = new Hls({ enableWorker: true });
+                  hls.loadSource(streamUrl);
+                  hls.attachMedia(video);
+                  hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+                  hls.on(Hls.Events.ERROR, (_, data) => {
+                    if (data.fatal) showMessage('HLS Error: ' + data.type);
+                  });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                  video.src = streamUrl;
+                  video.play();
+                } else {
+                  showMessage('HLS playback is not supported in this browser.');
+                }
+              } else {
+                showMessage('Unsupported stream URL: ' + streamUrl);
+              }
+            </script>
+          </body>
+        </html>
+      `;
+      newWin.document.open();
+      newWin.document.write(popupHtml);
+      newWin.document.close();
+      newWin.focus();
+    } else {
+      toast.error('Pop-up window was blocked. Please enable pop-ups for this site.');
+    }
+
+    // Mark this CCTV as opened in new window
+    setOpenedInNewWindowCctvIds((prev) => {
+      const nextSet = new Set(prev);
+      nextSet.add(cctv.id);
+      return nextSet;
+    });
+
+    // Auto cycle to the next un-opened CCTV on the list
+    const unOpened = cctvList.filter((c) => c.id !== cctv.id && !openedInNewWindowCctvIds.has(c.id));
+    if (unOpened.length > 0) {
+      // Find currentIndex in cctvList and look for next un-opened
+      const currentIdx = cctvList.findIndex((c) => c.id === cctv.id);
+      let nextCctv = unOpened.find((c, i) => {
+        const idx = cctvList.findIndex((item) => item.id === c.id);
+        return idx > currentIdx;
+      });
+      if (!nextCctv) {
+        nextCctv = unOpened[0];
+      }
+      setSelectedCctvId(nextCctv.id);
+    } else {
+      setSelectedCctvId(null);
+    }
+  };
 
   const notificationSetting = useSelector((state: RootState) => state.settings.notificationSetting);
 
@@ -334,7 +635,8 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
     alarm?.alarmStatus?.toLowerCase() === 'blacklist' ||
     (alarm as any)?.status?.toLowerCase() === 'blacklist' ||
     (alarm as any)?.alarmType?.toLowerCase() === 'blacklist' ||
-    (alarm as any)?.alarm?.toLowerCase() === 'blacklist';
+    (alarm as any)?.alarm?.toLowerCase() === 'blacklist' ||
+    (alarm as any)?.type?.toLowerCase() === 'blacklist';
 
   // Automatically critical if blacklist, otherwise use alarm.priority or fallback
   const effectivePriority = isBlacklist
@@ -368,6 +670,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
     setSelectedSecurity(null);
     setOpenUnseenDialog(false);
     setVisuallySeenIds(new Set());
+    setActiveTab('details');
   }, [alarm?.id]);
   useEffect(() => {
     if (!alarm) {
@@ -377,6 +680,7 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
       setSelectedSecurity(null);
       setOpenUnseenDialog(false);
       setVisuallySeenIds(new Set());
+      setActiveTab('details');
     }
   }, [alarm]);
 
@@ -403,15 +707,32 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
     };
 
     updateRect(); // initial measure
+    const rafId = requestAnimationFrame(updateRect);
 
+    // Periodically update rect while layout animation is running (350ms duration)
+    const intervalId = setInterval(updateRect, 30);
+    const stopIntervalTimer = setTimeout(() => {
+      clearInterval(intervalId);
+      updateRect();
+    }, 450);
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateRect();
+    });
+
+    resizeObserver.observe(popupRef.current);
     window.addEventListener('resize', updateRect);
     window.addEventListener('scroll', updateRect);
 
     return () => {
+      cancelAnimationFrame(rafId);
+      clearInterval(intervalId);
+      clearTimeout(stopIntervalTimer);
+      resizeObserver.disconnect();
       window.removeEventListener('resize', updateRect);
       window.removeEventListener('scroll', updateRect);
     };
-  }, [alarm, actionOpen, openUnseenDialog]);
+  }, [alarm, actionOpen, openUnseenDialog, activeTab]);
 
   //Postpone
   const [openPostponeDialog, setOpenPostponeDialog] = useState(false);
@@ -526,42 +847,70 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
           <AnimatePresence>
             {alarm && (
               <>
-                {/* ========= MAIN ALARM PANEL ========= */}
-                <motion.div
-                  key={`main-${alarm.id}`}
-                  initial={{ opacity: 0, scale: 0.85, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.85, y: -20 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                  style={{
+                {/* Zero-size anchor point fixed at (30%, 35%) */}
+                <Box
+                  sx={{
                     position: 'absolute',
-                    top: '30%',
-                    left: '35%',
-                    transform: 'translate(-50%, -50%)',
-                    pointerEvents: 'auto',
+                    top: '50%',
+                    left: '50%',
+                    width: 0,
+                    height: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    pointerEvents: 'none',
                     zIndex: 10,
                   }}
                 >
-                  <Box
-                    ref={popupRef}
-                    sx={{
-                      background: `linear-gradient(135deg, ${alpha(priorityColor, 0.95)}, ${darken(
-                        priorityColor,
-                        0.25,
-                      )})`,
-                      color: 'white',
-                      borderRadius: 4,
-                      px: 6,
-                      pt: 4,
-                      pb: 8,
-                      minWidth: { xs: '90vw', sm: 480, md: 600 },
-                      maxWidth: '90vw',
-                      textAlign: 'center',
-                      boxShadow: `0 8px 30px ${alpha(priorityColor, 0.5)}`,
-                      border: `1px solid ${alpha(priorityColor, 0.4)}`,
-                      position: 'relative',
+                  <motion.div
+                    key={`main-${alarm.id}`}
+                    layout
+                    initial={{ opacity: 0, scale: 0.85, y: 20 }}
+                    animate={{
+                      opacity: 1,
+                      scale: 1,
+                      y: 0,
+                    }}
+                    exit={{ opacity: 0, scale: 0.85, y: -20 }}
+                    transition={{
+                      opacity: { duration: 0.25, ease: 'easeOut' },
+                      scale: { duration: 0.25, ease: 'easeOut' },
+                      layout: { duration: 0.35, ease: [0.4, 0, 0.2, 1] },
+                    }}
+                    onUpdate={() => {
+                      if (popupRef.current) {
+                        setPanelRect(popupRef.current.getBoundingClientRect());
+                      }
+                    }}
+                    onLayoutAnimationComplete={() => {
+                      if (popupRef.current) {
+                        setPanelRect(popupRef.current.getBoundingClientRect());
+                      }
+                    }}
+                    style={{
+                      pointerEvents: 'auto',
                     }}
                   >
+                    <Box
+                      ref={popupRef}
+                      sx={{
+                        background: `linear-gradient(135deg, ${alpha(priorityColor, 0.95)}, ${darken(
+                          priorityColor,
+                          0.25,
+                        )})`,
+                        color: 'white',
+                        borderRadius: 4,
+                        px: { xs: 3, sm: 5 },
+                        pt: 3,
+                        pb: 7,
+                        minWidth: activeTab === 'cctv' ? { xs: '92vw', sm: 560, md: 680 } : { xs: '90vw', sm: 460, md: 560 },
+                        maxWidth: '92vw',
+                        textAlign: 'center',
+                        boxShadow: `0 8px 30px ${alpha(priorityColor, 0.5)}`,
+                        border: `1px solid ${alpha(priorityColor, 0.4)}`,
+                        position: 'relative',
+                      }}
+                    >
                     {/* 🔴 UNSEEN BADGE */}
                     {alarmLogs.length > 0 && (
                       <Box
@@ -600,13 +949,13 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                       </Box>
                     )}
 
-                    <Box display="flex" alignItems="center" justifyContent="center" gap={1.5} mb={2}>
-                      <Typography variant="h2" fontWeight="bold" letterSpacing={3}>
+                    <Box display="flex" alignItems="center" justifyContent="center" gap={1.5} mb={1.5}>
+                      <Typography variant="h3" fontWeight="bold" letterSpacing={2}>
                         ALARM TRIGGERED
                       </Typography>
                       {notificationSetting === 'mute' && (
                         <Tooltip title="Sound Muted">
-                          <VolumeOffIcon sx={{ fontSize: '2rem', opacity: 0.9 }} />
+                          <VolumeOffIcon sx={{ fontSize: '1.8rem', opacity: 0.9 }} />
                         </Tooltip>
                       )}
                     </Box>
@@ -615,74 +964,388 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                       sx={{
                         backgroundColor: chipColor,
                         px: 3,
-                        py: 1,
+                        py: 0.8,
                         borderRadius: 20,
-                        mb: 3,
+                        mb: 2,
                         fontWeight: 'bold',
-                        fontSize: '1.2rem',
+                        fontSize: '1.1rem',
+                        display: 'inline-block',
                       }}
                     >
                       {alarm.alarmStatus?.toUpperCase() || (alarm as any).status?.toUpperCase()}
                     </Box>
 
-                    {isLowBattery ? (
-                      <>
-                        <Typography variant="h4" fontWeight={700} mb={2}>
-                          {alarm.alarmName || (alarm as any).alarmName || alarm.target || 'Low battery alert'}
-                        </Typography>
+                    {/* 🔘 VIEW TOGGLE PILLS (Details vs CCTV) */}
+                    <Box display="flex" justifyContent="center" mb={3}>
+                      <Box
+                        sx={{
+                          display: 'inline-flex',
+                          backgroundColor: alpha('#000', 0.25),
+                          backdropFilter: 'blur(8px)',
+                          p: '4px',
+                          borderRadius: 30,
+                          border: `1px solid ${alpha('#fff', 0.2)}`,
+                        }}
+                      >
+                        <Button
+                          size="small"
+                          onClick={() => setActiveTab('details')}
+                          startIcon={<InfoOutlinedIcon fontSize="small" />}
+                          sx={{
+                            borderRadius: 24,
+                            px: 2.5,
+                            py: 0.6,
+                            fontSize: '0.875rem',
+                            fontWeight: activeTab === 'details' ? 700 : 500,
+                            color: activeTab === 'details' ? priorityColor : alpha('#fff', 0.8),
+                            backgroundColor: activeTab === 'details' ? '#fff' : 'transparent',
+                            boxShadow: activeTab === 'details' ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
+                            textTransform: 'none',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              backgroundColor: activeTab === 'details' ? '#fff' : alpha('#fff', 0.15),
+                              color: activeTab === 'details' ? priorityColor : '#fff',
+                            },
+                          }}
+                        >
+                          Details
+                        </Button>
 
-                        {(() => {
-                          const personName = (alarm as any)?.personName || (alarm?.target && alarm?.target !== 'Unknown' ? alarm.target : null);
-                          const personCategory = (alarm as any)?.personCategory || (alarm?.personType && alarm?.personType !== 'Security' ? alarm.personType : null);
-                          const usedByParts = [personName, personCategory].filter(Boolean);
-                          const usedBy = usedByParts.length > 0 ? usedByParts.join(' | ') : null;
+                        <Button
+                          size="small"
+                          onClick={() => setActiveTab('cctv')}
+                          startIcon={<VideocamIcon fontSize="small" />}
+                          sx={{
+                            borderRadius: 24,
+                            px: 2.5,
+                            py: 0.6,
+                            fontSize: '0.875rem',
+                            fontWeight: activeTab === 'cctv' ? 700 : 500,
+                            color: activeTab === 'cctv' ? priorityColor : alpha('#fff', 0.8),
+                            backgroundColor: activeTab === 'cctv' ? '#fff' : 'transparent',
+                            boxShadow: activeTab === 'cctv' ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
+                            textTransform: 'none',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              backgroundColor: activeTab === 'cctv' ? '#fff' : alpha('#fff', 0.15),
+                              color: activeTab === 'cctv' ? priorityColor : '#fff',
+                            },
+                          }}
+                        >
+                          CCTV {cctvList.length > 0 && `(${cctvList.length})`}
+                        </Button>
+                      </Box>
+                    </Box>
 
-                          return usedBy ? (
-                            <Typography mb={3} fontSize="1.15rem">
-                              Currently used by : <b>{usedBy}</b>
+                    {/* CONTENT SECTION: DETAILS TAB */}
+                    {activeTab === 'details' && (
+                      <Box>
+                        {isLowBattery ? (
+                          <>
+                            <Typography variant="h4" fontWeight={700} mb={2}>
+                              {alarm.alarmName || (alarm as any).alarmName || alarm.target || 'Low battery alert'}
                             </Typography>
-                          ) : null;
-                        })()}
 
-                        <Box display="flex" justifyContent="center" gap={2} mb={3}>
-                          <Typography>Priority:</Typography>
-                          <Chip
-                            label={effectivePriority.toUpperCase()}
-                            sx={{
-                              backgroundColor: priorityColor,
-                              color: 'white',
-                              fontWeight: 'bold',
-                            }}
-                          />
-                        </Box>
-                      </>
-                    ) : (
-                      <>
-                        <Typography mb={2}>
-                          🔔 Triggered by <b>{alarm.target}</b>
-                        </Typography>
+                            {(() => {
+                              const personName = (alarm as any)?.personName || (alarm?.target && alarm?.target !== 'Unknown' ? alarm.target : null);
+                              const personCategory = (alarm as any)?.personCategory || (alarm?.personType && alarm?.personType !== 'Security' ? alarm.personType : null);
+                              const usedByParts = [personName, personCategory].filter(Boolean);
+                              const usedBy = usedByParts.length > 0 ? usedByParts.join(' | ') : null;
 
-                        <Typography mb={2}>
-                          Card: <b>{alarm.dmac}</b>
-                        </Typography>
+                              return usedBy ? (
+                                <Typography mb={3} fontSize="1.15rem">
+                                  Currently used by : <b>{usedBy}</b>
+                                </Typography>
+                              ) : null;
+                            })()}
 
-                        <Typography mb={3}>
-                          Area: <b>{alarm.area}</b> | <b>{alarm.floor}</b>
-                        </Typography>
+                            <Box display="flex" justifyContent="center" gap={2} mb={3}>
+                              <Typography>Priority:</Typography>
+                              <Chip
+                                label={effectivePriority.toUpperCase()}
+                                sx={{
+                                  backgroundColor: priorityColor,
+                                  color: 'white',
+                                  fontWeight: 'bold',
+                                }}
+                              />
+                            </Box>
+                          </>
+                        ) : (
+                          <>
+                            <Typography mb={2}>
+                              🔔 Triggered by <b>{alarm.target}</b>
+                            </Typography>
 
-                        <Box display="flex" justifyContent="center" gap={2} mb={3}>
-                          <Typography>Priority:</Typography>
-                          <Chip
-                            label={effectivePriority.toUpperCase()}
-                            sx={{
-                              backgroundColor: priorityColor,
-                              color: 'white',
-                              fontWeight: 'bold',
-                            }}
-                          />
-                        </Box>
-                      </>
+                            <Typography mb={2}>
+                              Card: <b>{alarm.dmac}</b>
+                            </Typography>
+
+                            <Typography mb={3}>
+                              Area: <b>{alarm.area}</b> | <b>{alarm.floor}</b>
+                            </Typography>
+
+                            <Box display="flex" justifyContent="center" gap={2} mb={3}>
+                              <Typography>Priority:</Typography>
+                              <Chip
+                                label={effectivePriority.toUpperCase()}
+                                sx={{
+                                  backgroundColor: priorityColor,
+                                  color: 'white',
+                                  fontWeight: 'bold',
+                                }}
+                              />
+                            </Box>
+                          </>
+                        )}
+                      </Box>
                     )}
+
+                    {/* CONTENT SECTION: CCTV TAB */}
+                    {/* Rendered container with pre-rendered CCTV players kept alive */}
+                    <Box
+                      sx={{
+                        display: activeTab === 'cctv' ? 'block' : 'none',
+                        width: '100%',
+                        mt: 1,
+                        mb: 3,
+                      }}
+                    >
+                      {isLoadingCCTV ? (
+                        <Box
+                          sx={{
+                            height: 320,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: alpha('#000', 0.3),
+                            borderRadius: 3,
+                          }}
+                        >
+                          <CircularProgress color="inherit" />
+                          <Typography ml={2} fontWeight={600}>Loading CCTVs...</Typography>
+                        </Box>
+                      ) : cctvList.length === 0 ? (
+                        <Box
+                          sx={{
+                            height: 300,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: alpha('#000', 0.3),
+                            borderRadius: 3,
+                            p: 3,
+                          }}
+                        >
+                          <VideocamIcon sx={{ fontSize: 48, opacity: 0.6, mb: 1 }} />
+                          <Typography variant="h6">No CCTVs Available</Typography>
+                          <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                            There are currently no active CCTV streams configured.
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Box sx={{ position: 'relative', width: '100%' }}>
+                          {/* Active CCTV Name Indicator */}
+                          {selectedCctvId && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                mb: 1.5,
+                                px: 1,
+                              }}
+                            >
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                <Box
+                                  sx={{
+                                    width: 10,
+                                    height: 10,
+                                    borderRadius: '50%',
+                                    backgroundColor: '#4caf50',
+                                    boxShadow: '0 0 8px #4caf50',
+                                  }}
+                                />
+                                <Typography variant="subtitle1" fontWeight={700}>
+                                  {cctvList.find((c) => c.id === selectedCctvId)?.name || 'Live Camera Stream'}
+                                </Typography>
+                              </Stack>
+                              <Chip
+                                size="small"
+                                label="LIVE RTSP"
+                                sx={{
+                                  backgroundColor: '#f44336',
+                                  color: '#fff',
+                                  fontWeight: 700,
+                                  fontSize: '0.7rem',
+                                  height: 20,
+                                }}
+                              />
+                            </Box>
+                          )}
+
+                          {/* Fallback if all CCTVs have been opened in new windows */}
+                          {(!selectedCctvId || openedInNewWindowCctvIds.size >= cctvList.length) ? (
+                            <Box
+                              sx={{
+                                height: 300,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: alpha('#000', 0.45),
+                                borderRadius: 3,
+                                p: 3,
+                                border: '1px dashed rgba(255,255,255,0.25)',
+                              }}
+                            >
+                              <IconExternalLink size={44} style={{ opacity: 0.8, marginBottom: 12 }} />
+                              <Typography variant="h6" fontWeight={700}>
+                                CCTV stream opened in new window
+                              </Typography>
+                              <Typography variant="body2" sx={{ opacity: 0.8, mt: 0.5, maxWidth: 380 }}>
+                                All available camera streams for this area are currently active in separate window(s).
+                              </Typography>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                color="inherit"
+                                onClick={() => {
+                                  setOpenedInNewWindowCctvIds(new Set());
+                                  if (cctvList.length > 0) setSelectedCctvId(cctvList[0].id);
+                                }}
+                                sx={{
+                                  mt: 2,
+                                  borderRadius: 20,
+                                  borderColor: 'rgba(255,255,255,0.4)',
+                                  textTransform: 'none',
+                                  fontSize: '0.8rem',
+                                  '&:hover': {
+                                    borderColor: '#fff',
+                                    backgroundColor: 'rgba(255,255,255,0.1)',
+                                  },
+                                }}
+                              >
+                                Re-dock streams to this popup
+                              </Button>
+                            </Box>
+                          ) : (
+                            /* Pre-rendered CCTV stream views: initialized once upon response */
+                            <Box
+                              sx={{
+                                position: 'relative',
+                                width: '100%',
+                                backgroundColor: '#000',
+                                borderRadius: 3,
+                                overflow: 'hidden',
+                                boxShadow: '0 6px 24px rgba(0,0,0,0.4)',
+                                minHeight: 240,
+                                maxHeight: 380,
+                              }}
+                            >
+                              {/* Floating Semi-Transparent Overlay: Open in new window */}
+                              {selectedCctvId && (() => {
+                                const activeCctv = cctvList.find((c) => c.id === selectedCctvId);
+                                if (!activeCctv) return null;
+
+                                return (
+                                  <Box
+                                    sx={{
+                                      position: 'absolute',
+                                      top: 12,
+                                      right: 12,
+                                      zIndex: 5,
+                                    }}
+                                  >
+                                    <Tooltip title="Open this RTSP stream in a dedicated popup window" arrow>
+                                      <Button
+                                        size="small"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenInNewWindow(activeCctv);
+                                        }}
+                                        startIcon={<IconExternalLink size={16} />}
+                                        sx={{
+                                          backgroundColor: 'rgba(0, 0, 0, 0.65)',
+                                          backdropFilter: 'blur(8px)',
+                                          color: '#fff',
+                                          borderRadius: 20,
+                                          px: 1.8,
+                                          py: 0.5,
+                                          fontSize: '0.78rem',
+                                          fontWeight: 600,
+                                          textTransform: 'none',
+                                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                                          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                          transition: 'all 0.2s ease',
+                                          '&:hover': {
+                                            backgroundColor: 'rgba(0, 0, 0, 0.88)',
+                                            borderColor: 'rgba(255, 255, 255, 0.6)',
+                                            transform: 'scale(1.02)',
+                                          },
+                                        }}
+                                      >
+                                        Open in new window
+                                      </Button>
+                                    </Tooltip>
+                                  </Box>
+                                );
+                              })()}
+
+                              {/* Unique pre-rendered video players */}
+                              {uniqueRtspStreams.map((streamGroup) => {
+                                const isGroupActive = Boolean(
+                                  selectedCctvId && streamGroup.cctvIds.includes(selectedCctvId),
+                                );
+
+                                return (
+                                  <Box
+                                    key={streamGroup.streamUrl}
+                                    sx={{
+                                      display: isGroupActive ? 'block' : 'none',
+                                      width: '100%',
+                                      height: '100%',
+                                    }}
+                                  >
+                                    <UniversalVideoPlayer
+                                      streamUrl={streamGroup.streamUrl}
+                                      style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        maxHeight: 380,
+                                        borderRadius: 0,
+                                      }}
+                                    />
+                                  </Box>
+                                );
+                              })}
+
+                              {/* Fallback for selected CCTV without an RTSP URL */}
+                              {selectedCctvId &&
+                                !uniqueRtspStreams.some((s) => s.cctvIds.includes(selectedCctvId)) && (
+                                  <Box
+                                    sx={{
+                                      height: 280,
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: 'rgba(255,255,255,0.7)',
+                                    }}
+                                  >
+                                    <VideocamIcon sx={{ fontSize: 40, mb: 1, opacity: 0.5 }} />
+                                    <Typography variant="body2">
+                                      No RTSP URL configured for{' '}
+                                      {cctvList.find((c) => c.id === selectedCctvId)?.name || 'this camera'}
+                                    </Typography>
+                                  </Box>
+                                )}
+                            </Box>
+                          )}
+                        </Box>
+                      )}
+                    </Box>
 
                     {/* ACTION BUTTON */}
                     <Box
@@ -732,101 +1395,341 @@ const AlarmPopup: React.FC<AlarmPopupProps> = ({ alarm }) => {
                     </Box>
                   </Box>
                 </motion.div>
+              </Box>
 
-                {/* ========= UNSEEN ALARM PANEL (LEFT) ========= */}
-                {openUnseenDialog && (
-                  <motion.div
-                    key="unseen"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    style={{
-                      position: 'absolute',
-                      top: panelRect ? panelRect.top : '-100%',
-                      left: panelRect ? panelRect.left - 360 - 16 : 0,
-                      // transform: 'translateY(-50%)',
-                      width: 360,
-                      pointerEvents: 'auto',
-                      zIndex: 9,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        backgroundColor: '#fff',
-                        borderRadius: 2,
-                        boxShadow: 6,
-                        maxHeight: 460,
+                {/* ========= CCTV DETAILS & CAMERAS SIDEBAR (LEFT) ========= */}
+                {activeTab === 'cctv' && (() => {
+                  const isBothOpen = openUnseenDialog;
+                  const totalH = panelRect?.height ? panelRect.height : 520;
+                  const gap = 12;
+                  const halfH = Math.max(Math.floor((totalH - gap) / 2), 220);
+
+                  const sidebarTop = isBothOpen
+                    ? (panelRect ? panelRect.top + halfH + gap : 0)
+                    : (panelRect ? panelRect.top : '-100%');
+                  const sidebarMaxHeight = isBothOpen ? halfH : Math.max(totalH, 480);
+                  const scrollMaxHeight = isBothOpen ? Math.max(halfH - 170, 90) : 340;
+
+                  return (
+                    <motion.div
+                      key="cctv-sidebar"
+                      layout
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{
+                        opacity: 1,
+                        x: 0,
+                      }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{
+                        duration: 0.25,
+                        ease: 'easeInOut',
+                        layout: { duration: 0.35, ease: [0.4, 0, 0.2, 1] },
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: sidebarTop,
+                        left: panelRect ? panelRect.left - 360 - 16 : 0,
+                        width: 360,
+                        pointerEvents: 'auto',
+                        zIndex: 9,
                       }}
                     >
-                      {/* HEADER ACTIONS */}
                       <Box
                         sx={{
+                          backgroundColor: '#fff',
+                          borderRadius: 3,
+                          boxShadow: 8,
+                          overflow: 'hidden',
                           display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          px: 2,
-                          py: 1.5,
-                          borderBottom: '1px solid #eee',
+                          flexDirection: 'column',
+                          height: isBothOpen ? sidebarMaxHeight : 'auto',
+                          maxHeight: sidebarMaxHeight,
+                          transition: 'all 0.25s ease',
                         }}
                       >
-                        <Typography fontWeight="bold" fontSize="0.95rem">
-                          Unseen Alarms
-                        </Typography>
-
-                        <Stack direction="row" spacing={1}>
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              alarmLogs.forEach((alarm) => {
-                                handleAcknowledgeClick(alarm.id, alarm.action);
-                              });
-
-                              setSelectedAlarms([...alarmLogs]);
-                            }}
-                          >
-                            Select All
-                          </Button>
-
-                          <Button
-                            size="small"
-                            color="inherit"
-                            onClick={() => setSelectedAlarms([])}
-                          >
-                            Clear Selection
-                          </Button>
-                        </Stack>
-                      </Box>
-
-                      <Scrollbar sx={{ height: 385 }}>
-                        <Stack spacing={1} p={2}>
-                          {alarmLogs.map((trigger) => (
-                            <AlarmTriggerMenuItem
-                              key={trigger.id}
-                              trigger={trigger}
-                              isClicked={selectedAlarms.some((a) => a.id === trigger.id)}
-                              unseenBg={unseenBg}
-                              seenBg={seenBg}
-                              hoverBg={hoverBg}
-                              unseenBorder={unseenBorder}
-                              seenBorder={seenBorder}
-                              hoverBorder={hoverBorder}
-                              onClick={(t) => {
-                                handleAcknowledgeClick(t.id, t.action);
-                                setSelectedAlarms((prev) => {
-                                  const exists = prev.find((a) => a.id === t.id);
-                                  if (exists) {
-                                    return prev.filter((a) => a.id !== t.id);
-                                  }
-                                  return [...prev, t];
-                                });
+                        {/* Sidebar Header: Alarm Summary / Details */}
+                        <Box
+                          sx={{
+                            p: isBothOpen ? 1.5 : 2,
+                            background: `linear-gradient(135deg, ${alpha(priorityColor, 0.12)}, ${alpha(
+                              priorityColor,
+                              0.04,
+                            )})`,
+                            borderBottom: '1px solid #eee',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.6}>
+                            <Typography fontWeight="bold" fontSize="0.9rem" color="text.primary">
+                              Alarm Details
+                            </Typography>
+                            <Chip
+                              size="small"
+                              label={effectivePriority.toUpperCase()}
+                              sx={{
+                                backgroundColor: priorityColor,
+                                color: '#fff',
+                                fontWeight: 700,
+                                fontSize: '0.68rem',
+                                height: 20,
                               }}
                             />
-                          ))}
-                        </Stack>
-                      </Scrollbar>
-                    </Box>
-                  </motion.div>
-                )}
+                          </Stack>
+
+                          <Stack spacing={0.4}>
+                            <Box display="flex" justifyContent="space-between" fontSize="0.82rem">
+                              <Typography variant="caption" color="text.secondary">Triggered By:</Typography>
+                              <Typography variant="body2" fontWeight={600} color="text.primary">{alarm.target || '-'}</Typography>
+                            </Box>
+                            <Box display="flex" justifyContent="space-between" fontSize="0.82rem">
+                              <Typography variant="caption" color="text.secondary">Card / MAC:</Typography>
+                              <Typography variant="body2" fontWeight={600} color="text.primary">{alarm.dmac || '-'}</Typography>
+                            </Box>
+                            <Box display="flex" justifyContent="space-between" fontSize="0.82rem">
+                              <Typography variant="caption" color="text.secondary">Location:</Typography>
+                              <Typography variant="body2" fontWeight={600} color="text.primary">
+                                {alarm.area || '-'} {alarm.floor ? `| ${alarm.floor}` : ''}
+                              </Typography>
+                            </Box>
+                            {isLowBattery && (
+                              <Box display="flex" justifyContent="space-between" fontSize="0.82rem">
+                                <Typography variant="caption" color="text.secondary">Alert:</Typography>
+                                <Typography variant="body2" fontWeight={600} color="warning.main">Low Battery</Typography>
+                              </Box>
+                            )}
+                          </Stack>
+                        </Box>
+
+                        {/* CCTV List Section Header */}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            px: 2,
+                            py: 1,
+                            backgroundColor: '#f8f9fa',
+                            borderBottom: '1px solid #eee',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <VideocamIcon fontSize="small" sx={{ color: theme.palette.text.secondary }} />
+                            <Typography fontWeight={700} fontSize="0.85rem" color="text.primary">
+                              Available CCTVs
+                            </Typography>
+                          </Stack>
+                          <Chip
+                            size="small"
+                            label={`${cctvList.length} cameras`}
+                            sx={{ fontSize: '0.68rem', height: 18 }}
+                          />
+                        </Box>
+
+                        {/* CCTV List Items */}
+                        <Scrollbar sx={{ maxHeight: scrollMaxHeight, flex: 1 }}>
+                          <Stack spacing={1} p={1.2}>
+                            {cctvList.length === 0 ? (
+                              <Box py={2} textAlign="center" color="text.secondary">
+                                <Typography variant="body2">No CCTVs found</Typography>
+                              </Box>
+                            ) : (
+                              cctvList.map((cctv) => {
+                                const isSelected = selectedCctvId === cctv.id;
+                                return (
+                                  <Box
+                                    key={cctv.id}
+                                    onClick={() => setSelectedCctvId(cctv.id)}
+                                    sx={{
+                                      p: 1.2,
+                                      borderRadius: 2,
+                                      cursor: 'pointer',
+                                      border: isSelected ? `2px solid ${primaryColor}` : '1px solid #e0e0e0',
+                                      backgroundColor: isSelected ? alpha(primaryColor, 0.08) : '#fff',
+                                      transition: 'all 0.15s ease-in-out',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      '&:hover': {
+                                        backgroundColor: isSelected ? alpha(primaryColor, 0.12) : '#f5f5f5',
+                                        borderColor: isSelected ? primaryColor : '#bdbdbd',
+                                      },
+                                    }}
+                                  >
+                                    <Stack direction="row" spacing={1.2} alignItems="center">
+                                      <Box
+                                        sx={{
+                                          width: 30,
+                                          height: 30,
+                                          borderRadius: '50%',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          backgroundColor: isSelected ? primaryColor : alpha(theme.palette.grey[500], 0.15),
+                                          color: isSelected ? '#fff' : theme.palette.grey[700],
+                                        }}
+                                      >
+                                        <VideocamIcon sx={{ fontSize: 18 }} />
+                                      </Box>
+                                      <Box>
+                                        <Typography
+                                          fontWeight={isSelected ? 700 : 500}
+                                          fontSize="0.85rem"
+                                          color={isSelected ? primaryColor : 'text.primary'}
+                                        >
+                                          {cctv.name}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 180, display: 'block' }}>
+                                          {cctv.rtsp ? 'RTSP Stream Ready' : 'No Stream URL'}
+                                        </Typography>
+                                      </Box>
+                                    </Stack>
+
+                                    {openedInNewWindowCctvIds.has(cctv.id) ? (
+                                      <Chip
+                                        size="small"
+                                        label="In New Window"
+                                        variant="outlined"
+                                        color="secondary"
+                                        sx={{ height: 18, fontSize: '0.62rem', fontWeight: 600 }}
+                                      />
+                                    ) : isSelected ? (
+                                      <Chip
+                                        size="small"
+                                        label="Active"
+                                        color="primary"
+                                        sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                                      />
+                                    ) : null}
+                                  </Box>
+                                );
+                              })
+                            )}
+                          </Stack>
+                        </Scrollbar>
+                      </Box>
+                    </motion.div>
+                  );
+                })()}
+
+                {/* ========= UNSEEN ALARM PANEL (LEFT) ========= */}
+                {openUnseenDialog && (() => {
+                  const isBothOpen = activeTab === 'cctv';
+                  const totalH = panelRect?.height ? panelRect.height : 520;
+                  const gap = 12;
+                  const halfH = Math.max(Math.floor((totalH - gap) / 2), 220);
+
+                  const unseenMaxHeight = isBothOpen ? halfH : 460;
+                  const unseenScrollHeight = isBothOpen ? Math.max(halfH - 58, 120) : 385;
+
+                  return (
+                    <motion.div
+                      key="unseen"
+                      layout
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{
+                        opacity: 1,
+                        x: 0,
+                      }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{
+                        duration: 0.25,
+                        ease: 'easeInOut',
+                        layout: { duration: 0.35, ease: [0.4, 0, 0.2, 1] },
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: panelRect ? panelRect.top : 0,
+                        left: panelRect ? panelRect.left - 360 - 16 : 0,
+                        width: 360,
+                        pointerEvents: 'auto',
+                        zIndex: 9,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          backgroundColor: '#fff',
+                          borderRadius: 2,
+                          boxShadow: 6,
+                          height: isBothOpen ? unseenMaxHeight : 'auto',
+                          maxHeight: unseenMaxHeight,
+                          overflow: 'hidden',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          transition: 'all 0.25s ease',
+                        }}
+                      >
+                        {/* HEADER ACTIONS */}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            px: 2,
+                            py: 1.2,
+                            borderBottom: '1px solid #eee',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Typography fontWeight="bold" fontSize="0.95rem">
+                            Unseen Alarms
+                          </Typography>
+
+                          <Stack direction="row" spacing={1}>
+                            <Button
+                              size="small"
+                              onClick={() => {
+                                alarmLogs.forEach((alarm) => {
+                                  handleAcknowledgeClick(alarm.id, alarm.action);
+                                });
+
+                                setSelectedAlarms([...alarmLogs]);
+                              }}
+                            >
+                              Select All
+                            </Button>
+
+                            <Button
+                              size="small"
+                              color="inherit"
+                              onClick={() => setSelectedAlarms([])}
+                            >
+                              Clear Selection
+                            </Button>
+                          </Stack>
+                        </Box>
+
+                        <Scrollbar sx={{ maxHeight: unseenScrollHeight, flex: 1 }}>
+                          <Stack spacing={1} p={1.5}>
+                            {alarmLogs.map((trigger) => (
+                              <AlarmTriggerMenuItem
+                                key={trigger.id}
+                                trigger={trigger}
+                                isClicked={selectedAlarms.some((a) => a.id === trigger.id)}
+                                unseenBg={unseenBg}
+                                seenBg={seenBg}
+                                hoverBg={hoverBg}
+                                unseenBorder={unseenBorder}
+                                seenBorder={seenBorder}
+                                hoverBorder={hoverBorder}
+                                onClick={(t) => {
+                                  handleAcknowledgeClick(t.id, t.action);
+                                  setSelectedAlarms((prev) => {
+                                    const exists = prev.find((a) => a.id === t.id);
+                                    if (exists) {
+                                      return prev.filter((a) => a.id !== t.id);
+                                    }
+                                    return [...prev, t];
+                                  });
+                                }}
+                              />
+                            ))}
+                          </Stack>
+                        </Scrollbar>
+                      </Box>
+                    </motion.div>
+                  );
+                })()}
 
                 {/* ========= ACTION PANEL (RIGHT) ========= */}
                 {actionOpen && (

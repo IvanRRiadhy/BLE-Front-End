@@ -9,14 +9,11 @@ import {
   Box,
   Grid2 as Grid,
 } from '@mui/material';
-import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { IconMail, IconCircleX, IconClearAll } from '@tabler/icons-react';
+import { IconCircleX, IconClearAll } from '@tabler/icons-react';
 import {
   gender,
   genderIconMap,
-  genderEnumMap,
   visitorStatus,
-  visitorStatusEnumMap,
   visitorStatusIconMap,
 } from 'src/types/crud/input';
 import VisitorRegister from './visitorregister/visitorRegister';
@@ -46,149 +43,180 @@ interface DataType {
   filterbyTitle?: string;
   divider?: boolean;
   color?: string;
-  category?: string;
+  category?: 'all' | 'status' | 'gender';
 }
 
 type TimeRangeKey = 'any' | 'today' | 'week' | 'month' | 'custom';
 
+// Mapping status labels/values to lowercase standard keys
+const STATUS_KEY_MAP: Record<string, string> = {
+  waiting: 'waiting',
+  checkin: 'checkin',
+  checkout: 'checkout',
+  denied: 'denied',
+  deny: 'denied',
+  block: 'block',
+  unblock: 'unblock',
+  precheckin: 'precheckin',
+  preregist: 'preregist',
+};
+
 const VisitorFilter = () => {
-  const active = true;
   const dispatch = useDispatch();
-  const customizer = useSelector((state: any) => state.customizer);
-  const br = `${customizer.borderRadius}px`;
+  const settings = useSelector((state: RootState) => state.settings);
+  const br = `${settings.borderRadius}px`;
+
   const trxVisitorFilter = useSelector(
     (state: RootState) => state.TrxVisitorReducer.TrxVisitorFilter.filters,
   );
   const trxVisitorDateFilter = useSelector(
     (state: RootState) => state.TrxVisitorReducer.TrxVisitorFilter.dateFilters,
   );
-  const [timeRange, setTimeRange] = useState<TimeRangeKey>('any');
-  const [startTime, setStartTime] = useState<Dayjs | null>(null);
-  const [endTime, setEndTime] = useState<Dayjs | null>(null);
+
+  // Draft filters state for status and gender
+  const initialSelectedStatus: string[] = (() => {
+    const raw = (trxVisitorFilter as any)?.status ?? (trxVisitorFilter as any)?.Status;
+    if (Array.isArray(raw)) return raw.map((s: string) => s.toLowerCase());
+    if (typeof raw === 'string' && raw) return [raw.toLowerCase()];
+    return [];
+  })();
+
+  const initialSelectedGender: string[] = (() => {
+    const raw = (trxVisitorFilter as any)?.gender ?? (trxVisitorFilter as any)?.Gender;
+    if (Array.isArray(raw)) return raw.map((g: string) => g.toLowerCase());
+    if (typeof raw === 'string' && raw) return [raw.toLowerCase()];
+    return [];
+  })();
+
+  const [draftStatus, setDraftStatus] = useState<string[]>(initialSelectedStatus);
+  const [draftGender, setDraftGender] = useState<string[]>(initialSelectedGender);
+
+  // Time filter draft state
+  const [draftTimeRange, setDraftTimeRange] = useState<TimeRangeKey>('any');
+  const [draftStartTime, setDraftStartTime] = useState<Dayjs | null>(null);
+  const [draftEndTime, setDraftEndTime] = useState<Dayjs | null>(null);
+
+  // Sync draft status, gender, and time with redux when external redux filters change
+  useEffect(() => {
+    const rawStatus = (trxVisitorFilter as any)?.status ?? (trxVisitorFilter as any)?.Status;
+    const currentStatus = Array.isArray(rawStatus)
+      ? rawStatus.map((s: string) => s.toLowerCase())
+      : typeof rawStatus === 'string' && rawStatus
+      ? [rawStatus.toLowerCase()]
+      : [];
+    setDraftStatus(currentStatus);
+
+    const rawGender = (trxVisitorFilter as any)?.gender ?? (trxVisitorFilter as any)?.Gender;
+    const currentGender = Array.isArray(rawGender)
+      ? rawGender.map((g: string) => g.toLowerCase())
+      : typeof rawGender === 'string' && rawGender
+      ? [rawGender.toLowerCase()]
+      : [];
+    setDraftGender(currentGender);
+
+    const appliedPeriod = (trxVisitorDateFilter as any)?.VisitorPeriodStart;
+    if (appliedPeriod?.DateFrom && appliedPeriod?.DateTo) {
+      setDraftStartTime(dayjs(appliedPeriod.DateFrom));
+      setDraftEndTime(dayjs(appliedPeriod.DateTo));
+    } else {
+      setDraftTimeRange('any');
+      setDraftStartTime(null);
+      setDraftEndTime(null);
+    }
+  }, [trxVisitorFilter, trxVisitorDateFilter]);
 
   const genderFilters: DataType[] = gender
-    .filter((gender) => !gender.disabled) // Filter out disabled entries
-    .map((gender) => ({
-      id: gender.value,
-      name: gender.label,
-      filter: gender.value,
+    .filter((g) => !g.disabled)
+    .map((g) => ({
+      id: g.value,
+      name: g.label,
+      filter: g.value.toLowerCase(),
       category: 'gender',
-      icon: genderIconMap[gender.value] || IconCircleX,
+      icon: genderIconMap[g.value] || IconCircleX,
     }));
 
   const statusFilters: DataType[] = visitorStatus
     .filter((status) => !status.disabled)
-    .map((status) => ({
-      id: status.value,
-      name: status.label,
-      filter: status.value,
-      category: 'status',
-      icon: visitorStatusIconMap[status.value] || IconCircleX,
-    }));
+    .map((status) => {
+      const standardKey = STATUS_KEY_MAP[status.value.toLowerCase()] || status.value.toLowerCase();
+      return {
+        id: status.value,
+        name: status.label,
+        filter: standardKey,
+        category: 'status',
+        icon: visitorStatusIconMap[status.value] || IconCircleX,
+      };
+    });
 
   const filterData: DataType[] = [
     {
-      id: 1,
+      id: 'all',
       name: 'All',
       filter: 'show_all',
       category: 'all',
       icon: IconClearAll,
     },
     {
-      id: 2,
+      id: 'div-time',
       divider: true,
     },
     {
-      id: 3,
+      id: 'title-time',
       filterbyTitle: 'Visiting Time',
     },
     {
-      id: 4,
+      id: 'div-gender',
       divider: true,
     },
     {
-      id: 5,
+      id: 'title-gender',
       filterbyTitle: 'Gender',
     },
     ...genderFilters,
     {
-      id: 6,
+      id: 'div-status',
       divider: true,
     },
     {
-      id: 7,
+      id: 'title-status',
       filterbyTitle: 'Status',
     },
     ...statusFilters,
   ];
 
-  const handleFilter = (filter: string, category?: string) => {
-    const currentFilters = { ...trxVisitorFilter };
-
-    switch (category) {
-      // case 'gender': {
-      //   console.log('Gender Filter : ', filter);
-      //   const mappedValue = genderEnumMap[filter];
-      //   if (mappedValue === undefined) return;
-      //   const currentValue = currentFilters.Gender;
-      //   const newValue = currentValue === mappedValue ? undefined : mappedValue;
-      //   console.log("Adding gender: ", newValue);
-      //   dispatch(UpdateFilter({ filters: { ...currentFilters, Gender: newValue } }));
-      //   break;
-      // }
-      case 'all': {
-        dispatch(UpdateFilter({ filters: {} }));
-        break;
-      }
-      case 'status': {
-        const mappedValue = visitorStatusEnumMap[filter];
-        if (mappedValue === undefined) return;
-
-        const currentValue = currentFilters.Status;
-
-        const newValue = currentValue === mappedValue ? undefined : mappedValue;
-        console.log(newValue);
-        dispatch(UpdateFilter({ filters: { ...currentFilters, Status: newValue } }));
-        break;
-      }
-      default:
-        dispatch(UpdateFilter({ filters: {} }));
-        break;
-    }
-  };
-
-  const setFilters = (start?: Dayjs | null, end?: Dayjs | null) => {
-    const currentFilters = { ...trxVisitorDateFilter.VisitorPeriodStart };
-    if (!start || !end) {
-      // clear when "Any"
-      const { DateFrom, DateTo, ...rest } = currentFilters;
-      dispatch(UpdateFilter({ filters: {}, dateFilters: {} }));
+  const handleToggleFilter = (filterVal: string, category?: string) => {
+    if (category === 'all') {
+      setDraftStatus([]);
+      setDraftGender([]);
+      setDraftTimeRange('any');
+      setDraftStartTime(null);
+      setDraftEndTime(null);
       return;
     }
-    // Use ISO; swap to your preferred format if needed
-    dispatch(
-      UpdateFilter({
-        dateFilters: {
-          VisitorPeriodStart: {
-            DateFrom: start.toISOString(),
-            DateTo: end.toISOString(),
-          },
-        },
-      }),
-    );
+
+    if (category === 'status') {
+      const key = STATUS_KEY_MAP[filterVal.toLowerCase()] || filterVal.toLowerCase();
+      setDraftStatus((prev) =>
+        prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key],
+      );
+    } else if (category === 'gender') {
+      const key = filterVal.toLowerCase();
+      setDraftGender((prev) =>
+        prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key],
+      );
+    }
   };
 
-  // compute ranges (end is exclusive = start of next period)
-  const getRange = (key: TimeRangeKey): { start?: Dayjs; end?: Dayjs } => {
+  const getRange = (key: TimeRangeKey, customStart?: Dayjs | null, customEnd?: Dayjs | null): { start?: Dayjs | null; end?: Dayjs | null } => {
     const now = dayjs();
     switch (key) {
       case 'today': {
         const start = now.startOf('day');
-        const end = start.add(1, 'day'); // or start.endOf('day') for inclusive
+        const end = start.add(1, 'day');
         return { start, end };
       }
       case 'week': {
-        const start = now.startOf('week'); // change to .startOf('isoWeek') if you use ISO weeks
+        const start = now.startOf('week');
         const end = start.add(1, 'week');
         return { start, end };
       }
@@ -197,127 +225,252 @@ const VisitorFilter = () => {
         const end = start.add(1, 'month');
         return { start, end };
       }
+      case 'custom':
+        return { start: customStart ?? null, end: customEnd ?? null };
       case 'any':
-        return {};
       default:
-        return { start: startTime ?? null!, end: endTime ?? null! };
+        return { start: null, end: null };
     }
   };
 
-  // react to dropdown changes (non-custom)
-  useEffect(() => {
-    if (timeRange === 'custom') return;
-    const { start, end } = getRange(timeRange);
-    setStartTime(start ?? null);
-    setEndTime(end ?? null);
-    setFilters(start ?? null, end ?? null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRange]);
+  const handleTimeRangeSelect = (newRange: TimeRangeKey) => {
+    setDraftTimeRange(newRange);
+    if (newRange !== 'custom') {
+      const { start, end } = getRange(newRange);
+      setDraftStartTime(start ?? null);
+      setDraftEndTime(end ?? null);
+    }
+  };
 
-  // react to custom pickers
-  useEffect(() => {
-    if (timeRange !== 'custom') return;
-    if (startTime && endTime) setFilters(startTime, endTime);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRange, startTime, endTime]);
+  // Comparison for changed / active state
+  const reduxStatus = (trxVisitorFilter as any)?.status ?? (trxVisitorFilter as any)?.Status ?? [];
+  const reduxGender = (trxVisitorFilter as any)?.gender ?? (trxVisitorFilter as any)?.Gender ?? [];
+
+  const normalizedReduxStatus: string[] = Array.isArray(reduxStatus)
+    ? reduxStatus.map((s: string) => s.toLowerCase())
+    : typeof reduxStatus === 'string' && reduxStatus
+    ? [reduxStatus.toLowerCase()]
+    : [];
+
+  const normalizedReduxGender: string[] = Array.isArray(reduxGender)
+    ? reduxGender.map((g: string) => g.toLowerCase())
+    : typeof reduxGender === 'string' && reduxGender
+    ? [reduxGender.toLowerCase()]
+    : [];
+
+  const appliedPeriod = (trxVisitorDateFilter as any)?.VisitorPeriodStart;
+  const appliedDateFrom = appliedPeriod?.DateFrom || null;
+  const appliedDateTo = appliedPeriod?.DateTo || null;
+
+  const resolvedDraftRange = getRange(draftTimeRange, draftStartTime, draftEndTime);
+  const draftDateFrom = resolvedDraftRange.start ? resolvedDraftRange.start.toISOString() : null;
+  const draftDateTo = resolvedDraftRange.end ? resolvedDraftRange.end.toISOString() : null;
+
+  const isStatusChanged =
+    JSON.stringify([...draftStatus].sort()) !== JSON.stringify([...normalizedReduxStatus].sort());
+  const isGenderChanged =
+    JSON.stringify([...draftGender].sort()) !== JSON.stringify([...normalizedReduxGender].sort());
+  const isTimeChanged =
+    draftDateFrom !== appliedDateFrom || draftDateTo !== appliedDateTo;
+
+  const isChanged = isStatusChanged || isGenderChanged || isTimeChanged;
+
+  const hasTimeSelected = Boolean(draftDateFrom && draftDateTo);
+  const totalSelected = draftStatus.length + draftGender.length + (hasTimeSelected ? 1 : 0);
+
+  const handleApply = () => {
+    const newFilters: any = {};
+
+    if (draftStatus.length > 0) {
+      newFilters.status = draftStatus;
+      newFilters.Status = draftStatus;
+    }
+
+    if (draftGender.length > 0) {
+      newFilters.gender = draftGender;
+      newFilters.Gender = draftGender.length === 1 ? draftGender[0] : draftGender;
+    }
+
+    const newDateFilters: any = {};
+    if (draftDateFrom && draftDateTo) {
+      newDateFilters.VisitorPeriodStart = {
+        DateFrom: draftDateFrom,
+        DateTo: draftDateTo,
+      };
+    }
+
+    dispatch(
+      UpdateFilter({
+        filters: newFilters,
+        dateFilters: newDateFilters,
+        Start: 0,
+      }),
+    );
+    dispatch(SelectTrxVisitor(''));
+  };
+
+  const handleReset = () => {
+    setDraftStatus([]);
+    setDraftGender([]);
+    setDraftTimeRange('any');
+    setDraftStartTime(null);
+    setDraftEndTime(null);
+
+    dispatch(
+      UpdateFilter({
+        filters: {},
+        dateFilters: {},
+        Start: 0,
+      }),
+    );
+    dispatch(SelectTrxVisitor(''));
+  };
 
   return (
-    <>
-      <Box p={3} sx={{width: '95%', height: '100%', overflow: 'auto'}}>
+    <Box display="flex" flexDirection="column" height="100%" maxHeight="100%" sx={{ overflow: 'hidden' }}>
+      <Box p={3} sx={{ width: '95%', overflow: 'auto', flexShrink: 0 }}>
         <VisitorRegister />
       </Box>
 
-      <List>
-        <Box
-          key={'filter-list'}
-          sx={{
-            height: { lg: 'calc(100vh - 230px)', md: '100vh' },
-            maxHeight: '75vh',
-            overflow: 'auto',
-          }}
-        >
-          
-          {filterData.map((filter) => {
-            if (filter.filterbyTitle) {
+      {/* Sticky ALL filter */}
+      <Box
+        sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 2,
+          backgroundColor: isChanged ? 'info.light' : 'background.paper',
+        }}
+      >
+        <List>
+          {filterData
+            .filter((f) => f.category === 'all')
+            .map((filter) => {
+              const isSelected = draftStatus.length === 0 && draftGender.length === 0;
+
               return (
-                <React.Fragment key={filter.id}>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={600}
-                    pl={5.1}
-                    mt={1}
-                    pb={2}
-                    key={filter.id} // ✅ Add key here
-                  >
-                    {filter.filterbyTitle}
-                  </Typography>
-                  {/* ⬇️ Time Range UI goes here, just under "All" */}
-                  {filter.id === 3 && (
-                    <Box mx={3} mt={1} mb={2}>
-                      <TextField
-                        select
-                        label="Time Range"
-                        value={timeRange}
-                        onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
-                        fullWidth
-                        size="small"
-                      >
-                        <MenuItem value="any">Any</MenuItem>
-                        <MenuItem value="today">Today</MenuItem>
-                        <MenuItem value="week">This Week</MenuItem>
-                        <MenuItem value="month">This Month</MenuItem>
-                        <MenuItem value="custom">Custom</MenuItem>
-                      </TextField>
-
-                      {timeRange === 'custom' && (
-                        <Box mt={2}>
-                          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
-                            <Grid container  spacing={1.5}>
-                              <Grid>
-                                <DateTimePicker
-                                  label="From"
-                                  value={startTime}
-                                  onChange={setStartTime}
-                                  ampm={false}
-                                  format="ddd, DD - MMM - YYYY, HH:mm"
-                                  viewRenderers={{
-                                    hours: renderTimeViewClock,
-                                    minutes: renderTimeViewClock,
-                                    seconds: renderTimeViewClock,
-                                  }}
-                                  slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-                                />
-                              </Grid>
-                              <Grid>
-                                <DateTimePicker
-                                  label="To"
-                                  value={endTime}
-                                  onChange={setEndTime}
-                                  ampm={false}
-                                  format="ddd, DD - MMM - YYYY, HH:mm"
-                                  viewRenderers={{
-                                    hours: renderTimeViewClock,
-                                    minutes: renderTimeViewClock,
-                                    seconds: renderTimeViewClock,
-                                  }}
-                                  slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-                                />
-                              </Grid>
-                            </Grid>
-                          </LocalizationProvider>
-                        </Box>
-                      )}
-                    </Box>
-                  )}
-                </React.Fragment>
-              );
-            } else if (filter.divider) {
-              return <Divider key={filter.id} sx={{ mb: 3 }} />; // ✅ Add key here
-            }
-
-            return (
-              <React.Fragment key={filter.id}>
                 <ListItemButton
+                  key={filter.id}
+                  selected={isSelected}
+                  onClick={() => handleToggleFilter(filter.filter!, filter.category)}
+                  sx={{
+                    mx: 3,
+                    borderRadius: br,
+                    '&.Mui-selected': {
+                      backgroundColor: 'primary.main',
+                      color: 'white',
+                    },
+                    '&.Mui-selected:hover': {
+                      backgroundColor: 'primary.dark',
+                      color: 'white',
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: '30px' }}>
+                    <filter.icon stroke="1.5" size={19} />
+                  </ListItemIcon>
+                  <ListItemText primary={filter.name} />
+                </ListItemButton>
+              );
+            })}
+        </List>
+        <Divider />
+      </Box>
+
+      {/* Scrollable Filter List */}
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <List>
+          {filterData
+            .filter((f) => f.category !== 'all')
+            .map((filter) => {
+              if (filter.filterbyTitle) {
+                return (
+                  <React.Fragment key={filter.id}>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={600}
+                      pl={5.1}
+                      mt={1}
+                      pb={1}
+                    >
+                      {filter.filterbyTitle}
+                    </Typography>
+
+                    {/* Visiting Time Pickers under "Visiting Time" */}
+                    {filter.id === 'title-time' && (
+                      <Box mx={3} mt={1} mb={2}>
+                        <TextField
+                          select
+                          label="Time Range"
+                          value={draftTimeRange}
+                          onChange={(e) => handleTimeRangeSelect(e.target.value as TimeRangeKey)}
+                          fullWidth
+                          size="small"
+                        >
+                          <MenuItem value="any">Any</MenuItem>
+                          <MenuItem value="today">Today</MenuItem>
+                          <MenuItem value="week">This Week</MenuItem>
+                          <MenuItem value="month">This Month</MenuItem>
+                          <MenuItem value="custom">Custom</MenuItem>
+                        </TextField>
+
+                        {draftTimeRange === 'custom' && (
+                          <Box mt={2}>
+                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
+                              <Grid container spacing={1.5}>
+                                <Grid size={12}>
+                                  <DateTimePicker
+                                    label="From"
+                                    value={draftStartTime}
+                                    onChange={(val) => setDraftStartTime(val)}
+                                    ampm={false}
+                                    format="ddd, DD - MMM - YYYY, HH:mm"
+                                    viewRenderers={{
+                                      hours: renderTimeViewClock,
+                                      minutes: renderTimeViewClock,
+                                      seconds: renderTimeViewClock,
+                                    }}
+                                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                                  />
+                                </Grid>
+                                <Grid size={12}>
+                                  <DateTimePicker
+                                    label="To"
+                                    value={draftEndTime}
+                                    onChange={(val) => setDraftEndTime(val)}
+                                    ampm={false}
+                                    format="ddd, DD - MMM - YYYY, HH:mm"
+                                    viewRenderers={{
+                                      hours: renderTimeViewClock,
+                                      minutes: renderTimeViewClock,
+                                      seconds: renderTimeViewClock,
+                                    }}
+                                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                                  />
+                                </Grid>
+                              </Grid>
+                            </LocalizationProvider>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                  </React.Fragment>
+                );
+              } else if (filter.divider) {
+                return <Divider key={filter.id} sx={{ mb: 2 }} />;
+              }
+
+              const isSelected =
+                filter.category === 'status'
+                  ? draftStatus.includes(filter.filter!)
+                  : filter.category === 'gender'
+                  ? draftGender.includes(filter.filter!)
+                  : false;
+
+              return (
+                <ListItemButton
+                  key={filter.id}
+                  selected={isSelected}
+                  onClick={() => handleToggleFilter(filter.filter!, filter.category)}
                   sx={{
                     mb: 1,
                     mx: 3,
@@ -325,41 +478,76 @@ const VisitorFilter = () => {
                     '&.Mui-selected': {
                       backgroundColor: 'primary.main',
                       color: 'white',
-                      '&:hover': { backgroundColor: 'primary.dark' },
+                    },
+                    '&.Mui-selected:hover': {
+                      backgroundColor: 'primary.dark',
+                      color: 'white',
                     },
                   }}
-                  selected={
-                    filter.category === 'all' &&
-                    trxVisitorFilter.Status === undefined ||
-                    filter.category === 'status' &&
-                    trxVisitorFilter.Status === visitorStatusEnumMap[filter.filter!]
-                  }
-                  onClick={() => {
-                    handleFilter(`${filter.filter}`, filter.category);
-
-                    // ⬇️ Reset time range & filters when All is clicked
-                    if (filter.id === 1) {
-                      setTimeRange('any');
-                      setStartTime(null);
-                      setEndTime(null);
-                      setFilters(null, null); // clears StartTimeFilter & EndTimeFilter
-                    }
-
-                    dispatch(SelectTrxVisitor(''));
-                  }}
-                  key={filter.id}
                 >
                   <ListItemIcon sx={{ minWidth: '30px', color: filter.color }}>
                     <filter.icon stroke="1.5" size={19} />
                   </ListItemIcon>
                   <ListItemText primary={filter.name} />
                 </ListItemButton>
-              </React.Fragment>
-            );
-          })}
-        </Box>
-      </List>
-    </>
+              );
+            })}
+        </List>
+      </Box>
+
+      {/* Bottom Sticky Action Buttons */}
+      <Box
+        sx={{
+          position: 'sticky',
+          bottom: 0,
+          p: 2,
+          backgroundColor: 'background.paper',
+          borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+          display: 'flex',
+          gap: 1,
+          zIndex: 3,
+        }}
+      >
+        <ListItemButton
+          onClick={handleReset}
+          disabled={totalSelected === 0 && draftTimeRange === 'any'}
+          sx={{
+            flex: 1,
+            justifyContent: 'center',
+            borderRadius: br,
+            backgroundColor: 'grey.200',
+            textAlign: 'center',
+          }}
+        >
+          <ListItemText primary="Reset" />
+        </ListItemButton>
+
+        <ListItemButton
+          disabled={!isChanged}
+          onClick={handleApply}
+          sx={{
+            flex: 2,
+            justifyContent: 'center',
+            borderRadius: br,
+            backgroundColor: isChanged ? 'primary.main' : 'grey.300',
+            color: isChanged ? 'white' : 'grey.500',
+            textAlign: 'center',
+            '&:hover': {
+              backgroundColor: isChanged ? 'primary.dark' : 'grey.300',
+              color: isChanged ? 'white' : 'grey.500',
+            },
+          }}
+        >
+          <ListItemText
+            primary={
+              totalSelected > 0
+                ? `Apply Filter (${totalSelected})`
+                : 'Apply Filter'
+            }
+          />
+        </ListItemButton>
+      </Box>
+    </Box>
   );
 };
 

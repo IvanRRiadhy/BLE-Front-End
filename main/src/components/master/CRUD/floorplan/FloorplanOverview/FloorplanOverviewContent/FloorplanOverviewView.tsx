@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AppDispatch, useDispatch, useSelector, RootState } from 'src/store/Store';
 import { Box, FormControlLabel, FormLabel, Switch, CircularProgress, Typography } from '@mui/material';
@@ -222,9 +222,7 @@ const FloorplanOverviewView = React.forwardRef<
 
   // Get floorplan image URL
   const originalFloorplanImage = activeFloorPlan?.floorplanImage
-    ? activeFloorPlan.floorplanImage.startsWith('/Uploads/')
-      ? `${BASE_URL}${activeFloorPlan.floorplanImage}`
-      : activeFloorPlan.floorplanImage
+    ? getCdnUrl(activeFloorPlan.floorplanImage)
     : FloorplanHouse;
 
   const floorplanImage = USE_IMAGE_PROXY && originalFloorplanImage !== FloorplanHouse

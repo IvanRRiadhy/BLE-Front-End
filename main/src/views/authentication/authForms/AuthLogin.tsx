@@ -23,6 +23,8 @@ import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheck
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
 import axiosServices, { setAccessToken, setAuthResponse } from 'src/utils/axios';
+import { useQueryClient } from '@tanstack/react-query';
+import { fetchLicenseInfo } from 'src/hooks/useInfo';
 import { getConfig } from 'src/config';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import _ from 'lodash';
@@ -105,6 +107,7 @@ loginTheme.components = components(loginTheme);
 
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>('admin');
   const [direction, setDirection] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -367,12 +370,8 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         localStorage.setItem('rememberMePreference', 'false');
       }
 
-      // Simpan refreshToken jika ada (atau hapus jika backend mengandalkan HttpOnly cookie)
-      if (data?.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
-      } else {
-        localStorage.removeItem('refreshToken');
-      }
+      // Refresh token ditangani secara eksklusif via HttpOnly cookie
+      localStorage.removeItem('refreshToken');
 
       // Simpan data response lengkap di memory variabel
       setAuthResponse(data);
@@ -387,6 +386,15 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         setLoginError('You do not have permission to login as Admin');
         resetAltcha();
         return;
+      }
+
+      // 🔄 Refetch license info and active features on login
+      try {
+        await fetchLicenseInfo();
+        queryClient.invalidateQueries({ queryKey: ['info'] });
+        queryClient.invalidateQueries({ queryKey: ['activeFeatures'] });
+      } catch (licenseErr) {
+        console.warn('Failed to refetch license info on login:', licenseErr);
       }
 
       setTimeout(() => {

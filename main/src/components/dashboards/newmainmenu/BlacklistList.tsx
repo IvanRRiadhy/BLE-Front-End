@@ -11,7 +11,7 @@ import {
 import { IconSearch, IconX } from '@tabler/icons-react';
 import { useBlacklistLog } from 'src/hooks/useDashboard';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 
 interface BlacklistItem {
   id: string;
@@ -27,7 +27,7 @@ const NewBlacklist: React.FC = () => {
     return data.map((x: any) => ({
       id: x.id,
       name: x.name,
-      image: x.faceImage ? `${BASE_URL}${x.faceImage}` : '',
+      image: x.faceImage ? getCdnUrl(x.faceImage) : '',
     }));
   }, [data]);
 

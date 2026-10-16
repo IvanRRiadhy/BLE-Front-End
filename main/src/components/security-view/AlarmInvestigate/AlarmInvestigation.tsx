@@ -17,8 +17,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { AppDispatch, RootState, useDispatch, useSelector } from 'src/store/Store';
-import { useNavigate } from 'react-router';
-import { BASE_URL } from 'src/utils/axios';
+import { getCdnUrl } from 'src/utils/axios';
 import { useRealtimeAlarmLog } from 'src/hooks/useDashboard';
 import SmartScrollingText from 'src/utils/SmartScrollingText';
 import { useAcceptInvestigate, useAlarmTriggerList } from 'src/hooks/useAlarmTrigger';
@@ -112,7 +111,7 @@ const settings = useSelector((state: RootState) => state.settings);
 
       return {
         id: x.id,
-        image: person.image ? `${BASE_URL}${person.image}` : '',
+        image: person.image ? getCdnUrl(person.image) : '',
         name: person.name,
         beacon: x.beaconId ?? '-',
         idleTime: x.idleTimestamp ? new Date(x.idleTimestamp).toLocaleString() : '-',

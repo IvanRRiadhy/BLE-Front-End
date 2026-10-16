@@ -52,7 +52,7 @@ import useImage from 'use-image';
 import { AreaInvestigationData, AreaInvestigationAlarm, Nodes, GlobalInvestigationData } from 'src/hooks/useInvestigate';
 import GlobalInvestigationOverview from './GlobalInvestigationOverview';
 import { AreaOption } from './NewAreaInvestigateFilter';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import dayjs from 'dayjs';
 
 interface NewAreaInvestigateContentProps {
@@ -71,10 +71,7 @@ interface NewAreaInvestigateContentProps {
 
 const normalizeImageUrl = (path?: string | null) => {
   if (!path) return null;
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
-  const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${cleanBase}${cleanPath}`;
+  return getCdnUrl(path);
 };
 
 /**

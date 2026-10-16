@@ -40,14 +40,11 @@ import {
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { GlobalInvestigationData } from 'src/hooks/useInvestigate';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 
 const normalizeImageUrl = (path?: string | null) => {
   if (!path) return undefined;
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
-  const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${cleanBase}${cleanPath}`;
+  return getCdnUrl(path);
 };
 
 interface GlobalInvestigationOverviewProps {

@@ -20,7 +20,7 @@ export interface CCTVType {
   updatedBy: string;
   updatedAt: string;
   integrationId: string;
-  applicationId: string;
+  // applicationId: string;
   integration?: IntegrationType;
 }
 

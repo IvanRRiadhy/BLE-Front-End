@@ -1,4 +1,3 @@
-import { BASE_URL } from 'src/utils/axios';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box,
@@ -51,6 +50,21 @@ import { defaultBuildingFilter } from 'src/store/apps/defaultForm';
 import toast from 'react-hot-toast';
 import { useBuildingList, useDeleteBuilding, useExportBuildingConfig } from 'src/hooks/useBuilding';
 import { useAllFloors, useDeleteFloor } from 'src/hooks/useFloor';
+import { getConfig } from 'src/config';
+
+const getCdnUrl = (url?: string | null) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  let cdnBase = '';
+  try {
+    cdnBase = getConfig()?.CDN_URL || '';
+  } catch {
+    cdnBase = '';
+  }
+  const cleanBase = cdnBase.replace(/\/+$/, '');
+  const cleanPath = url.replace(/^\/+/, '');
+  return cleanBase ? `${cleanBase}/${cleanPath}` : url;
+};
 
 const columns = [
   { label: 'Building Name', field: 'name', sortAble: true },
@@ -74,7 +88,7 @@ const FloorTable = ({
     <Table size="small">
       <TableHead>
         <TableRow>
-          <TableCell sx={{ fontWeight: 600, width: 80 }}>No</TableCell>
+          <TableCell sx={{ fontWeight: 600, width: 80 }}>Level</TableCell>
           <TableCell sx={{ fontWeight: 600 }}>Floor Name</TableCell>
           <TableCell align="right" sx={{ fontWeight: 600, width: 120 }}>
             Actions
@@ -91,9 +105,9 @@ const FloorTable = ({
             </TableCell>
           </TableRow>
         ) : (
-          floors.map((floor, i) => (
+          floors.map((floor) => (
             <TableRow key={floor.id}>
-              <TableCell>{i + 1}</TableCell>
+              <TableCell>{typeof floor.level === 'number' ? floor.level : 0}</TableCell>
               <TableCell>{floor.name}</TableCell>
               <TableCell align="right">
                 <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1}>
@@ -563,9 +577,13 @@ const BuildingList = () => {
                     ? renderSkeletonRows(rowsPerPage || SKELETON_ROWS)
                     : buildingData.map((building, index) => {
                         const isOpen = expandedBuildingId === building.id;
-                        const buildingFloors = (floorData || []).filter(
-                          (f) => f.buildingId === building.id,
-                        );
+                        const buildingFloors = (floorData || [])
+                          .filter((f) => f.buildingId === building.id)
+                          .sort((a, b) => {
+                            const levelA = typeof a.level === 'number' ? a.level : 0;
+                            const levelB = typeof b.level === 'number' ? b.level : 0;
+                            return levelA - levelB;
+                          });
                         return (
                           <React.Fragment key={building.id || index}>
                             <TableRow hover>
@@ -604,7 +622,7 @@ const BuildingList = () => {
                               <TableCell>
                                 {building.image ? (
                                   <img
-                                    src={`${BASE_URL}${building.image}`}
+                                    src={getCdnUrl(building.image)}
                                     alt="Building"
                                     style={{ width: 80, height: 80, objectFit: 'cover' }}
                                   />

@@ -161,8 +161,9 @@ const FullLayout: FC = () => {
   }, [showAlarmPopup]);
 
   const normalizePriority = (value?: string): AlarmPriority | undefined => {
-    if (value === 'low' || value === 'medium' || value === 'high') {
-      return value;
+    const v = value?.toLowerCase();
+    if (v === 'low' || v === 'medium' || v === 'high' || v === 'critical') {
+      return v as AlarmPriority;
     }
     return undefined; // or default to 'low'
   };
@@ -260,12 +261,19 @@ const FullLayout: FC = () => {
         dispatch(fetchAlarmTrigger());
       }
 
+      const isBlacklist =
+        alarmData?.status?.toLowerCase() === 'blacklist' ||
+        alarmData?.alarm?.toLowerCase() === 'blacklist' ||
+        alarmData?.alarmType?.toLowerCase() === 'blacklist' ||
+        alarmData?.alarmStatus?.toLowerCase() === 'blacklist' ||
+        alarmData?.type?.toLowerCase() === 'blacklist';
+
       const alarmLog: AlarmLogItem = {
         id: `alarm-${alarmData.triggerId || alarmData.cardId || alarmData.dmac || uniqueId()}-${Date.now()}-${alarmData.status}`,
         type: 'Alarm',
         target: alarmData.personName || alarmData.visitorName || alarmData.MemberName || alarmData.cardName || 'Unknown',
         image: alarmData.faceImage || '',
-        color: alarmData.color || (isLowBattery ? '#c8b560' : 'gray'),
+        color: alarmData.color || (isLowBattery ? '#c8b560' : isBlacklist ? '#dc143c' : 'gray'),
         dmac: alarmData.dmac,
         floor: alarmData.buildingName || alarmData.floorplanName ? `${alarmData.buildingName || 'Unknown Building'} - ${alarmData.floorplanName || 'Unknown Floor'}` : '',
         floorplanId: alarmData.floorplanId || '',
@@ -274,7 +282,7 @@ const FullLayout: FC = () => {
         triggerId: alarmData.triggerId || '',
         alarmStatus: alarmData.status || (isLowBattery ? 'LowBattery' : 'Alarm'),
         action: alarmData.action || 'Idle',
-        priority: normalizePriority(alarmData.priority) || (isLowBattery ? 'low' : 'medium'),
+        priority: isBlacklist ? 'critical' : (normalizePriority(alarmData.priority) || (isLowBattery ? 'low' : 'medium')),
         time: alarmData.timestamp || new Date().toISOString(),
         seen: false,
         personType: alarmData.personCategory || (alarmData.visitorName ? 'Visitor' : 'Member'),

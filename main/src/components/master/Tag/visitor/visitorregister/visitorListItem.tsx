@@ -1,5 +1,5 @@
 import React from 'react';
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import { useSelector } from 'src/store/Store';
 import {
   ListItemText,
@@ -26,7 +26,7 @@ const VisitorListItem = ({ onTagClick, visitor }: Props) => {
   return (
     <ListItemButton sx={{ mb: 1 }} onClick={onTagClick}>
       <ListItemAvatar>
-        <Avatar alt="Visitor Face" src={`${BASE_URL}${visitor?.faceImage}`} />
+        <Avatar alt="Visitor Face" src={getCdnUrl(visitor?.faceImage)} />
       </ListItemAvatar>
       <ListItemText>
         <Stack direction="row" gap="10px" alignItems="center">

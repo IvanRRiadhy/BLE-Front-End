@@ -1,4 +1,4 @@
-import { BASE_URL } from 'src/utils/axios';
+import { BASE_URL, getCdnUrl } from 'src/utils/axios';
 import {
   Button,
   Dialog,
@@ -435,7 +435,7 @@ const AddEditVisitor = ({ type, visitor }: FormType) => {
                 )}
                 {preview && (
                   <img
-                    src={preview?.startsWith('blob:') ? preview : `${BASE_URL}${preview}`}
+                    src={preview?.startsWith('blob:') ? preview : getCdnUrl(preview)}
                     alt="Face Preview"
                     style={{ width: '100%', marginTop: '10px', borderRadius: '5px' }}
                   />
